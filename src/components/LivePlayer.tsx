@@ -259,11 +259,17 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--border-subtle)',
       }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.85rem' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--accent-cyan)' }}>
-              Workout Timer: {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({totalWorkoutProgress}%)</span>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
+            <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
+              {currentItem.blockTitle}
+            </span>
+            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--text-main)' }}>
+              {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--accent-cyan)' }}>({totalWorkoutProgress}%)</span>
             </div>
+            <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>
+              Exercise {currentIndex + 1} of {allExercises.length}
+            </span>
           </div>
 
           {/* Global Progress Bar */}
@@ -280,16 +286,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       </div>
 
       <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-      {/* Current Block & Exercise Info */}
-      <div className="glass-panel" style={{ padding: '12px 20px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.9rem' }}>
-        <span className="badge" style={{ background: currentItem.blockBadgeColor, color: '#050B14' }}>
-          {currentItem.blockTitle}
-        </span>
-        <span style={{ color: 'var(--text-muted)' }}>
-          Exercise {currentIndex + 1} of {allExercises.length}
-        </span>
-      </div>
 
       {/* Mobile/Tablet Panel Swapper Toggle Bar */}
       <div className="mobile-panel-toggle" style={{
