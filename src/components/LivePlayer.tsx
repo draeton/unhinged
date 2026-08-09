@@ -245,18 +245,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* Top Total Program Progress Bar */}
-      <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontSize: '0.88rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge" style={{ background: currentItem.blockBadgeColor, color: '#050B14' }}>
-              {currentItem.blockTitle}
-            </span>
-            <span style={{ color: 'var(--text-muted)' }}>
-              Exercise {currentIndex + 1} of {allExercises.length}
-            </span>
-          </div>
+      <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.1rem' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--accent-cyan)' }}>
-            Workout Timer: {formatTime(totalSecondsElapsed)} ({totalWorkoutProgress}%)
+            Workout Timer: {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>({totalWorkoutProgress}%)</span>
           </div>
         </div>
 
@@ -270,6 +262,16 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
           }} />
         </div>
+      </div>
+
+      {/* Current Block & Exercise Info */}
+      <div className="glass-panel" style={{ padding: '12px 20px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.9rem' }}>
+        <span className="badge" style={{ background: currentItem.blockBadgeColor, color: '#050B14' }}>
+          {currentItem.blockTitle}
+        </span>
+        <span style={{ color: 'var(--text-muted)' }}>
+          Exercise {currentIndex + 1} of {allExercises.length}
+        </span>
       </div>
 
       {/* Mobile/Tablet Panel Swapper Toggle Bar */}
