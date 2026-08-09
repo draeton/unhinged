@@ -25,56 +25,6 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
-      {/* Hero Banner */}
-      <div className="glass-panel" style={{
-        padding: '36px 32px',
-        background: 'linear-gradient(135deg, rgba(18, 24, 38, 0.95) 0%, rgba(32, 44, 68, 0.8) 50%, rgba(176, 38, 255, 0.15) 100%)',
-        border: '1px solid var(--border-glow)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span className="badge glow-cyan" style={{ background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
-              ⚡ 60-MINUTE TARGETED ROUTINE
-            </span>
-            <span className="badge left-scapula-badge">
-              LEFT SCAPULA & WRIST RELIEF
-            </span>
-          </div>
-
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: '900',
-            letterSpacing: '-0.03em',
-            color: '#FFFFFF',
-            marginTop: '12px',
-            lineHeight: 1.1,
-          }}>
-            UNHINGED WORKOUT
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '10px', maxWidth: '650px', lineHeight: 1.6 }}>
-            Pull-Ups & Left Scapular Asymmetry • Handstands & Wrist Care • PNF Hamstrings & Modified Jefferson Curls
-          </p>
-
-          {/* Quick Block Breakdown Pills */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '20px' }}>
-            <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
-              1. Warm-Up (10m)
-            </span>
-            <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00FF9D' }}>
-              2. Strength (20m)
-            </span>
-            <span className="badge" style={{ background: 'rgba(255, 0, 122, 0.15)', color: '#FF007A' }}>
-              3. Forward Fold (25m)
-            </span>
-            <span className="badge" style={{ background: 'rgba(255, 215, 0, 0.15)', color: '#FFD700' }}>
-              4. Cooldown (5m)
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Navigation Hub Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         
