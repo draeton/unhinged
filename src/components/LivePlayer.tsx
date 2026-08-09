@@ -69,6 +69,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
+  // On exercise change: scroll to top and ensure sets tab is active on mobile
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setMobileActivePanel('details');
+  }, [currentIndex]);
+
   const navigateToExercise = (newIndex: number) => {
     setCurrentIndex(newIndex);
     setIsIntervalStarted(false);
