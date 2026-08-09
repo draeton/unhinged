@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
-import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
+import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './utils/storage';
 import { audio } from './utils/audio';
 
 import { Header } from './components/Header';
@@ -14,14 +14,14 @@ import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
 
 export function App() {
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('start');
+  // Workout Global Timer State
+  const [isWorkoutStarted, setIsWorkoutStarted] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true');
+  const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true' ? true : false); // Pause on resume
+  const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
+
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(isWorkoutStarted ? 'player' : 'start');
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
-
-  // Workout Global Timer State
-  const [isWorkoutStarted, setIsWorkoutStarted] = useState<boolean>(false);
-  const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(false);
-  const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(0);
 
   // Completion Modal State
   const [showCompletionModal, setShowCompletionModal] = useState<boolean>(false);
@@ -48,6 +48,19 @@ export function App() {
     };
   }, [isWorkoutStarted, isWorkoutPaused]);
 
+  // Persist global state
+  useEffect(() => {
+    if (isWorkoutStarted) {
+      localStorage.setItem('unhinged_isWorkoutStarted', 'true');
+      localStorage.setItem('unhinged_totalSecondsElapsed', String(totalSecondsElapsed));
+    }
+  }, [isWorkoutStarted, totalSecondsElapsed]);
+
+  // Scroll to top when changing screens
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentScreen]);
+
   // Navigate to screen
   const handleNavigate = (screen: ScreenType) => {
     if (screen === 'player') {
@@ -71,6 +84,7 @@ export function App() {
     setIsWorkoutStarted(false);
     setIsWorkoutPaused(false);
     setTotalSecondsElapsed(0);
+    clearActiveWorkoutState();
     setCurrentScreen('start');
   };
 
@@ -104,6 +118,7 @@ export function App() {
     setIsWorkoutStarted(false);
     setIsWorkoutPaused(false);
     setTotalSecondsElapsed(0);
+    clearActiveWorkoutState();
 
     setCurrentScreen('history');
   };

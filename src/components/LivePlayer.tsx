@@ -34,15 +34,18 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     return list;
   }, [blocks]);
 
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const currentIndexRef = useRef<number>(0);
-  const [isResting, setIsResting] = useState<boolean>(false);
-  const [timeLeft, setTimeLeft] = useState<number>(allExercises[0]?.exercise.durationSeconds || 180);
-  const [isIntervalStarted, setIsIntervalStarted] = useState<boolean>(false);
-  const [isIntervalPaused, setIsIntervalPaused] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(() => parseInt(localStorage.getItem('unhinged_currentIndex') || '0', 10));
+  const currentIndexRef = useRef<number>(currentIndex);
+  const [isResting, setIsResting] = useState<boolean>(() => localStorage.getItem('unhinged_isResting') === 'true');
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    const val = localStorage.getItem('unhinged_timeLeft');
+    return val ? parseInt(val, 10) : (allExercises[0]?.exercise.durationSeconds || 180);
+  });
+  const [isIntervalStarted, setIsIntervalStarted] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalStarted') === 'true');
+  const [isIntervalPaused, setIsIntervalPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalPaused') === 'true');
 
   // Set Tracking per exercise: { [exerciseId]: completedSetCount }
-  const [completedSets, setCompletedSets] = useState<{ [exerciseId: string]: number }>({});
+  const [completedSets, setCompletedSets] = useState<{ [exerciseId: string]: number }>(() => JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}'));
 
   // Mobile / Tablet Panel Switcher: 'details' (Panel 1) vs 'timer' (Panel 2)
   const [mobileActivePanel, setMobileActivePanel] = useState<'details' | 'timer'>('details');
@@ -51,14 +54,28 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const currentExercise = currentItem?.exercise;
   const nextItem = allExercises[currentIndex + 1];
 
+  // Sync to local storage
+  useEffect(() => {
+    localStorage.setItem('unhinged_currentIndex', String(currentIndex));
+    localStorage.setItem('unhinged_isResting', String(isResting));
+    localStorage.setItem('unhinged_timeLeft', String(timeLeft));
+    localStorage.setItem('unhinged_isIntervalStarted', String(isIntervalStarted));
+    localStorage.setItem('unhinged_isIntervalPaused', String(isIntervalPaused));
+    localStorage.setItem('unhinged_completedSets', JSON.stringify(completedSets));
+  }, [currentIndex, isResting, timeLeft, isIntervalStarted, isIntervalPaused, completedSets]);
+
   // Keep ref in sync so setTimeout callbacks always read the latest index
   useEffect(() => {
     currentIndexRef.current = currentIndex;
-    // Reset interval state when moving to a new exercise
+  }, [currentIndex]);
+
+  const navigateToExercise = (newIndex: number) => {
+    setCurrentIndex(newIndex);
     setIsIntervalStarted(false);
     setIsIntervalPaused(false);
     setIsResting(false);
-  }, [currentIndex]);
+    setTimeLeft(allExercises[newIndex]?.exercise.durationSeconds || 180);
+  };
 
   // Propagate global pause into local interval pause state
   useEffect(() => {
@@ -159,7 +176,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     ? Math.max(0, Math.min(100, ((totalExerciseDuration - timeLeft) / totalExerciseDuration) * 100))
     : 0;
 
-  const totalWorkoutProgress = Math.min(100, Math.round(((currentIndex + 1) / allExercises.length) * 100));
+  const totalWorkoutProgress = Math.min(100, Math.round((currentIndex / allExercises.length) * 100));
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -191,7 +208,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         setIsResting(false);
         if (snapIndex < allExercises.length - 1) {
           audio.playStart();
-          setCurrentIndex(snapIndex + 1);
+          navigateToExercise(snapIndex + 1);
         } else {
           audio.playFanfare();
           onWorkoutComplete(
@@ -208,16 +225,14 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   };
 
   const handleSkipNext = () => {
-    setIsResting(false);
     if (currentIndex < allExercises.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+      navigateToExercise(currentIndex + 1);
     }
   };
 
   const handleSkipPrev = () => {
-    setIsResting(false);
     if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+      navigateToExercise(currentIndex - 1);
     }
   };
 
@@ -285,7 +300,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           }}
         >
           <FileText size={16} />
-          <span>Cues & Sets</span>
+          <span>Sets</span>
         </button>
 
         <button
@@ -308,7 +323,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           }}
         >
           <Clock size={16} />
-          <span>Interval Timer ({formatTime(timeLeft)})</span>
+          <span>Timer ({formatTime(timeLeft)})</span>
         </button>
       </div>
 
