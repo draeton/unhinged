@@ -102,10 +102,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const completedSetsRef = useRef<{ [exerciseId: string]: number }>({});
   const onWorkoutCompleteRef = useRef(onWorkoutComplete);
   const currentExerciseRef = useRef(currentExercise);
+  const timeLeftRef = useRef<number>(timeLeft);
   useEffect(() => { totalSecondsElapsedRef.current = totalSecondsElapsed; }, [totalSecondsElapsed]);
   useEffect(() => { completedSetsRef.current = completedSets; }, [completedSets]);
   useEffect(() => { onWorkoutCompleteRef.current = onWorkoutComplete; }, [onWorkoutComplete]);
   useEffect(() => { currentExerciseRef.current = currentExercise; }, [currentExercise]);
+  useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
 
   // Initial reset of timer duration when navigating or switching rest state
   useEffect(() => {
@@ -231,11 +233,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   };
 
   const handleAdjustRest = (deltaSeconds: number) => {
-    setTimeLeft(prev => {
-      const next = Math.max(5, prev + deltaSeconds);
-      setTimeOffset(o => o + (next - prev));
-      return next;
-    });
+    const prev = timeLeftRef.current;
+    const next = Math.max(5, prev + deltaSeconds);
+    const actualDelta = next - prev;
+    setTimeLeft(next);
+    setTimeOffset(o => o + actualDelta);
   };
 
   const handleSkipNext = () => {
