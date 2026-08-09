@@ -43,6 +43,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   });
   const [isIntervalStarted, setIsIntervalStarted] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalStarted') === 'true');
   const [isIntervalPaused, setIsIntervalPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalPaused') === 'true');
+  const [timeOffset, setTimeOffset] = useState<number>(() => parseInt(localStorage.getItem('unhinged_timeOffset') || '0', 10));
 
   // Set Tracking per exercise: { [exerciseId]: completedSetCount }
   const [completedSets, setCompletedSets] = useState<{ [exerciseId: string]: number }>(() => JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}'));
@@ -61,8 +62,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     localStorage.setItem('unhinged_timeLeft', String(timeLeft));
     localStorage.setItem('unhinged_isIntervalStarted', String(isIntervalStarted));
     localStorage.setItem('unhinged_isIntervalPaused', String(isIntervalPaused));
+    localStorage.setItem('unhinged_timeOffset', String(timeOffset));
     localStorage.setItem('unhinged_completedSets', JSON.stringify(completedSets));
-  }, [currentIndex, isResting, timeLeft, isIntervalStarted, isIntervalPaused, completedSets]);
+  }, [currentIndex, isResting, timeLeft, isIntervalStarted, isIntervalPaused, completedSets, timeOffset]);
 
   // Keep ref in sync so setTimeout callbacks always read the latest index
   useEffect(() => {
@@ -105,9 +107,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   useEffect(() => { onWorkoutCompleteRef.current = onWorkoutComplete; }, [onWorkoutComplete]);
   useEffect(() => { currentExerciseRef.current = currentExercise; }, [currentExercise]);
 
-  // Reset interval countdown when changing exercise or switching to rest
+  // Initial reset of timer duration when navigating or switching rest state
   useEffect(() => {
     if (currentExercise) {
+      setTimeOffset(0);
       if (isResting) {
         setTimeLeft(currentExercise.restSeconds > 0 ? currentExercise.restSeconds : 30);
       } else {
@@ -178,8 +181,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   if (!currentExercise) return null;
 
   // Progress calculations
-  // If time is added beyond the original duration, dynamically expand the max duration so the animation continues smoothly
-  const currentMaxDuration = Math.max(totalExerciseDuration, timeLeft);
+  const currentMaxDuration = totalExerciseDuration + timeOffset;
   const progressPercent = currentMaxDuration > 0
     ? Math.max(0, Math.min(100, ((currentMaxDuration - timeLeft) / currentMaxDuration) * 100))
     : 0;
@@ -229,7 +231,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   };
 
   const handleAdjustRest = (deltaSeconds: number) => {
-    setTimeLeft(prev => Math.max(5, prev + deltaSeconds));
+    setTimeLeft(prev => {
+      const next = Math.max(5, prev + deltaSeconds);
+      setTimeOffset(o => o + (next - prev));
+      return next;
+    });
   };
 
   const handleSkipNext = () => {
@@ -609,6 +615,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 onClick={() => {
                   setIsIntervalStarted(false);
                   setIsIntervalPaused(false);
+                  setTimeOffset(0);
                   setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
                 }}
                 style={{
