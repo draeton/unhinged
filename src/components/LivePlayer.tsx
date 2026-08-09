@@ -245,15 +245,26 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* Top Total Program Progress Bar */}
-      <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.1rem' }}>
+      <div className="glass-panel" style={{
+        padding: '10px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        position: 'sticky',
+        top: '65px',
+        zIndex: 40,
+        background: 'rgba(18, 24, 38, 0.95)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.85rem' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--accent-cyan)' }}>
-            Workout Timer: {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>({totalWorkoutProgress}%)</span>
+            Workout Timer: {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({totalWorkoutProgress}%)</span>
           </div>
         </div>
 
         {/* Global Progress Bar */}
-        <div style={{ width: '100%', height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
           <div style={{
             width: `${totalWorkoutProgress}%`,
             height: '100%',
