@@ -555,7 +555,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 <Minus size={14} /> 15s
               </button>
               <button className="btn-secondary" onClick={() => handleAdjustRest(15)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                <Plus size={14} /> 15s Rest
+                <Plus size={14} /> 15s
               </button>
             </div>
 
