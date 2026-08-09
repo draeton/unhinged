@@ -126,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
                 }}
               >
                 {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
-                <span>{isWorkoutPaused ? 'Resume' : 'Pause'}</span>
+                <span className="hide-on-mobile">{isWorkoutPaused ? 'Resume' : 'Pause'}</span>
               </button>
 
               <button
@@ -149,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({
                 }}
               >
                 <Square size={16} fill="#FF007A" />
-                <span>Stop</span>
+                <span className="hide-on-mobile">Stop</span>
               </button>
             </>
           )}
@@ -178,7 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
           >
             {isMenuOpen ? <XIcon size={18} /> : <Menu size={18} />}
-            <span>Menu</span>
+            <span className="hide-on-mobile">Menu</span>
             {isWorkoutActive && (
               <span style={{
                 width: '8px',
