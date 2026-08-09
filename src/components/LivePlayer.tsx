@@ -242,10 +242,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const isJeffersonCurlFocus = currentExercise.id === 'm3';
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       
-      {/* Top Total Program Progress Bar */}
-      <div className="glass-panel" style={{
+      {/* Top Total Program Progress Bar (Sticky & Full Width) */}
+      <div style={{
+        width: '100%',
         padding: '10px 16px',
         display: 'flex',
         flexDirection: 'column',
@@ -253,27 +254,32 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         position: 'sticky',
         top: '65px',
         zIndex: 40,
-        background: 'rgba(18, 24, 38, 0.95)',
+        background: 'rgba(10, 13, 20, 0.95)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '1px solid var(--border-subtle)',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.85rem' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--accent-cyan)' }}>
-            Workout Timer: {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({totalWorkoutProgress}%)</span>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.85rem' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--accent-cyan)' }}>
+              Workout Timer: {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>({totalWorkoutProgress}%)</span>
+            </div>
+          </div>
+
+          {/* Global Progress Bar */}
+          <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{
+              width: `${totalWorkoutProgress}%`,
+              height: '100%',
+              background: 'linear-gradient(90deg, #00F0FF 0%, #00FF9D 50%, #FF007A 100%)',
+              transition: 'width 0.4s ease',
+              boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
+            }} />
           </div>
         </div>
-
-        {/* Global Progress Bar */}
-        <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-          <div style={{
-            width: `${totalWorkoutProgress}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #00F0FF 0%, #00FF9D 50%, #FF007A 100%)',
-            transition: 'width 0.4s ease',
-            boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
-          }} />
-        </div>
       </div>
+
+      <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Current Block & Exercise Info */}
       <div className="glass-panel" style={{ padding: '12px 20px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.9rem' }}>
@@ -684,6 +690,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
       </div>
 
+    </div>
     </div>
   );
 };
