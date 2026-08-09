@@ -104,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           
           {/* Live Workout Quick Actions */}
-          {currentScreen === 'player' && (
+          {isWorkoutActive && (
             <>
               <button
                 onClick={onToggleWorkoutPause}
