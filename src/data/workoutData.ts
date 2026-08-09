@@ -79,7 +79,7 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
   },
   {
     id: 'block-2',
-    title: '2. STRENGTH BLOCK (10–30 min)',
+    title: '2. STRENGTH',
     subtitle: 'Strict pulling asymmetry correction and handstand balance overhead loading.',
     durationMinutes: 20,
     category: 'pullups',
@@ -126,7 +126,7 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
   },
   {
     id: 'block-3',
-    title: '3. MOBILITY & FLEXIBILITY: FORWARD FOLD FOCUS (30–55 min)',
+    title: '3. MOBILITY',
     subtitle: 'Active hip compression, PNF hamstring lengthening, spinal articulation, and psoas release.',
     durationMinutes: 25,
     category: 'hamstrings',
