@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, SkipForward, SkipBack, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw } from 'lucide-react';
 
 interface LivePlayerProps {
   blocks: WorkoutBlock[];
@@ -559,8 +559,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               </button>
             </div>
 
-            {/* Play / Pause Button — centred */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '24px' }}>
+            {/* Play / Pause & Reset Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '24px' }}>
               <button
                 className="btn-primary"
                 onClick={() => {
@@ -600,6 +600,27 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   : (isIntervalPaused || isWorkoutPaused)
                   ? <Play size={28} fill="#050B14" style={{ marginLeft: '4px' }} />
                   : <Pause size={28} fill="#050B14" />}
+              </button>
+
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setIsIntervalStarted(false);
+                  setIsIntervalPaused(false);
+                  setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
+                }}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  padding: 0,
+                  justifyContent: 'center',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+                title="Reset Timer"
+              >
+                <RotateCcw size={20} color="var(--text-main)" />
               </button>
             </div>
           </div>
