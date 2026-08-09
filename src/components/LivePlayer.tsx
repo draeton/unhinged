@@ -178,8 +178,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   if (!currentExercise) return null;
 
   // Progress calculations
-  const progressPercent = totalExerciseDuration > 0
-    ? Math.max(0, Math.min(100, ((totalExerciseDuration - timeLeft) / totalExerciseDuration) * 100))
+  // If time is added beyond the original duration, dynamically expand the max duration so the animation continues smoothly
+  const currentMaxDuration = Math.max(totalExerciseDuration, timeLeft);
+  const progressPercent = currentMaxDuration > 0
+    ? Math.max(0, Math.min(100, ((currentMaxDuration - timeLeft) / currentMaxDuration) * 100))
     : 0;
 
   const totalWorkoutProgress = Math.min(100, Math.round((currentIndex / allExercises.length) * 100));
