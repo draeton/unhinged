@@ -101,7 +101,60 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right Action Menu Group */}
-        <div style={{ position: 'relative' }} ref={menuRef}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          
+          {/* Live Workout Quick Actions */}
+          {currentScreen === 'player' && (
+            <>
+              <button
+                onClick={onToggleWorkoutPause}
+                title={isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}
+                style={{
+                  background: isWorkoutPaused ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 107, 0, 0.15)',
+                  border: isWorkoutPaused ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid rgba(255, 107, 0, 0.3)',
+                  borderRadius: '12px',
+                  padding: '8px 12px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
+                  fontWeight: '700',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
+                <span>{isWorkoutPaused ? 'Resume' : 'Pause'}</span>
+              </button>
+
+              <button
+                onClick={onStopWorkout}
+                title="Stop Workout"
+                style={{
+                  background: 'rgba(255, 0, 122, 0.1)',
+                  border: '1px solid rgba(255, 0, 122, 0.3)',
+                  borderRadius: '12px',
+                  padding: '8px 12px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: '#FF007A',
+                  fontWeight: '700',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Square size={16} fill="#FF007A" />
+                <span>Stop</span>
+              </button>
+            </>
+          )}
+
+          <div style={{ position: 'relative' }} ref={menuRef}>
           
           {/* Main Action Menu Trigger Button */}
           <button
@@ -155,64 +208,6 @@ export const Header: React.FC<HeaderProps> = ({
               zIndex: 100,
             }}>
               
-              {/* Live Workout actions */}
-              {currentScreen === 'player' && (
-                <>
-                  <button
-                    onClick={() => {
-                      onToggleWorkoutPause();
-                      setIsMenuOpen(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: 'none',
-                      background: isWorkoutPaused ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 107, 0, 0.15)',
-                      color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
-                      fontWeight: '700',
-                      fontSize: '0.88rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
-                    <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      onStopWorkout();
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(255, 0, 122, 0.3)',
-                      background: 'rgba(255, 0, 122, 0.1)',
-                      color: '#FF007A',
-                      fontWeight: '700',
-                      fontSize: '0.88rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    <Square size={16} fill="#FF007A" />
-                    <span>Stop Workout</span>
-                  </button>
-                </>
-              )}
-
-              <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
-
               {/* Navigation Links */}
               <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700', padding: '4px 10px' }}>
                 Navigation
@@ -361,6 +356,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         </div>
 
+        </div>
       </div>
     </header>
   );
