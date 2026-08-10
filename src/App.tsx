@@ -66,12 +66,14 @@ export function App() {
   // Navigate to screen
   const handleNavigate = (screen: ScreenType) => {
     if (screen === 'blueprint' || screen === 'guide' || screen === 'history' || screen === 'player') {
-      if (screen === 'player' && !isWorkoutStarted) {
-        // Start a brand new workout if none started!
-        setIsWorkoutStarted(true);
+      if (screen === 'player') {
+        if (!isWorkoutStarted) {
+          // Start a brand new workout if none started!
+          setIsWorkoutStarted(true);
+          setTotalSecondsElapsed(0);
+          audio.playStart();
+        }
         setIsWorkoutPaused(false);
-        setTotalSecondsElapsed(0);
-        audio.playStart();
       }
       setActiveDrawer(screen as 'blueprint' | 'guide' | 'history' | 'player');
       return;
