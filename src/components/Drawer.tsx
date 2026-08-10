@@ -86,7 +86,8 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
           transition: 'opacity 0.3s ease',
-          zIndex: 998
+          zIndex: 998,
+          touchAction: 'none'
         }} 
         onClick={onClose}
       />
@@ -105,7 +106,8 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           transition: currentY !== null ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
           zIndex: 999,
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          overscrollBehavior: 'none'
         }}
       >
         <div 
@@ -113,11 +115,11 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '16px 0', cursor: 'grab' }}
+          style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '16px 0', cursor: 'grab', touchAction: 'none' }}
         >
           <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px' }} />
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px', overscrollBehavior: 'contain' }}>
           {children}
         </div>
       </div>
