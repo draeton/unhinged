@@ -265,7 +265,66 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       
       <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: 'column' }}>
+          {/* Visual Exercise Navigator Carousel */}
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: '12px',
+            padding: '0 4px',
+            marginBottom: '4px',
+            width: '100%',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }} className="hide-scrollbar">
+            {allExercises.map((item, index) => {
+              const imgUrl = `/images/exercises/${item.exercise.id}.jpg`;
+              const isActive = index === currentIndex;
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  style={{
+                    flex: '0 0 auto',
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '16px',
+                    border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
+                    background: `url(${imgUrl}) center/cover no-repeat, var(--bg-card)`,
+                    scrollSnapAlign: 'start',
+                    cursor: 'pointer',
+                    opacity: isActive ? 1 : 0.6,
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    padding: 0
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'rgba(0,0,0,0.7)',
+                    padding: '4px',
+                    fontSize: '0.65rem',
+                    color: '#fff',
+                    fontWeight: '700',
+                    textAlign: 'center',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden'
+                  }}>
+                    {item.exercise.name}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Top Total Program Progress Bar */}
+          <div style={{ display: 'flex', gap: '12px', width: '100%', alignItems: 'flex-start' }}>
           {/* Top Total Program Progress Bar */}
           <div className="glass-panel" style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
@@ -293,6 +352,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
       {/* Mobile/Tablet Panel Swapper Toggle Bar */}
       <div className="mobile-panel-toggle" style={{

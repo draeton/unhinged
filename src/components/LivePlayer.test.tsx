@@ -10,6 +10,7 @@ describe('LivePlayer Component', () => {
     isWorkoutPaused: false,
     onToggleWorkoutPause: vi.fn(),
     onWorkoutComplete: vi.fn(),
+    onPlayVideo: vi.fn(),
   };
 
   it('renders the first block and exercise', () => {
