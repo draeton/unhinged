@@ -38,14 +38,15 @@ export const Header: React.FC<HeaderProps> = ({
             width: '40px',
             height: '40px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #00F0FF 0%, #B026FF 100%)',
+            background: 'rgba(0, 240, 255, 0.15)',
+            border: '1px solid rgba(0, 240, 255, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)',
+            boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)',
             fontSize: '1.3rem',
             fontWeight: '900',
-            color: '#050B14',
+            color: '#00F0FF',
           }}>
             ⚡
           </div>
@@ -57,9 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
                 letterSpacing: '-0.03em',
                 fontFamily: 'var(--font-mono)',
                 textTransform: 'uppercase',
-                background: 'linear-gradient(90deg, #FFFFFF 0%, #00F0FF 50%, #FF007A 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: '#FFFFFF'
               }}>
                 UNHINGED
               </h1>

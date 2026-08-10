@@ -11,11 +11,11 @@
   
   /* Brand Accent Colors */
   --accent-cyan: #00F0FF;
-  --accent-emerald: #00FF9D;
-  --accent-pink: #FF007A;
-  --accent-gold: #FFD700;
-  --accent-purple: #B026FF;
-  --accent-orange: #FF6B00;
+  --accent-emerald: #00F0FF;
+  --accent-pink: #00F0FF;
+  --accent-gold: #00F0FF;
+  --accent-purple: #00F0FF;
+  --accent-orange: #00F0FF;
 
   --text-main: #F1F5F9;
   --text-muted: #94A3B8;
@@ -232,3 +232,9 @@ html, body {
 .pulsing-timer {
   animation: timerPulse 2s infinite;
 }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+

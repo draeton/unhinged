@@ -33,7 +33,7 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
         </div>
 
         <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(0, 255, 157, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00FF9D' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(0, 240, 255, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00F0FF' }}>
             <Clock size={24} />
           </div>
           <div>
@@ -47,7 +47,7 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
         </div>
 
         <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255, 0, 122, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF007A' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(0, 240, 255, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00F0FF' }}>
             <CheckCircle2 size={24} />
           </div>
           <div>
@@ -104,7 +104,7 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
                   <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
                     ⏱️ {w.durationMinutes} mins
                   </span>
-                  <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00FF9D' }}>
+                  <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00F0FF' }}>
                     ✅ {w.totalSetsCompleted} sets
                   </span>
                 </div>

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { App } from './App';
 import { clearActiveWorkoutState } from './utils/storage';
@@ -43,6 +43,7 @@ describe('App Integration', () => {
   });
   
   it('resets workout correctly', async () => {
+    vi.useFakeTimers();
     render(<App />);
     
     // Start
@@ -56,9 +57,54 @@ describe('App Integration', () => {
     const resetButton = screen.getByText('Reset Workout');
     fireEvent.click(resetButton);
     
+    expect(screen.getByText('Reset Session?')).toBeInTheDocument();
+
+    for (let i = 0; i < 3; i++) {
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+
+    const yesButton = screen.getByText('Yes, Reset Workout');
+    fireEvent.click(yesButton);
+
     // Wait for start screen
-    await waitFor(() => {
-      expect(screen.getByText(/Start New Session/i)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/Start New Session/i)).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('completes workout correctly from FAB', async () => {
+    vi.useFakeTimers();
+    render(<App />);
+    
+    // Start
+    fireEvent.click(screen.getByText(/Start New Session/i));
+    
+    // Open FAB
+    const fabButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
+    fireEvent.click(fabButton);
+    
+    // Complete
+    const completeButton = screen.getByText('Complete Workout');
+    fireEvent.click(completeButton);
+    
+    // Verify drawer shows up
+    expect(screen.getByText('Complete Session?')).toBeInTheDocument();
+
+    // Advance 3s in steps
+    for (let i = 0; i < 3; i++) {
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+
+    const yesButton = screen.getByText('Yes, Complete Workout');
+    fireEvent.click(yesButton);
+    
+    // Completion modal shows
+    expect(screen.getByText('UNHINGED Mastered!')).toBeInTheDocument();
+    expect(screen.getByText('0 mins')).toBeInTheDocument();
+    
+    vi.useRealTimers();
   });
 });

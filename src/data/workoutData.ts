@@ -83,7 +83,7 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     subtitle: 'Strict pulling asymmetry correction and handstand balance overhead loading.',
     durationMinutes: 20,
     category: 'pullups',
-    badgeColor: '#00FF9D',
+    badgeColor: '#00F0FF',
     exercises: [
       {
         id: 's1',
@@ -130,7 +130,7 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     subtitle: 'Active hip compression, PNF hamstring lengthening, spinal articulation, and psoas release.',
     durationMinutes: 25,
     category: 'hamstrings',
-    badgeColor: '#FF007A',
+    badgeColor: '#00F0FF',
     exercises: [
       {
         id: 'm1',
@@ -242,7 +242,7 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     subtitle: 'Nervous system down-regulation & wrist counter-flexion.',
     durationMinutes: 5,
     category: 'cooldown',
-    badgeColor: '#FFD700',
+    badgeColor: '#00F0FF',
     exercises: [
       {
         id: 'c1',

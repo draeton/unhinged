@@ -54,7 +54,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               width: '52px',
               height: '52px',
               borderRadius: '16px',
-              background: 'linear-gradient(135deg, #00F0FF 0%, #00FF9D 100%)',
+              background: 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -66,16 +66,16 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             {isWorkoutActive && (
               <span className="badge" style={{ 
                 background: isWorkoutPaused ? 'rgba(255, 107, 0, 0.2)' : 'rgba(0, 255, 157, 0.2)', 
-                border: isWorkoutPaused ? '1px solid #FF6B00' : '1px solid #00FF9D',
-                color: isWorkoutPaused ? '#FF6B00' : '#00FF9D',
+                border: isWorkoutPaused ? '1px solid #00F0FF' : '1px solid #00F0FF',
+                color: isWorkoutPaused ? '#00F0FF' : '#00F0FF',
                 display: 'flex', alignItems: 'center', gap: '6px'
               }}>
                 <span style={{
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: isWorkoutPaused ? '#FF6B00' : '#00FF9D',
-                  boxShadow: isWorkoutPaused ? '0 0 8px #FF6B00' : '0 0 8px #00FF9D',
+                  background: isWorkoutPaused ? '#00F0FF' : '#00F0FF',
+                  boxShadow: isWorkoutPaused ? '0 0 8px #00F0FF' : '0 0 8px #00F0FF',
                 }} />
                 {isWorkoutPaused ? 'PAUSED' : 'IN PROGRESS'} ({formatTime(totalSecondsElapsed)})
               </span>
@@ -162,18 +162,18 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             flexDirection: 'column',
             justifyContent: 'space-between',
             gap: '16px',
-            border: '1px solid rgba(176, 38, 255, 0.3)',
           }}
         >
           <div style={{
             width: '52px',
             height: '52px',
             borderRadius: '16px',
-            background: 'rgba(176, 38, 255, 0.15)',
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#D8B4FE',
+            color: '#FFFFFF',
           }}>
             <ShieldAlert size={26} />
           </div>
@@ -181,14 +181,14 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <div>
             <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
               Form & Scapula Guide
-              <ChevronRight size={20} color="#D8B4FE" />
+              <ChevronRight size={20} color="var(--text-muted)" />
             </h3>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
               Master left shoulder blade wrapping, handstand parallettes wrist relief, and Jefferson curl rules.
             </p>
           </div>
 
-          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: '#D8B4FE' }}>
+          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-main)' }}>
             Read Biomechanics →
           </div>
         </div>
@@ -205,18 +205,18 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             flexDirection: 'column',
             justifyContent: 'space-between',
             gap: '16px',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
           }}
         >
           <div style={{
             width: '52px',
             height: '52px',
             borderRadius: '16px',
-            background: 'rgba(255, 215, 0, 0.15)',
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#FFD700',
+            color: '#FFFFFF',
           }}>
             <History size={26} />
           </div>
@@ -224,14 +224,14 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <div>
             <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
               Logs & Stats
-              <ChevronRight size={20} color="#FFD700" />
+              <ChevronRight size={20} color="var(--text-muted)" />
             </h3>
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
               Track completed sessions, total minutes logged, set volumes, and personal exertion ratings.
             </p>
           </div>
 
-          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: '#FFD700' }}>
+          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-main)' }}>
             View Workout Logs ({completedWorkoutsCount}) →
           </div>
         </div>

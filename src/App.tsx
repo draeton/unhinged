@@ -3,7 +3,7 @@ import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './utils/storage';
 import { audio } from './utils/audio';
-import { Play, Pause, Square, Settings, X, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, RotateCcw, Settings, X, Volume2, VolumeX, CheckCircle } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
@@ -31,6 +31,10 @@ export function App() {
   const [completionStats, setCompletionStats] = useState<{ durationMinutes: number; completedSets: number }>({ durationMinutes: 60, completedSets: 0 });
 
   const [isFabMenuOpen, setIsFabMenuOpen] = useState<boolean>(false);
+  const [showConfirmComplete, setShowConfirmComplete] = useState<boolean>(false);
+  const [confirmCountdown, setConfirmCountdown] = useState<number>(3);
+  const [showConfirmReset, setShowConfirmReset] = useState<boolean>(false);
+  const [resetCountdown, setResetCountdown] = useState<number>(3);
   const fabMenuRef = useRef<HTMLDivElement>(null);
   
   const workoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -48,6 +52,26 @@ export function App() {
   useEffect(() => {
     setCompletedWorkouts(getCompletedWorkouts());
   }, []);
+
+  useEffect(() => {
+    let timerComplete: any;
+    if (showConfirmComplete && confirmCountdown > 0) {
+      timerComplete = setTimeout(() => {
+        setConfirmCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timerComplete);
+  }, [showConfirmComplete, confirmCountdown]);
+
+  useEffect(() => {
+    let timerReset: any;
+    if (showConfirmReset && resetCountdown > 0) {
+      timerReset = setTimeout(() => {
+        setResetCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timerReset);
+  }, [showConfirmReset, resetCountdown]);
 
   // Global Workout Timer counter (Counts UP while workout is active and not paused)
   useEffect(() => {
@@ -111,6 +135,12 @@ export function App() {
     setActiveDrawer(null);
   };
 
+  const handleResetWorkoutClick = () => {
+    setResetCountdown(3);
+    setShowConfirmReset(true);
+    setIsFabMenuOpen(false);
+  };
+
   const handleToggleSound = () => {
     const nextMuted = !soundMuted;
     setSoundMuted(nextMuted);
@@ -121,6 +151,21 @@ export function App() {
     setIsWorkoutPaused(true);
     setCompletionStats({ durationMinutes, completedSets });
     setShowCompletionModal(true);
+    setActiveDrawer(null);
+  };
+
+  const handleCompleteWorkoutClick = () => {
+    setConfirmCountdown(3);
+    setShowConfirmComplete(true);
+    setIsFabMenuOpen(false);
+  };
+
+  const handleForceCompleteWorkout = () => {
+    const completedSetsDict = JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}');
+    const totalSets = Object.values(completedSetsDict).reduce((a: any, b: any) => a + Number(b), 0) as number;
+    const durationMinutes = Math.round(totalSecondsElapsed / 60);
+    handleWorkoutComplete(durationMinutes, totalSets);
+    setIsFabMenuOpen(false);
   };
 
   const handleSaveWorkout = (rpe: number, notes: string) => {
@@ -145,10 +190,6 @@ export function App() {
 
     setCurrentScreen('start');
     setActiveDrawer('history');
-  };
-
-  const handleStartFromBlock = () => {
-    handleNavigate('player');
   };
 
   return (
@@ -184,7 +225,6 @@ export function App() {
       <Drawer isOpen={activeDrawer === 'blueprint'} onClose={() => setActiveDrawer(null)}>
         <RoutineOverview
           blocks={DEFAULT_WORKOUT_BLOCKS}
-          onStartFromBlock={handleStartFromBlock}
         />
       </Drawer>
 
@@ -228,6 +268,11 @@ export function App() {
               <button
                 onClick={() => {
                   handleToggleWorkoutPause();
+                  if (!isWorkoutPaused) {
+                    setActiveDrawer(null);
+                  } else {
+                    setActiveDrawer('player');
+                  }
                   setIsFabMenuOpen(false);
                 }}
                 style={{
@@ -236,7 +281,7 @@ export function App() {
                   borderRadius: '10px',
                   border: 'none',
                   background: 'rgba(255, 255, 255, 0.04)',
-                  color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
+                  color: '#FFFFFF',
                   fontWeight: '600',
                   fontSize: '0.88rem',
                   cursor: 'pointer',
@@ -247,22 +292,19 @@ export function App() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
+                {isWorkoutPaused ? <Play size={16} fill="#FFFFFF" color="#FFFFFF" /> : <Pause size={16} fill="#FFFFFF" color="#FFFFFF" />}
                 <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
               </button>
 
               <button
-                onClick={() => {
-                  handleStopWorkout();
-                  setIsFabMenuOpen(false);
-                }}
+                onClick={handleCompleteWorkoutClick}
                 style={{
                   width: '100%',
                   padding: '10px 14px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: 'rgba(255, 0, 122, 0.1)',
-                  color: '#FF007A',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: '#FFFFFF',
                   fontWeight: '600',
                   fontSize: '0.88rem',
                   cursor: 'pointer',
@@ -273,7 +315,30 @@ export function App() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                <Square size={16} fill="#FF007A" />
+                <CheckCircle size={16} fill="#FFFFFF" stroke="#050B14" />
+                <span>Complete Workout</span>
+              </button>
+
+              <button
+                onClick={handleResetWorkoutClick}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <RotateCcw size={16} color="#FFFFFF" />
                 <span>Reset Workout</span>
               </button>
 
@@ -330,6 +395,153 @@ export function App() {
           </button>
         </div>
       )}
+
+      {/* Confirmation Drawer for Reset */}
+      {showConfirmReset && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9998,
+            }} 
+            onClick={() => setShowConfirmReset(false)}
+          />
+          <div style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'var(--bg-dark)',
+            borderTopLeftRadius: '24px',
+            borderTopRightRadius: '24px',
+            borderTop: '1px solid var(--border-glow)',
+            boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.8)',
+            padding: '24px',
+            paddingBottom: '40px',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            animation: 'slideUp 0.3s ease-out forwards',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>Reset Session?</h3>
+              <button
+                onClick={() => setShowConfirmReset(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              Are you sure you want to completely reset this session? All current progress will be lost.
+            </p>
+            <button
+              disabled={resetCountdown > 0}
+              onClick={() => {
+                setShowConfirmReset(false);
+                handleStopWorkout();
+              }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: resetCountdown > 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 0, 122, 0.8)',
+                color: resetCountdown > 0 ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF',
+                fontWeight: '800',
+                fontSize: '1rem',
+                cursor: resetCountdown > 0 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                marginTop: '8px',
+              }}
+            >
+              {resetCountdown > 0 ? `Confirm in ${resetCountdown}s` : 'Yes, Reset Workout'}
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Confirmation Drawer for Complete */}
+      {showConfirmComplete && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 9998,
+            }} 
+            onClick={() => setShowConfirmComplete(false)}
+          />
+          <div style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'var(--bg-dark)',
+            borderTopLeftRadius: '24px',
+            borderTopRightRadius: '24px',
+            borderTop: '1px solid var(--border-glow)',
+            boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.8)',
+            padding: '24px',
+            paddingBottom: '40px',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            animation: 'slideUp 0.3s ease-out forwards',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>Complete Session?</h3>
+              <button
+                onClick={() => setShowConfirmComplete(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              Are you sure you want to finish this session? This will stop the timer and log your workout stats.
+            </p>
+            <button
+              disabled={confirmCountdown > 0}
+              onClick={() => {
+                setShowConfirmComplete(false);
+                handleForceCompleteWorkout();
+              }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: confirmCountdown > 0 ? 'rgba(255, 255, 255, 0.1)' : 'var(--accent-cyan)',
+                color: confirmCountdown > 0 ? 'rgba(255, 255, 255, 0.5)' : '#050B14',
+                fontWeight: '800',
+                fontSize: '1rem',
+                cursor: confirmCountdown > 0 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                marginTop: '8px',
+              }}
+            >
+              {confirmCountdown > 0 ? `Confirm in ${confirmCountdown}s` : 'Yes, Complete Workout'}
+            </button>
+          </div>
+        </>
+      )}
+
     </div>
   );
 }

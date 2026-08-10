@@ -138,7 +138,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               } else {
                 audio.playFanfare();
                 onWorkoutCompleteRef.current(
-                  Math.round(totalSecondsElapsedRef.current / 60) || 60,
+                  Math.round(totalSecondsElapsedRef.current / 60),
                   Object.values(completedSetsRef.current).reduce((a, b) => a + b, 0)
                 );
               }
@@ -155,7 +155,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 } else {
                   audio.playFanfare();
                   onWorkoutCompleteRef.current(
-                    Math.round(totalSecondsElapsedRef.current / 60) || 60,
+                    Math.round(totalSecondsElapsedRef.current / 60),
                     Object.values(completedSetsRef.current).reduce((a, b) => a + b, 0)
                   );
                 }
@@ -225,7 +225,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         } else {
           audio.playFanfare();
           onWorkoutComplete(
-            Math.round(totalSecondsElapsed / 60) || 60,
+            Math.round(totalSecondsElapsed / 60),
             totalCompleted
           );
         }
@@ -270,6 +270,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
                 {currentItem.blockTitle}
               </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? 'var(--text-muted)' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)' }}>
+                <Clock size={14} />
+                <span>{formatTime(totalSecondsElapsed)}</span>
+              </div>
               <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>
                 Exercise {currentIndex + 1} of {allExercises.length}
               </span>
@@ -280,7 +284,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               <div style={{
                 width: `${totalWorkoutProgress}%`,
                 height: '100%',
-                background: 'linear-gradient(90deg, #00F0FF 0%, #00FF9D 50%, #FF007A 100%)',
+                background: 'linear-gradient(90deg, #00F0FF 0%, #00F0FF 50%, #00F0FF 100%)',
                 transition: 'width 0.4s ease',
                 boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
               }} />
@@ -302,7 +306,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             padding: '10px',
             borderRadius: '10px',
             border: 'none',
-            background: mobileActivePanel === 'details' ? 'linear-gradient(135deg, #00F0FF 0%, #00FF9D 100%)' : 'transparent',
+            background: mobileActivePanel === 'details' ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)' : 'transparent',
             color: mobileActivePanel === 'details' ? '#050B14' : 'var(--text-muted)',
             fontWeight: '700',
             fontSize: '0.85rem',
@@ -325,7 +329,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             padding: '10px',
             borderRadius: '10px',
             border: 'none',
-            background: mobileActivePanel === 'timer' ? 'linear-gradient(135deg, #00F0FF 0%, #00FF9D 100%)' : 'transparent',
+            background: mobileActivePanel === 'timer' ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)' : 'transparent',
             color: mobileActivePanel === 'timer' ? '#050B14' : 'var(--text-muted)',
             fontWeight: '700',
             fontSize: '0.85rem',
@@ -412,7 +416,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '12px',
-                color: '#FF007A'
+                color: '#00F0FF'
               }}>
                 <AlertCircle size={22} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
@@ -514,7 +518,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   cx="120"
                   cy="120"
                   r="100"
-                  stroke={isResting ? '#FF6B00' : currentItem.blockBadgeColor}
+                  stroke={isResting ? '#00F0FF' : currentItem.blockBadgeColor}
                   strokeWidth="12"
                   fill="transparent"
                   strokeDasharray={628.3}
@@ -532,7 +536,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   fontWeight: '900',
                   letterSpacing: '-0.04em',
                   lineHeight: 1,
-                  color: isResting ? '#FF6B00' : '#FFFFFF',
+                  color: isResting ? '#00F0FF' : '#FFFFFF',
                   textShadow: isResting ? '0 0 20px rgba(255, 107, 0, 0.5)' : '0 0 20px rgba(0, 240, 255, 0.4)'
                 }}>
                   {formatTime(timeLeft)}
@@ -578,10 +582,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   padding: 0,
                   justifyContent: 'center',
                   background: !isIntervalStarted
-                    ? 'linear-gradient(135deg, #00FF9D 0%, #00F0FF 100%)'
+                    ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)'
                     : (isIntervalPaused || isWorkoutPaused)
-                    ? 'linear-gradient(135deg, #00F0FF 0%, #00FF9D 100%)'
-                    : 'linear-gradient(135deg, #FF007A 0%, #FF6B00 100%)',
+                    ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)'
+                    : 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
                   boxShadow: !isIntervalStarted
                     ? '0 0 25px rgba(0, 255, 157, 0.5)'
                     : (isIntervalPaused || isWorkoutPaused)
@@ -647,9 +651,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                     minWidth: '56px',
                     padding: '12px',
                     borderRadius: '12px',
-                    border: isDone ? '1px solid #00FF9D' : '1px solid var(--border-subtle)',
+                    border: isDone ? '1px solid #00F0FF' : '1px solid var(--border-subtle)',
                     background: isDone ? 'rgba(0, 255, 157, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                    color: isDone ? '#00FF9D' : 'var(--text-muted)',
+                    color: isDone ? '#00F0FF' : 'var(--text-muted)',
                     fontWeight: '700',
                     fontSize: '0.88rem',
                     cursor: 'pointer',

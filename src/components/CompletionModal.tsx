@@ -23,7 +23,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
         particleCount: 120,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ['#00F0FF', '#00FF9D', '#FF007A', '#FFD700', '#B026FF']
+        colors: ['#00F0FF', '#00F0FF', '#00F0FF', '#00F0FF', '#00F0FF']
       });
     } catch {
       // Ignore if confetti fails
@@ -34,7 +34,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
     <div style={{
       position: 'fixed',
       inset: 0,
-      zIndex: 100,
+      zIndex: 10000,
       background: 'rgba(5, 11, 20, 0.85)',
       backdropFilter: 'blur(16px)',
       display: 'flex',
@@ -60,7 +60,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
           width: '72px',
           height: '72px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00F0FF 0%, #00FF9D 100%)',
+          background: 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -92,7 +92,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
           </div>
           <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700' }}>SETS LOGGED</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#00FF9D', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#00F0FF', fontFamily: 'var(--font-mono)', marginTop: '2px' }}>
               {completedSetsCount} sets
             </div>
           </div>

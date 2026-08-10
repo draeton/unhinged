@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import type { WorkoutBlock } from '../types/workout';
-import { Play, Clock, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, ShieldAlert, ChevronDown, ChevronUp, Video } from 'lucide-react';
 
 interface RoutineOverviewProps {
   blocks: WorkoutBlock[];
-  onStartFromBlock: (blockIndex: number) => void;
 }
 
-export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStartFromBlock }) => {
+export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
 
@@ -37,10 +36,6 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
               A scientifically balanced routine pairing heavy upper vertical pulling and left scapular symmetry with deep hamstring compression, Jefferson curling, and wrist relief.
             </p>
           </div>
-
-          <button className="btn-primary" onClick={() => onStartFromBlock(0)}>
-            <Play size={18} fill="#050B14" /> Start Full Workout
-          </button>
         </div>
 
         {/* Quick Filter Buttons */}
@@ -74,7 +69,7 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
       </div>
 
       {/* Workout Blocks List */}
-      {filteredBlocks.map((block, blockIdx) => (
+      {filteredBlocks.map((block) => (
         <div key={block.id} className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
           {/* Block Header */}
@@ -92,10 +87,6 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
                 {block.subtitle}
               </p>
             </div>
-
-            <button className="btn-secondary" onClick={() => onStartFromBlock(blockIdx)} style={{ padding: '8px 14px', fontSize: '0.82rem' }}>
-              <Play size={14} /> Jump to Block
-            </button>
           </div>
 
           {/* Exercises in Block */}
@@ -139,11 +130,6 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
                           <h4 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#FFFFFF' }}>
                             {ex.name}
                           </h4>
-                          {isLeftScapular && (
-                            <span className="badge left-scapula-badge" style={{ fontSize: '0.68rem' }}>
-                              LEFT SCAPULA FOCUS
-                            </span>
-                          )}
                         </div>
                         <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                           {ex.repsOrTime} • Equipment: {ex.equipment}
@@ -152,9 +138,6 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'rgba(0,0,0,0.3)', padding: '4px 10px', borderRadius: '12px' }}>
-                        Rest: {ex.restSeconds}s
-                      </span>
                       {isExpanded ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />}
                     </div>
                   </div>
@@ -162,6 +145,16 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
                   {/* Expanded Details */}
                   {isExpanded && (
                     <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {isLeftScapular && (
+                          <span className="badge left-scapula-badge" style={{ fontSize: '0.68rem' }}>
+                            LEFT SCAPULA FOCUS
+                          </span>
+                        )}
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'rgba(0,0,0,0.3)', padding: '4px 10px', borderRadius: '12px', display: 'flex', alignItems: 'center' }}>
+                          Rest: {ex.restSeconds}s
+                        </span>
+                      </div>
                       <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
                         {ex.description}
                       </p>
@@ -177,9 +170,45 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onStar
                         </ul>
                       </div>
 
-                      <div style={{ fontSize: '0.8rem', color: '#FF007A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <ShieldAlert size={14} /> <strong>Safety Note:</strong> {ex.safetyTip}
+                      <div style={{ fontSize: '0.8rem', color: '#00F0FF', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ShieldAlert size={14} /> <strong>Safety Note:</strong>
+                        </div>
+                        <div style={{ paddingLeft: '20px' }}>
+                          {ex.safetyTip}
+                        </div>
                       </div>
+
+                      {ex.videoUrls && ex.videoUrls.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                          {ex.videoUrls.map((video, idx) => (
+                            <a
+                              key={idx}
+                              href={video.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '10px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                color: '#00F0FF',
+                                fontSize: '0.85rem',
+                                fontWeight: '600',
+                                transition: 'background 0.2s ease',
+                              }}
+                              onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                              onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+                            >
+                              <Video size={16} />
+                              {video.title}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
