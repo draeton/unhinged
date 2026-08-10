@@ -58,7 +58,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           bottom: 0,
           left: 0,
           right: 0,
-          height: '85vh',
+          height: '95vh',
           background: 'var(--bg-dark)',
           borderTopLeftRadius: '24px',
           borderTopRightRadius: '24px',
