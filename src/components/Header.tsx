@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Pause, Play, Menu, Home, ClipboardList, ShieldAlert, History, Activity, XIcon, Square } from 'lucide-react';
+import { Volume2, VolumeX, Pause, Play, Menu, XIcon, Square } from 'lucide-react';
 import type { ScreenType } from './StartScreen';
 
 interface HeaderProps {
@@ -14,7 +14,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentScreen,
   onNavigate,
   isWorkoutActive,
   isWorkoutPaused,
@@ -36,11 +35,6 @@ export const Header: React.FC<HeaderProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleSelectNav = (screen: ScreenType) => {
-    setIsMenuOpen(false);
-    onNavigate(screen);
-  };
 
   return (
     <header style={{
@@ -102,58 +96,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Action Menu Group */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          
-          {/* Live Workout Quick Actions */}
-          {isWorkoutActive && (
-            <>
-              <button
-                onClick={onToggleWorkoutPause}
-                title={isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}
-                style={{
-                  background: isWorkoutPaused ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 107, 0, 0.15)',
-                  border: isWorkoutPaused ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid rgba(255, 107, 0, 0.3)',
-                  borderRadius: '12px',
-                  padding: '8px 12px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
-                  fontWeight: '700',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
-                <span className="hide-on-mobile">{isWorkoutPaused ? 'Resume' : 'Pause'}</span>
-              </button>
-
-              <button
-                onClick={onStopWorkout}
-                title="Stop Workout"
-                style={{
-                  background: 'rgba(255, 0, 122, 0.1)',
-                  border: '1px solid rgba(255, 0, 122, 0.3)',
-                  borderRadius: '12px',
-                  padding: '8px 12px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  color: '#FF007A',
-                  fontWeight: '700',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <Square size={16} fill="#FF007A" />
-                <span className="hide-on-mobile">Stop</span>
-              </button>
-            </>
-          )}
-
           <div style={{ position: 'relative' }} ref={menuRef}>
           
           {/* Main Action Menu Trigger Button */}
@@ -208,118 +150,69 @@ export const Header: React.FC<HeaderProps> = ({
               zIndex: 100,
             }}>
               
-              {/* Navigation Links */}
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700', padding: '4px 10px' }}>
-                Navigation
-              </div>
+              {/* Live Workout Quick Actions */}
+              {isWorkoutActive && (
+                <>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700', padding: '4px 10px' }}>
+                    Active Workout
+                  </div>
 
-              <button
-                onClick={() => handleSelectNav('start')}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: currentScreen === 'start' ? 'rgba(0, 240, 255, 0.12)' : 'transparent',
-                  color: currentScreen === 'start' ? '#00F0FF' : 'var(--text-muted)',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <Home size={15} />
-                <span>Start Hub</span>
-              </button>
+                  <button
+                    onClick={() => {
+                      onToggleWorkoutPause();
+                      setIsMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
+                      fontWeight: '600',
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
+                    <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
+                  </button>
 
-              <button
-                onClick={() => handleSelectNav('player')}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: currentScreen === 'player' ? 'rgba(0, 240, 255, 0.12)' : 'transparent',
-                  color: currentScreen === 'player' ? '#00F0FF' : 'var(--text-muted)',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <Activity size={15} />
-                <span>Live Workout</span>
-              </button>
-
-              <button
-                onClick={() => handleSelectNav('blueprint')}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: currentScreen === 'blueprint' ? 'rgba(0, 240, 255, 0.12)' : 'transparent',
-                  color: currentScreen === 'blueprint' ? '#00F0FF' : 'var(--text-muted)',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <ClipboardList size={15} />
-                <span>Program Blueprint</span>
-              </button>
-
-              <button
-                onClick={() => handleSelectNav('guide')}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: currentScreen === 'guide' ? 'rgba(176, 38, 255, 0.15)' : 'transparent',
-                  color: currentScreen === 'guide' ? '#D8B4FE' : 'var(--text-muted)',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <ShieldAlert size={15} />
-                <span>Form & Scapula Guide</span>
-              </button>
-
-              <button
-                onClick={() => handleSelectNav('history')}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: currentScreen === 'history' ? 'rgba(255, 215, 0, 0.15)' : 'transparent',
-                  color: currentScreen === 'history' ? '#FFD700' : 'var(--text-muted)',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <History size={15} />
-                <span>Logs & Stats</span>
-              </button>
+                  <button
+                    onClick={() => {
+                      onStopWorkout();
+                      setIsMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'rgba(255, 0, 122, 0.1)',
+                      color: '#FF007A',
+                      fontWeight: '600',
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <Square size={16} fill="#FF007A" />
+                    <span>Stop Workout</span>
+                  </button>
+                </>
+              )}
 
               {/* Audio Beeps Toggle — only on Live Workout */}
-              {currentScreen === 'player' && (
+              {isWorkoutActive && (
                 <>
                   <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
                   <button
