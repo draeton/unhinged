@@ -12,23 +12,39 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      // Prevent iOS Safari background scrolling
+      const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-      document.body.style.height = '100%';
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
+      // Store the scroll position on the body dataset so we can retrieve it when unmounting
+      document.body.dataset.scrollY = scrollY.toString();
     } else {
-      document.body.style.overflow = '';
+      const scrollY = document.body.dataset.scrollY;
       document.body.style.position = '';
+      document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.height = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0'));
+      }
     }
     
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
+      // In case it unmounts while open
+      if (document.body.style.position === 'fixed') {
+        const scrollY = document.body.dataset.scrollY;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.overflow = '';
+        if (scrollY) {
+          window.scrollTo(0, parseInt(scrollY || '0'));
+        }
+      }
     };
   }, [isOpen]);
 
