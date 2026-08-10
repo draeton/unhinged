@@ -3,6 +3,7 @@ import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './utils/storage';
 import { audio } from './utils/audio';
+import { Play, Pause, Square, Menu, X, Volume2, VolumeX } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
@@ -29,7 +30,20 @@ export function App() {
   const [showCompletionModal, setShowCompletionModal] = useState<boolean>(false);
   const [completionStats, setCompletionStats] = useState<{ durationMinutes: number; completedSets: number }>({ durationMinutes: 60, completedSets: 0 });
 
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState<boolean>(false);
+  const fabMenuRef = useRef<HTMLDivElement>(null);
+  
   const workoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fabMenuRef.current && !fabMenuRef.current.contains(event.target as Node)) {
+        setIsFabMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setCompletedWorkouts(getCompletedWorkouts());
@@ -162,9 +176,6 @@ export function App() {
           totalSecondsElapsed={totalSecondsElapsed}
           isWorkoutPaused={isWorkoutPaused}
           onToggleWorkoutPause={handleToggleWorkoutPause}
-          onStopWorkout={handleStopWorkout}
-          soundMuted={soundMuted}
-          onToggleSound={handleToggleSound}
           onWorkoutComplete={handleWorkoutComplete}
         />
       </Drawer>
@@ -193,6 +204,130 @@ export function App() {
           completedSetsCount={completionStats.completedSets}
           onSaveAndClose={handleSaveWorkout}
         />
+      )}
+
+      {/* Global FAB Action Menu (Visible when workout is active) */}
+      {isWorkoutStarted && (
+        <div style={{ position: 'fixed', bottom: '24px', right: '20px', zIndex: 1000 }} ref={fabMenuRef}>
+          {isFabMenuOpen && (
+            <div className="glass-panel" style={{
+              position: 'absolute',
+              bottom: '70px',
+              right: 0,
+              width: '220px',
+              padding: '8px',
+              background: 'rgba(14, 18, 28, 0.96)',
+              border: '1px solid var(--border-glow)',
+              borderRadius: '16px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+            }}>
+              <button
+                onClick={() => {
+                  handleToggleWorkoutPause();
+                  setIsFabMenuOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
+                  fontWeight: '600',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
+                <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleStopWorkout();
+                  setIsFabMenuOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'rgba(255, 0, 122, 0.1)',
+                  color: '#FF007A',
+                  fontWeight: '600',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Square size={16} fill="#FF007A" />
+                <span>Reset Workout</span>
+              </button>
+
+              <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
+              <button
+                onClick={() => {
+                  handleToggleSound();
+                  setIsFabMenuOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: soundMuted ? 'var(--text-dim)' : 'var(--text-main)',
+                  fontWeight: '600',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {soundMuted ? <VolumeX size={16} color="var(--text-dim)" /> : <Volume2 size={16} color="var(--accent-cyan)" />}
+                <span>{soundMuted ? 'Unmute Audio Beeps' : 'Mute Audio Beeps'}</span>
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+            title="Menu"
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '28px',
+              background: isFabMenuOpen ? 'rgba(0, 240, 255, 0.2)' : 'linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(18, 24, 38, 0.9) 100%)',
+              border: isFabMenuOpen ? '1px solid #00F0FF' : '1px solid rgba(0, 240, 255, 0.3)',
+              color: isFabMenuOpen ? '#00F0FF' : '#FFFFFF',
+              boxShadow: isFabMenuOpen ? '0 0 20px rgba(0, 240, 255, 0.3)' : '0 10px 30px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.25s ease',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+            }}
+          >
+            {isFabMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       )}
     </div>
   );

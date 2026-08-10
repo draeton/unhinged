@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, SkipForward, SkipBack, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw, Menu, X, Square, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw } from 'lucide-react';
 
 interface LivePlayerProps {
   blocks: WorkoutBlock[];
   totalSecondsElapsed: number;
   isWorkoutPaused: boolean;
   onToggleWorkoutPause: () => void;
-  onStopWorkout: () => void;
-  soundMuted: boolean;
-  onToggleSound: () => void;
   onWorkoutComplete: (totalMinutes: number, completedSets: number) => void;
 }
 
@@ -19,9 +16,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   totalSecondsElapsed,
   isWorkoutPaused,
   onToggleWorkoutPause,
-  onStopWorkout,
-  soundMuted,
-  onToggleSound,
   onWorkoutComplete,
 }) => {
   // Flatten exercises with block metadata
@@ -50,8 +44,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const [isIntervalStarted, setIsIntervalStarted] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalStarted') === 'true');
   const [isIntervalPaused, setIsIntervalPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalPaused') === 'true');
   const [timeOffset, setTimeOffset] = useState<number>(() => parseInt(localStorage.getItem('unhinged_timeOffset') || '0', 10));
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+
 
   // Set Tracking per exercise: { [exerciseId]: completedSetCount }
   const [completedSets, setCompletedSets] = useState<{ [exerciseId: string]: number }>(() => JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}'));
@@ -62,16 +55,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
   const nextItem = allExercises[currentIndex + 1];
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Sync to local storage
   useEffect(() => {
@@ -302,126 +285,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
               }} />
             </div>
-          </div>
-
-          <div style={{ position: 'relative' }} ref={menuRef}>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              title="Menu"
-              className="glass-panel"
-              style={{
-                width: '52px',
-                height: '52px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: isMenuOpen ? '#00F0FF' : '#FFFFFF',
-                cursor: 'pointer',
-                border: isMenuOpen ? '1px solid #00F0FF' : '1px solid var(--border-subtle)',
-                background: isMenuOpen ? 'rgba(0, 240, 255, 0.1)' : 'rgba(255, 255, 255, 0.04)',
-                padding: 0,
-                flexShrink: 0,
-              }}
-            >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {isMenuOpen && (
-              <div className="glass-panel" style={{
-                position: 'absolute',
-                right: 0,
-                top: '60px',
-                width: '220px',
-                padding: '8px',
-                background: 'rgba(14, 18, 28, 0.96)',
-                border: '1px solid var(--border-glow)',
-                borderRadius: '16px',
-                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px',
-                zIndex: 100,
-              }}>
-                <button
-                  onClick={() => {
-                    onToggleWorkoutPause();
-                    setIsMenuOpen(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: 'none',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    color: isWorkoutPaused ? '#00F0FF' : '#FF6B00',
-                    fontWeight: '600',
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {isWorkoutPaused ? <Play size={16} fill="#00F0FF" /> : <Pause size={16} fill="#FF6B00" />}
-                  <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    onStopWorkout();
-                    setIsMenuOpen(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: 'none',
-                    background: 'rgba(255, 0, 122, 0.1)',
-                    color: '#FF007A',
-                    fontWeight: '600',
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <Square size={16} fill="#FF007A" />
-                  <span>Reset Workout</span>
-                </button>
-
-                <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
-                <button
-                  onClick={() => {
-                    onToggleSound();
-                    setIsMenuOpen(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: 'none',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    color: soundMuted ? 'var(--text-dim)' : 'var(--text-main)',
-                    fontWeight: '600',
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {soundMuted ? <VolumeX size={16} color="var(--text-dim)" /> : <Volume2 size={16} color="var(--accent-cyan)" />}
-                  <span>{soundMuted ? 'Unmute Audio Beeps' : 'Mute Audio Beeps'}</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
