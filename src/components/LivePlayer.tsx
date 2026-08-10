@@ -290,7 +290,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
       {/* Mobile/Tablet Panel Swapper Toggle Bar */}
       <div className="mobile-panel-toggle" style={{
-        display: 'flex',
         background: 'rgba(255, 255, 255, 0.04)',
         padding: '4px',
         borderRadius: '14px',
