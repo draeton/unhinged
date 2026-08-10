@@ -12,6 +12,7 @@ import { RoutineOverview } from './components/RoutineOverview';
 import { AsymmetryGuide } from './components/AsymmetryGuide';
 import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
+import { Drawer } from './components/Drawer';
 
 export function App() {
   // Workout Global Timer State
@@ -20,6 +21,7 @@ export function App() {
   const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
 
   const [currentScreen, setCurrentScreen] = useState<ScreenType>(isWorkoutStarted ? 'player' : 'start');
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
 
@@ -63,6 +65,11 @@ export function App() {
 
   // Navigate to screen
   const handleNavigate = (screen: ScreenType) => {
+    if (screen === 'blueprint' || screen === 'guide' || screen === 'history') {
+      setActiveDrawer(screen as 'blueprint' | 'guide' | 'history');
+      return;
+    }
+
     if (screen === 'player') {
       if (!isWorkoutStarted) {
         // Start a brand new workout if none started!
@@ -73,6 +80,7 @@ export function App() {
       }
     }
     setCurrentScreen(screen);
+    setActiveDrawer(null);
   };
 
 
@@ -120,7 +128,8 @@ export function App() {
     setTotalSecondsElapsed(0);
     clearActiveWorkoutState();
 
-    setCurrentScreen('history');
+    setCurrentScreen('start');
+    setActiveDrawer('history');
   };
 
   const handleStartFromBlock = () => {
@@ -161,24 +170,24 @@ export function App() {
             onWorkoutComplete={handleWorkoutComplete}
           />
         )}
-
-        {currentScreen === 'blueprint' && (
-          <RoutineOverview
-            blocks={DEFAULT_WORKOUT_BLOCKS}
-            onStartFromBlock={handleStartFromBlock}
-          />
-        )}
-
-        {currentScreen === 'guide' && (
-          <AsymmetryGuide />
-        )}
-
-        {currentScreen === 'history' && (
-          <HistoryStats
-            workouts={completedWorkouts}
-          />
-        )}
       </main>
+
+      <Drawer isOpen={activeDrawer === 'blueprint'} onClose={() => setActiveDrawer(null)}>
+        <RoutineOverview
+          blocks={DEFAULT_WORKOUT_BLOCKS}
+          onStartFromBlock={handleStartFromBlock}
+        />
+      </Drawer>
+
+      <Drawer isOpen={activeDrawer === 'guide'} onClose={() => setActiveDrawer(null)}>
+        <AsymmetryGuide />
+      </Drawer>
+
+      <Drawer isOpen={activeDrawer === 'history'} onClose={() => setActiveDrawer(null)}>
+        <HistoryStats
+          workouts={completedWorkouts}
+        />
+      </Drawer>
 
       {/* Completion Modal */}
       {showCompletionModal && (
