@@ -3,7 +3,7 @@ import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './utils/storage';
 import { audio } from './utils/audio';
-import { Play, Pause, Square, Menu, X, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Square, Settings, X, Volume2, VolumeX } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
@@ -325,7 +325,7 @@ export function App() {
               WebkitBackdropFilter: 'blur(16px)',
             }}
           >
-            {isFabMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isFabMenuOpen ? <X size={24} /> : <Settings size={24} />}
           </button>
         </div>
       )}
