@@ -121,15 +121,6 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {isMenuOpen ? <XIcon size={18} /> : <Menu size={18} />}
             <span className="hide-on-mobile">Menu</span>
-            {isWorkoutActive && (
-              <span style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: isWorkoutPaused ? '#FF6B00' : '#00FF9D',
-                boxShadow: isWorkoutPaused ? '0 0 8px #FF6B00' : '0 0 8px #00FF9D',
-              }} />
-            )}
           </button>
 
           {/* Action Menu Dropdown Popover */}

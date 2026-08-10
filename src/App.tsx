@@ -154,6 +154,7 @@ export function App() {
           <StartScreen
             onNavigate={handleNavigate}
             isWorkoutActive={isWorkoutStarted}
+            isWorkoutPaused={isWorkoutPaused}
             totalSecondsElapsed={totalSecondsElapsed}
             completedWorkoutsCount={completedWorkouts.length}
           />

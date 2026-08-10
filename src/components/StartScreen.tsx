@@ -6,6 +6,7 @@ export type ScreenType = 'start' | 'player' | 'blueprint' | 'history' | 'guide';
 interface StartScreenProps {
   onNavigate: (screen: ScreenType) => void;
   isWorkoutActive: boolean;
+  isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
   completedWorkoutsCount: number;
 }
@@ -13,6 +14,7 @@ interface StartScreenProps {
 export const StartScreen: React.FC<StartScreenProps> = ({
   onNavigate,
   isWorkoutActive,
+  isWorkoutPaused,
   totalSecondsElapsed,
   completedWorkoutsCount,
 }) => {
@@ -62,8 +64,20 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               <Play size={28} fill="#050B14" style={{ marginLeft: '3px' }} />
             </div>
             {isWorkoutActive && (
-              <span className="badge glow-pink" style={{ background: 'rgba(255, 0, 122, 0.2)', border: '1px solid #FF007A' }}>
-                IN PROGRESS ({formatTime(totalSecondsElapsed)})
+              <span className="badge" style={{ 
+                background: isWorkoutPaused ? 'rgba(255, 107, 0, 0.2)' : 'rgba(0, 255, 157, 0.2)', 
+                border: isWorkoutPaused ? '1px solid #FF6B00' : '1px solid #00FF9D',
+                color: isWorkoutPaused ? '#FF6B00' : '#00FF9D',
+                display: 'flex', alignItems: 'center', gap: '6px'
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: isWorkoutPaused ? '#FF6B00' : '#00FF9D',
+                  boxShadow: isWorkoutPaused ? '0 0 8px #FF6B00' : '0 0 8px #00FF9D',
+                }} />
+                {isWorkoutPaused ? 'PAUSED' : 'IN PROGRESS'} ({formatTime(totalSecondsElapsed)})
               </span>
             )}
           </div>
