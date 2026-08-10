@@ -14,6 +14,7 @@ import { AsymmetryGuide } from './components/AsymmetryGuide';
 import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
 import { Drawer } from './components/Drawer';
+import { VideoModal } from './components/VideoModal';
 
 export function App() {
   // Workout Global Timer State
@@ -38,6 +39,47 @@ export function App() {
   const fabMenuRef = useRef<HTMLDivElement>(null);
   
   const workoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wakeLockRef = useRef<any>(null);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+
+  // Screen Wake Lock for Live Workout Drawer
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      if (activeDrawer === 'player' && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        } catch (err: any) {
+          console.error(`Wake Lock error: ${err.name}, ${err.message}`);
+        }
+      }
+    };
+
+    const releaseWakeLock = () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+        wakeLockRef.current = null;
+      }
+    };
+
+    if (activeDrawer === 'player') {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && activeDrawer === 'player') {
+        requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      releaseWakeLock();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [activeDrawer]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -219,13 +261,12 @@ export function App() {
           isWorkoutPaused={isWorkoutPaused}
           onToggleWorkoutPause={handleToggleWorkoutPause}
           onWorkoutComplete={handleWorkoutComplete}
+          onPlayVideo={setActiveVideoUrl}
         />
       </Drawer>
 
       <Drawer isOpen={activeDrawer === 'blueprint'} onClose={() => setActiveDrawer(null)}>
-        <RoutineOverview
-          blocks={DEFAULT_WORKOUT_BLOCKS}
-        />
+        <RoutineOverview blocks={DEFAULT_WORKOUT_BLOCKS} onPlayVideo={setActiveVideoUrl} />
       </Drawer>
 
       <Drawer isOpen={activeDrawer === 'guide'} onClose={() => setActiveDrawer(null)}>
@@ -240,12 +281,15 @@ export function App() {
 
       {/* Completion Modal */}
       {showCompletionModal && (
-        <CompletionModal
-          durationMinutes={completionStats.durationMinutes}
-          completedSetsCount={completionStats.completedSets}
+        <CompletionModal 
+          durationMinutes={completionStats.durationMinutes} 
+          completedSetsCount={completionStats.completedSets} 
           onSaveAndClose={handleSaveWorkout}
         />
       )}
+
+      {/* Full Screen Video Modal */}
+      <VideoModal url={activeVideoUrl} onClose={() => setActiveVideoUrl(null)} />
 
       {/* Global FAB Action Menu (Visible when workout is active) */}
       {isWorkoutStarted && (

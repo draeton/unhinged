@@ -9,6 +9,7 @@ interface LivePlayerProps {
   isWorkoutPaused: boolean;
   onToggleWorkoutPause: () => void;
   onWorkoutComplete: (totalMinutes: number, completedSets: number) => void;
+  onPlayVideo: (url: string) => void;
 }
 
 export const LivePlayer: React.FC<LivePlayerProps> = ({
@@ -17,6 +18,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   isWorkoutPaused,
   onToggleWorkoutPause,
   onWorkoutComplete,
+  onPlayVideo,
 }) => {
   // Flatten exercises with block metadata
   const allExercises = React.useMemo(() => {
@@ -356,13 +358,20 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           {/* Exercise Card */}
           <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', lineHeight: 1.2 }}>
                   {currentExercise.name}
                 </h2>
-                <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                  {currentExercise.repsOrTime}
-                </span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
+                    {currentExercise.repsOrTime}
+                  </span>
+                  {currentExercise.equipment && (
+                    <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
+                      {currentExercise.equipment}
+                    </span>
+                  )}
+                </div>
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '8px', lineHeight: 1.5 }}>
                 {currentExercise.description}
@@ -372,12 +381,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             {/* SPECIAL CUE HIGHLIGHT: Left Scapular Asymmetry Warning */}
             {isLeftScapularFocus && (
               <div className="left-scapula-badge" style={{ padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <ShieldAlert size={22} style={{ flexShrink: 0, color: '#D8B4FE', marginTop: '2px' }} />
+                <ShieldAlert size={22} style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div>
                   <div style={{ fontWeight: '800', fontSize: '0.88rem', letterSpacing: '0.04em' }}>
-                    ⚡ LEFT SCAPULAR ASYMMETRY FOCUS
+                    LEFT SCAPULAR ASYMMETRY FOCUS
                   </div>
-                  <div style={{ fontSize: '0.82rem', marginTop: '4px', opacity: 0.9 }}>
+                  <div style={{ fontSize: '0.82rem', marginTop: '4px', opacity: 0.9, color: 'var(--text-main)' }}>
                     Wrap left shoulder blade DOWN and BACK firmly into back pocket during the 3 slow scapular pull-ups before pulling chin over bar!
                   </div>
                 </div>
@@ -409,8 +418,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             {/* SPECIAL CUE HIGHLIGHT: Jefferson Curl Spine Segmenting */}
             {isJeffersonCurlFocus && (
               <div style={{
-                background: 'rgba(255, 0, 122, 0.12)',
-                border: '1px solid rgba(255, 0, 122, 0.3)',
+                background: 'rgba(0, 240, 255, 0.12)',
+                border: '1px solid rgba(0, 240, 255, 0.3)',
                 padding: '12px 16px',
                 borderRadius: '12px',
                 display: 'flex',
@@ -441,17 +450,17 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               {currentExercise.videoUrls && currentExercise.videoUrls.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
                   {currentExercise.videoUrls.map((video, idx) => (
-                    <a
+                    <button
                       key={idx}
-                      href={video.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={() => onPlayVideo(video.url)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                         padding: '10px',
                         background: 'rgba(255, 255, 255, 0.05)',
+                        border: 'none',
+                        cursor: 'pointer',
                         borderRadius: '8px',
                         color: 'var(--accent-cyan)',
                         textDecoration: 'none',
@@ -463,8 +472,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                       onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
                     >
                       <Video size={16} />
-                      {video.title}
-                    </a>
+                      <span>{video.title}</span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -673,7 +682,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
         {/* Next Up Preview Teaser */}
         {nextItem && (
-          <div className="glass-panel" style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="glass-panel" style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700' }}>
                 NEXT UP PREVIEW
@@ -682,9 +691,16 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 {nextItem.exercise.name}
               </div>
             </div>
-            <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--accent-cyan)' }}>
-              {nextItem.exercise.repsOrTime}
-            </span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--accent-cyan)' }}>
+                {nextItem.exercise.repsOrTime}
+              </span>
+              {nextItem.exercise.equipment && (
+                <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
+                  {nextItem.exercise.equipment}
+                </span>
+              )}
+            </div>
           </div>
         )}
 

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import type { WorkoutBlock } from '../types/workout';
-import { Clock, ShieldAlert, ChevronDown, ChevronUp, Video } from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, ShieldAlert, Video } from 'lucide-react';
 
 interface RoutineOverviewProps {
   blocks: WorkoutBlock[];
+  onPlayVideo: (url: string) => void;
 }
 
-export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks }) => {
+export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlayVideo }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
 
@@ -99,8 +100,8 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks }) => {
                 <div
                   key={ex.id}
                   style={{
-                    background: isLeftScapular ? 'rgba(176, 38, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
-                    border: isLeftScapular ? '1px solid rgba(176, 38, 255, 0.3)' : '1px solid var(--border-subtle)',
+                    background: isLeftScapular ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isLeftScapular ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid var(--border-subtle)',
                     borderRadius: '12px',
                     padding: '16px',
                     transition: 'all 0.2s ease',
@@ -182,11 +183,9 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks }) => {
                       {ex.videoUrls && ex.videoUrls.length > 0 && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
                           {ex.videoUrls.map((video, idx) => (
-                            <a
+                            <button
                               key={idx}
-                              href={video.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              onClick={() => onPlayVideo(video.url)}
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -198,14 +197,16 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks }) => {
                                 color: '#00F0FF',
                                 fontSize: '0.85rem',
                                 fontWeight: '600',
+                                border: 'none',
+                                cursor: 'pointer',
                                 transition: 'background 0.2s ease',
                               }}
                               onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
                               onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
                             >
                               <Video size={16} />
-                              {video.title}
-                            </a>
+                              <span>{video.title}</span>
+                            </button>
                           ))}
                         </div>
                       )}

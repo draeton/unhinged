@@ -152,10 +152,9 @@ html, body {
 
 /* Left Scapular Highlight Box */
 .left-scapula-badge {
-  background: rgba(176, 38, 255, 0.15);
-  border: 1px solid rgba(176, 38, 255, 0.4);
-  color: #D8B4FE;
-  box-shadow: 0 0 12px rgba(176, 38, 255, 0.2);
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: #00F0FF;
 }
 
 /* Responsive Swappable Panels for Live Player */
