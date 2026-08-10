@@ -197,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
                     }}
                   >
                     <Square size={16} fill="#FF007A" />
-                    <span>Stop Workout</span>
+                    <span>Reset Workout</span>
                   </button>
                 </>
               )}
