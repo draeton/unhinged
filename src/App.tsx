@@ -108,6 +108,7 @@ export function App() {
     setTotalSecondsElapsed(0);
     clearActiveWorkoutState();
     setCurrentScreen('start');
+    setActiveDrawer(null);
   };
 
   const handleToggleSound = () => {
