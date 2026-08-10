@@ -140,14 +140,7 @@ export function App() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-dark)' }}>
       {/* Header Bar */}
       <Header
-        currentScreen={currentScreen}
         onNavigate={handleNavigate}
-        isWorkoutActive={isWorkoutStarted}
-        isWorkoutPaused={isWorkoutPaused}
-        onToggleWorkoutPause={handleToggleWorkoutPause}
-        onStopWorkout={handleStopWorkout}
-        soundMuted={soundMuted}
-        onToggleSound={handleToggleSound}
       />
 
       {/* Main Screen Body */}
@@ -169,6 +162,9 @@ export function App() {
           totalSecondsElapsed={totalSecondsElapsed}
           isWorkoutPaused={isWorkoutPaused}
           onToggleWorkoutPause={handleToggleWorkoutPause}
+          onStopWorkout={handleStopWorkout}
+          soundMuted={soundMuted}
+          onToggleSound={handleToggleSound}
           onWorkoutComplete={handleWorkoutComplete}
         />
       </Drawer>
