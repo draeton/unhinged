@@ -260,29 +260,14 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       
-      {/* Top Total Program Progress Bar (Sticky & Full Width) */}
-      <div style={{
-        width: '100%',
-        padding: '10px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        position: 'sticky',
-        top: '65px',
-        zIndex: 40,
-        background: 'rgba(10, 13, 20, 0.95)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--border-subtle)',
-      }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        {/* Top Total Program Progress Bar */}
+        <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
             <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
               {currentItem.blockTitle}
             </span>
-            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: '700', color: 'var(--text-main)' }}>
-              {formatTime(totalSecondsElapsed)} <span style={{ color: 'var(--accent-cyan)' }}>({totalWorkoutProgress}%)</span>
-            </div>
             <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>
               Exercise {currentIndex + 1} of {allExercises.length}
             </span>
@@ -299,9 +284,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             }} />
           </div>
         </div>
-      </div>
-
-      <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Mobile/Tablet Panel Swapper Toggle Bar */}
       <div className="mobile-panel-toggle" style={{
