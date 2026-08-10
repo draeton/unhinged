@@ -632,7 +632,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
             {Array.from({ length: currentExercise.sets }).map((_, idx) => {
               const setNum = idx + 1;
               const isDone = (completedSets[currentExercise.id] || 0) >= setNum;
@@ -641,7 +641,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   key={setNum}
                   onClick={() => handleToggleSet(setNum)}
                   style={{
-                    flex: 1,
+                    flex: '1 0 auto',
                     minWidth: '56px',
                     padding: '12px',
                     borderRadius: '12px',
