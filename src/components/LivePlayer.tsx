@@ -74,10 +74,21 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
+  const carouselRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
   // On exercise change: scroll to top and ensure sets tab is active on mobile
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setMobileActivePanel('details');
+    
+    // Scroll carousel active item into view
+    if (carouselRefs.current[currentIndex] && typeof carouselRefs.current[currentIndex]?.scrollIntoView === 'function') {
+      carouselRefs.current[currentIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
   }, [currentIndex]);
 
   const navigateToExercise = (newIndex: number) => {
@@ -310,6 +321,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             return (
               <button
                 key={index}
+                ref={(el) => {
+                  carouselRefs.current[index] = el;
+                }}
                 onClick={() => setCurrentIndex(index)}
                 style={{
                   flex: '0 0 auto',
