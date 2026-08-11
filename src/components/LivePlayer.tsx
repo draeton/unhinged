@@ -274,91 +274,105 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       
-      <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: 'column' }}>
+      {/* Sticky Full-Width Header Section */}
+      <div style={{
+        position: 'sticky',
+        top: '65px',
+        zIndex: 40,
+        background: 'rgba(10, 13, 20, 0.95)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid var(--border-subtle)',
+        padding: '16px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        width: '100%',
+      }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Top Total Program Progress Bar */}
           <div style={{ display: 'flex', gap: '12px', width: '100%', alignItems: 'flex-start' }}>
-          {/* Top Total Program Progress Bar */}
-          <div className="glass-panel" style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-              <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
-                {currentItem.blockTitle}
-              </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
-                <span>{formatTime(totalSecondsElapsed)}</span>
+            <div className="glass-panel" style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
+                <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
+                  {currentItem.blockTitle}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                  {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
+                  <span>{formatTime(totalSecondsElapsed)}</span>
+                </div>
+              </div>
+
+              {/* Global Progress Bar */}
+              <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${totalWorkoutProgress}%`,
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #00F0FF 0%, #00F0FF 50%, #00F0FF 100%)',
+                  transition: 'width 0.4s ease',
+                  boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
+                }} />
               </div>
             </div>
+          </div>
 
-            {/* Global Progress Bar */}
-            <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{
-                width: `${totalWorkoutProgress}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #00F0FF 0%, #00F0FF 50%, #00F0FF 100%)',
-                transition: 'width 0.4s ease',
-                boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
-              }} />
-            </div>
+          {/* Visual Exercise Navigator Carousel */}
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: '12px',
+            padding: '0 4px',
+            width: '100%',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }} className="hide-scrollbar">
+            {allExercises.map((item, index) => {
+              const isActive = index === currentIndex;
+
+              return (
+                <button
+                  key={index}
+                  ref={(el) => {
+                    carouselRefs.current[index] = el;
+                  }}
+                  onClick={() => setCurrentIndex(index)}
+                  style={{
+                    flex: '0 0 auto',
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '16px',
+                    border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
+                    background: isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)',
+                    scrollSnapAlign: 'start',
+                    cursor: 'pointer',
+                    opacity: isActive ? 1 : 0.6,
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px'
+                  }}
+                >
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: isActive ? '#00F0FF' : '#fff',
+                    fontWeight: '700',
+                    textAlign: 'center',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {item.exercise.name}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
-
-        {/* Visual Exercise Navigator Carousel */}
-        <div style={{
-          display: 'flex',
-          overflowX: 'auto',
-          gap: '12px',
-          padding: '0 4px',
-          marginBottom: '4px',
-          width: '100%',
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-        }} className="hide-scrollbar">
-          {allExercises.map((item, index) => {
-            const isActive = index === currentIndex;
-
-            return (
-              <button
-                key={index}
-                ref={(el) => {
-                  carouselRefs.current[index] = el;
-                }}
-                onClick={() => setCurrentIndex(index)}
-                style={{
-                  flex: '0 0 auto',
-                  width: '100px',
-                  height: '100px',
-                  borderRadius: '16px',
-                  border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
-                  background: isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)',
-                  scrollSnapAlign: 'start',
-                  cursor: 'pointer',
-                  opacity: isActive ? 1 : 0.6,
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '8px'
-                }}
-              >
-                <div style={{
-                  fontSize: '0.75rem',
-                  color: isActive ? '#00F0FF' : '#fff',
-                  fontWeight: '700',
-                  textAlign: 'center',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}>
-                  {item.exercise.name}
-                </div>
-              </button>
-            );
-          })}
-        </div>
       </div>
+
+      <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Mobile/Tablet Panel Swapper Toggle Bar */}
       <div className="mobile-panel-toggle" style={{
