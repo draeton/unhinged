@@ -285,7 +285,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
                 {currentItem.blockTitle}
               </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
                 {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
                 <span>{formatTime(totalSecondsElapsed)}</span>
               </div>
@@ -607,6 +607,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <span style={{
                   fontFamily: 'var(--font-mono)',
+                  fontVariantNumeric: 'tabular-nums',
                   fontSize: '3.6rem',
                   fontWeight: '900',
                   letterSpacing: '-0.04em',

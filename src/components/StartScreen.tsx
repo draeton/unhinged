@@ -77,7 +77,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                   background: isWorkoutPaused ? '#FFB300' : '#00F0FF',
                   boxShadow: isWorkoutPaused ? '0 0 8px rgba(255, 179, 0, 0.6)' : '0 0 8px rgba(0, 240, 255, 0.6)',
                 }} />
-                {isWorkoutPaused ? 'PAUSED' : 'IN PROGRESS'} ({formatTime(totalSecondsElapsed)})
+                {isWorkoutPaused ? 'PAUSED' : 'IN PROGRESS'} <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>({formatTime(totalSecondsElapsed)})</span>
               </span>
             )}
           </div>
