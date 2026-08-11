@@ -266,58 +266,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: 'column' }}>
-          {/* Visual Exercise Navigator Carousel */}
-          <div style={{
-            display: 'flex',
-            overflowX: 'auto',
-            gap: '12px',
-            padding: '0 4px',
-            marginBottom: '4px',
-            width: '100%',
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-          }} className="hide-scrollbar">
-            {allExercises.map((item, index) => {
-              const isActive = index === currentIndex;
-
-              return (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  style={{
-                    flex: '0 0 auto',
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '16px',
-                    border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
-                    background: isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)',
-                    scrollSnapAlign: 'start',
-                    cursor: 'pointer',
-                    opacity: isActive ? 1 : 0.6,
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '8px'
-                  }}
-                >
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: isActive ? '#00F0FF' : '#fff',
-                    fontWeight: '700',
-                    textAlign: 'center',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                  }}>
-                    {item.exercise.name}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
           {/* Top Total Program Progress Bar */}
           <div style={{ display: 'flex', gap: '12px', width: '100%', alignItems: 'flex-start' }}>
           {/* Top Total Program Progress Bar */}
@@ -343,6 +291,58 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               }} />
             </div>
           </div>
+        </div>
+
+        {/* Visual Exercise Navigator Carousel */}
+        <div style={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: '12px',
+          padding: '0 4px',
+          marginBottom: '4px',
+          width: '100%',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+        }} className="hide-scrollbar">
+          {allExercises.map((item, index) => {
+            const isActive = index === currentIndex;
+
+            return (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                style={{
+                  flex: '0 0 auto',
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '16px',
+                  border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
+                  background: isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)',
+                  scrollSnapAlign: 'start',
+                  cursor: 'pointer',
+                  opacity: isActive ? 1 : 0.6,
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '8px'
+                }}
+              >
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isActive ? '#00F0FF' : '#fff',
+                  fontWeight: '700',
+                  textAlign: 'center',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}>
+                  {item.exercise.name}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
