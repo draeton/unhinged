@@ -335,9 +335,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 <Clock size={14} />
                 <span>{formatTime(totalSecondsElapsed)}</span>
               </div>
-              <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>
-                Exercise {currentIndex + 1} of {allExercises.length}
-              </span>
             </div>
 
             {/* Global Progress Bar */}
