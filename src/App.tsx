@@ -31,12 +31,10 @@ export function App() {
   const [showCompletionModal, setShowCompletionModal] = useState<boolean>(false);
   const [completionStats, setCompletionStats] = useState<{ durationMinutes: number; completedSets: number }>({ durationMinutes: 60, completedSets: 0 });
 
-  const [isFabMenuOpen, setIsFabMenuOpen] = useState<boolean>(false);
   const [showConfirmComplete, setShowConfirmComplete] = useState<boolean>(false);
   const [confirmCountdown, setConfirmCountdown] = useState<number>(3);
   const [showConfirmReset, setShowConfirmReset] = useState<boolean>(false);
   const [resetCountdown, setResetCountdown] = useState<number>(3);
-  const fabMenuRef = useRef<HTMLDivElement>(null);
   
   const workoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wakeLockRef = useRef<any>(null);
@@ -81,15 +79,7 @@ export function App() {
     };
   }, [currentScreen]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (fabMenuRef.current && !fabMenuRef.current.contains(event.target as Node)) {
-        setIsFabMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
 
   useEffect(() => {
     setCompletedWorkouts(getCompletedWorkouts());
@@ -181,7 +171,6 @@ export function App() {
   const handleResetWorkoutClick = () => {
     setResetCountdown(3);
     setShowConfirmReset(true);
-    setIsFabMenuOpen(false);
   };
 
   const handleToggleSound = () => {
@@ -200,7 +189,6 @@ export function App() {
   const handleCompleteWorkoutClick = () => {
     setConfirmCountdown(3);
     setShowConfirmComplete(true);
-    setIsFabMenuOpen(false);
   };
 
   const handleForceCompleteWorkout = () => {
@@ -208,7 +196,6 @@ export function App() {
     const totalSets = Object.values(completedSetsDict).reduce((a: any, b: any) => a + Number(b), 0) as number;
     const durationMinutes = Math.round(totalSecondsElapsed / 60);
     handleWorkoutComplete(durationMinutes, totalSets);
-    setIsFabMenuOpen(false);
   };
 
   const handleSaveWorkout = (rpe: number, notes: string) => {
@@ -240,6 +227,13 @@ export function App() {
       {/* Header Bar */}
       <Header
         onNavigate={handleNavigate}
+        isWorkoutStarted={isWorkoutStarted}
+        isWorkoutPaused={isWorkoutPaused}
+        soundMuted={soundMuted}
+        onToggleWorkoutPause={handleToggleWorkoutPause}
+        onCompleteWorkoutClick={handleCompleteWorkoutClick}
+        onResetWorkoutClick={handleResetWorkoutClick}
+        onToggleSound={handleToggleSound}
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
@@ -289,155 +283,6 @@ export function App() {
 
       {/* Full Screen Video Modal */}
       <VideoModal url={activeVideoUrl} onClose={() => setActiveVideoUrl(null)} />
-
-      {/* Global FAB Action Menu (Visible when workout is active) */}
-      {isWorkoutStarted && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '20px', zIndex: 1000 }} ref={fabMenuRef}>
-          {isFabMenuOpen && (
-            <div className="glass-panel" style={{
-              position: 'absolute',
-              bottom: '70px',
-              right: 0,
-              width: '220px',
-              padding: '8px',
-              background: 'rgba(14, 18, 28, 0.96)',
-              border: '1px solid var(--border-glow)',
-              borderRadius: '16px',
-              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.6)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-            }}>
-              <button
-                onClick={() => {
-                  handleToggleWorkoutPause();
-                  if (!isWorkoutPaused) {
-                    setActiveDrawer(null);
-                  } else {
-                    setActiveDrawer('player');
-                  }
-                  setIsFabMenuOpen(false);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  color: '#FFFFFF',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {isWorkoutPaused ? <Play size={16} fill="#FFFFFF" color="#FFFFFF" /> : <Pause size={16} fill="#FFFFFF" color="#FFFFFF" />}
-                <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
-              </button>
-
-              <button
-                onClick={handleCompleteWorkoutClick}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  color: '#FFFFFF',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <CheckCircle size={16} fill="#FFFFFF" stroke="#050B14" />
-                <span>Complete Workout</span>
-              </button>
-
-              <button
-                onClick={handleResetWorkoutClick}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  color: '#FFFFFF',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <RotateCcw size={16} color="#FFFFFF" />
-                <span>Reset Workout</span>
-              </button>
-
-              <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
-              <button
-                onClick={() => {
-                  handleToggleSound();
-                  setIsFabMenuOpen(false);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  color: soundMuted ? 'var(--text-dim)' : 'var(--text-main)',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {soundMuted ? <VolumeX size={16} color="var(--text-dim)" /> : <Volume2 size={16} color="var(--accent-cyan)" />}
-                <span>{soundMuted ? 'Unmute Audio Beeps' : 'Mute Audio Beeps'}</span>
-              </button>
-            </div>
-          )}
-
-          <button
-            onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-            title="Menu"
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '28px',
-              background: isFabMenuOpen ? 'rgba(0, 240, 255, 0.2)' : 'linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(18, 24, 38, 0.9) 100%)',
-              border: isFabMenuOpen ? '1px solid #00F0FF' : '1px solid rgba(0, 240, 255, 0.3)',
-              color: isFabMenuOpen ? '#00F0FF' : '#FFFFFF',
-              boxShadow: isFabMenuOpen ? '0 0 20px rgba(0, 240, 255, 0.3)' : '0 10px 30px rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.25s ease',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-            }}
-          >
-            {isFabMenuOpen ? <X size={24} /> : <Settings size={24} />}
-          </button>
-        </div>
-      )}
 
       {/* Confirmation Drawer for Reset */}
       {showConfirmReset && (
