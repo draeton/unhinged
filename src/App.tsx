@@ -22,8 +22,8 @@ export function App() {
   const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true' ? true : false); // Pause on resume
   const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
 
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('start');
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'player' | null>(isWorkoutStarted ? 'player' : null);
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => isWorkoutStarted ? 'player' : 'start');
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
 
@@ -45,7 +45,7 @@ export function App() {
   // Screen Wake Lock for Live Workout Drawer
   useEffect(() => {
     const requestWakeLock = async () => {
-      if (activeDrawer === 'player' && 'wakeLock' in navigator) {
+      if (currentScreen === 'player' && 'wakeLock' in navigator) {
         try {
           wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
         } catch (err: any) {
@@ -61,14 +61,14 @@ export function App() {
       }
     };
 
-    if (activeDrawer === 'player') {
+    if (currentScreen === 'player') {
       requestWakeLock();
     } else {
       releaseWakeLock();
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && activeDrawer === 'player') {
+      if (document.visibilityState === 'visible' && currentScreen === 'player') {
         requestWakeLock();
       }
     };
@@ -79,7 +79,7 @@ export function App() {
       releaseWakeLock();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [activeDrawer]);
+  }, [currentScreen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -145,18 +145,19 @@ export function App() {
 
   // Navigate to screen
   const handleNavigate = (screen: ScreenType) => {
-    if (screen === 'blueprint' || screen === 'guide' || screen === 'history' || screen === 'player') {
-      if (screen === 'player') {
-        if (!isWorkoutStarted) {
-          // Start a brand new workout if none started!
-          setIsWorkoutStarted(true);
-          setTotalSecondsElapsed(0);
-          audio.playStart();
-        }
-        setIsWorkoutPaused(false);
-      }
-      setActiveDrawer(screen as 'blueprint' | 'guide' | 'history' | 'player');
+    if (screen === 'blueprint' || screen === 'guide' || screen === 'history') {
+      setActiveDrawer(screen as 'blueprint' | 'guide' | 'history');
       return;
+    }
+
+    if (screen === 'player') {
+      if (!isWorkoutStarted) {
+        // Start a brand new workout if none started!
+        setIsWorkoutStarted(true);
+        setTotalSecondsElapsed(0);
+        audio.playStart();
+      }
+      setIsWorkoutPaused(false);
     }
 
     setCurrentScreen(screen);
@@ -241,7 +242,6 @@ export function App() {
         onNavigate={handleNavigate}
       />
 
-      {/* Main Screen Body */}
       <main style={{ flex: 1, paddingBottom: '60px' }}>
         {currentScreen === 'start' && (
           <StartScreen
@@ -252,18 +252,17 @@ export function App() {
             completedWorkoutsCount={completedWorkouts.length}
           />
         )}
+        {currentScreen === 'player' && (
+          <LivePlayer
+            blocks={DEFAULT_WORKOUT_BLOCKS}
+            totalSecondsElapsed={totalSecondsElapsed}
+            isWorkoutPaused={isWorkoutPaused}
+            onToggleWorkoutPause={handleToggleWorkoutPause}
+            onWorkoutComplete={handleWorkoutComplete}
+            onPlayVideo={setActiveVideoUrl}
+          />
+        )}
       </main>
-
-      <Drawer isOpen={activeDrawer === 'player'} onClose={() => setActiveDrawer(null)}>
-        <LivePlayer
-          blocks={DEFAULT_WORKOUT_BLOCKS}
-          totalSecondsElapsed={totalSecondsElapsed}
-          isWorkoutPaused={isWorkoutPaused}
-          onToggleWorkoutPause={handleToggleWorkoutPause}
-          onWorkoutComplete={handleWorkoutComplete}
-          onPlayVideo={setActiveVideoUrl}
-        />
-      </Drawer>
 
       <Drawer isOpen={activeDrawer === 'blueprint'} onClose={() => setActiveDrawer(null)}>
         <RoutineOverview blocks={DEFAULT_WORKOUT_BLOCKS} onPlayVideo={setActiveVideoUrl} />
