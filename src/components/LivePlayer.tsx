@@ -278,7 +278,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             WebkitOverflowScrolling: 'touch',
           }} className="hide-scrollbar">
             {allExercises.map((item, index) => {
-              const imgUrl = `/images/exercises/${item.exercise.id}.jpg`;
               const isActive = index === currentIndex;
 
               return (
@@ -291,29 +290,25 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                     height: '100px',
                     borderRadius: '16px',
                     border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
-                    background: `url(${imgUrl}) center/cover no-repeat, var(--bg-card)`,
+                    background: isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)',
                     scrollSnapAlign: 'start',
                     cursor: 'pointer',
                     opacity: isActive ? 1 : 0.6,
                     transition: 'all 0.2s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    padding: 0
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px'
                   }}
                 >
                   <div style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    background: 'rgba(0,0,0,0.7)',
-                    padding: '4px',
-                    fontSize: '0.65rem',
-                    color: '#fff',
+                    fontSize: '0.75rem',
+                    color: isActive ? '#00F0FF' : '#fff',
                     fontWeight: '700',
                     textAlign: 'center',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
                     overflow: 'hidden'
                   }}>
                     {item.exercise.name}
