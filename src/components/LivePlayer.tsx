@@ -721,20 +721,18 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   key={setNum}
                   onClick={() => handleToggleSet(setNum)}
                   style={{
-                    flex: '1 0 auto',
-                    minWidth: '56px',
-                    padding: '12px',
+                    flex: '0 0 64px',
+                    height: '52px',
                     borderRadius: '12px',
                     border: isDone ? '1px solid #00F0FF' : '1px solid var(--border-subtle)',
                     background: isDone ? 'rgba(0, 255, 157, 0.15)' : 'rgba(255, 255, 255, 0.04)',
                     color: isDone ? '#00F0FF' : 'var(--text-muted)',
                     fontWeight: '700',
-                    fontSize: '0.88rem',
+                    fontSize: '1rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
                     transition: 'all 0.2s ease',
                   }}
                 >
