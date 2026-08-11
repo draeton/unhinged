@@ -254,17 +254,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     setTimeOffset(o => o + actualDelta);
   };
 
-  const handleSkipNext = () => {
-    if (currentIndex < allExercises.length - 1) {
-      navigateToExercise(currentIndex + 1);
-    }
-  };
 
-  const handleSkipPrev = () => {
-    if (currentIndex > 0) {
-      navigateToExercise(currentIndex - 1);
-    }
-  };
 
   // Specific Asymmetry Cues
   const isLeftScapularFocus = currentExercise.id === 's1';
@@ -779,27 +769,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         )}
 
-        {/* Previous / Next Exercise Navigation */}
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            className="btn-secondary"
-            onClick={handleSkipPrev}
-            disabled={currentIndex === 0}
-            style={{ flex: 1, padding: '10px', borderRadius: '12px', justifyContent: 'center', gap: '8px', opacity: currentIndex === 0 ? 0.4 : 1 }}
-          >
-            <SkipBack size={16} />
-            <span>Previous</span>
-          </button>
-          <button
-            className="btn-secondary"
-            onClick={handleSkipNext}
-            disabled={currentIndex === allExercises.length - 1}
-            style={{ flex: 1, padding: '10px', borderRadius: '12px', justifyContent: 'center', gap: '8px', opacity: currentIndex === allExercises.length - 1 ? 0.4 : 1 }}
-          >
-            <span>Next</span>
-            <SkipForward size={16} />
-          </button>
-        </div>
+
 
       </div>
 
