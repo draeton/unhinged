@@ -23,7 +23,7 @@ export function App() {
   const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
 
   const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => isWorkoutStarted ? 'player' : 'start');
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
 
@@ -227,13 +227,7 @@ export function App() {
       {/* Header Bar */}
       <Header
         onNavigate={handleNavigate}
-        isWorkoutStarted={isWorkoutStarted}
-        isWorkoutPaused={isWorkoutPaused}
-        soundMuted={soundMuted}
-        onToggleWorkoutPause={handleToggleWorkoutPause}
-        onCompleteWorkoutClick={handleCompleteWorkoutClick}
-        onResetWorkoutClick={handleResetWorkoutClick}
-        onToggleSound={handleToggleSound}
+        onMenuClick={() => setActiveDrawer('workoutMenu')}
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
@@ -270,6 +264,67 @@ export function App() {
         <HistoryStats
           workouts={completedWorkouts}
         />
+      </Drawer>
+
+      <Drawer isOpen={activeDrawer === 'workoutMenu'} onClose={() => setActiveDrawer(null)}>
+        <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '8px', color: '#fff' }}>
+            Workout Menu
+          </h2>
+          
+          {isWorkoutStarted && (
+            <>
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  handleToggleWorkoutPause();
+                  setActiveDrawer(null);
+                }}
+                style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+              >
+                {isWorkoutPaused ? <Play size={20} fill="#fff" /> : <Pause size={20} fill="#fff" />}
+                <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
+              </button>
+
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  handleCompleteWorkoutClick();
+                  setActiveDrawer(null);
+                }}
+                style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+              >
+                <CheckCircle size={20} fill="#fff" stroke="#050B14" />
+                <span>Complete Workout</span>
+              </button>
+
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  handleResetWorkoutClick();
+                  setActiveDrawer(null);
+                }}
+                style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)', color: '#FF3366' }}
+              >
+                <RotateCcw size={20} />
+                <span>Reset Workout</span>
+              </button>
+
+              <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }} />
+            </>
+          )}
+
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              handleToggleSound();
+            }}
+            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+          >
+            {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
+          </button>
+        </div>
       </Drawer>
 
       {/* Completion Modal */}
