@@ -283,38 +283,32 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--border-subtle)',
-        padding: '16px 20px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
         width: '100%',
       }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Top Total Program Progress Bar */}
-          <div style={{ display: 'flex', gap: '12px', width: '100%', alignItems: 'flex-start' }}>
-            <div className="glass-panel" style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-                <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
-                  {currentItem.blockTitle}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-                  {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
-                  <span>{formatTime(totalSecondsElapsed)}</span>
-                </div>
-              </div>
-
-              {/* Global Progress Bar */}
-              <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-                <div style={{
-                  width: `${totalWorkoutProgress}%`,
-                  height: '100%',
-                  background: 'linear-gradient(90deg, #00F0FF 0%, #00F0FF 50%, #00F0FF 100%)',
-                  transition: 'width 0.4s ease',
-                  boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
-                }} />
-              </div>
+        {/* Text Header */}
+        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '12px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
+            <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
+              {currentItem.blockTitle}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+              {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
+              <span>{formatTime(totalSecondsElapsed)}</span>
             </div>
           </div>
+        </div>
+
+        {/* Global Progress Bar (Edge to Edge) */}
+        <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)' }}>
+          <div style={{
+            width: `${totalWorkoutProgress}%`,
+            height: '100%',
+            background: 'linear-gradient(90deg, #00F0FF 0%, #00F0FF 50%, #00F0FF 100%)',
+            transition: 'width 0.4s ease',
+            boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
+          }} />
         </div>
       </div>
 
