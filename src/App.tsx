@@ -269,10 +269,10 @@ export function App() {
       <Drawer isOpen={activeDrawer === 'workoutMenu'} onClose={() => setActiveDrawer(null)}>
         <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h2 style={{ fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '8px', color: '#fff' }}>
-            Workout Menu
+            {currentScreen === 'start' ? 'App Menu' : 'Workout Menu'}
           </h2>
           
-          {isWorkoutStarted && (
+          {currentScreen === 'player' && isWorkoutStarted && (
             <>
               <button
                 className="btn-secondary"
@@ -309,21 +309,21 @@ export function App() {
                 <RotateCcw size={20} />
                 <span>Reset Workout</span>
               </button>
-
-              <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }} />
             </>
           )}
 
-          <button
-            className="btn-secondary"
-            onClick={() => {
-              handleToggleSound();
-            }}
-            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
-          >
-            {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-            <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
-          </button>
+          {currentScreen === 'start' && (
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                handleToggleSound();
+              }}
+              style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+            >
+              {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
+            </button>
+          )}
         </div>
       </Drawer>
 
