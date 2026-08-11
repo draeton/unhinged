@@ -286,7 +286,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 {currentItem.blockTitle}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)' }}>
-                <Clock size={14} />
+                {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
                 <span>{formatTime(totalSecondsElapsed)}</span>
               </div>
             </div>
