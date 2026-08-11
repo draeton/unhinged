@@ -22,7 +22,13 @@ export function App() {
   const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true' ? true : false); // Pause on resume
   const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
 
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => isWorkoutStarted ? 'player' : 'start');
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => {
+    const savedScreen = localStorage.getItem('unhinged_currentScreen');
+    if (savedScreen === 'start' || savedScreen === 'player') {
+      return savedScreen as ScreenType;
+    }
+    return isWorkoutStarted ? 'player' : 'start';
+  });
   const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
@@ -131,6 +137,7 @@ export function App() {
   // Scroll to top when changing screens
   useEffect(() => {
     window.scrollTo(0, 0);
+    localStorage.setItem('unhinged_currentScreen', currentScreen);
   }, [currentScreen]);
 
   // Navigate to screen
