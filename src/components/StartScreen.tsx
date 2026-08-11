@@ -65,17 +65,17 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             </div>
             {isWorkoutActive && (
               <span className="badge" style={{ 
-                background: isWorkoutPaused ? 'rgba(255, 107, 0, 0.2)' : 'rgba(0, 255, 157, 0.2)', 
-                border: isWorkoutPaused ? '1px solid #00F0FF' : '1px solid #00F0FF',
-                color: isWorkoutPaused ? '#00F0FF' : '#00F0FF',
+                background: isWorkoutPaused ? 'rgba(255, 179, 0, 0.15)' : 'rgba(0, 240, 255, 0.15)', 
+                border: isWorkoutPaused ? '1px solid #FFB300' : '1px solid #00F0FF',
+                color: isWorkoutPaused ? '#FFB300' : '#00F0FF',
                 display: 'flex', alignItems: 'center', gap: '6px'
               }}>
                 <span style={{
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: isWorkoutPaused ? '#00F0FF' : '#00F0FF',
-                  boxShadow: isWorkoutPaused ? '0 0 8px #00F0FF' : '0 0 8px #00F0FF',
+                  background: isWorkoutPaused ? '#FFB300' : '#00F0FF',
+                  boxShadow: isWorkoutPaused ? '0 0 8px rgba(255, 179, 0, 0.6)' : '0 0 8px rgba(0, 240, 255, 0.6)',
                 }} />
                 {isWorkoutPaused ? 'PAUSED' : 'IN PROGRESS'} ({formatTime(totalSecondsElapsed)})
               </span>
