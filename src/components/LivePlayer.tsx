@@ -78,7 +78,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   // On exercise change: scroll to top and ensure sets tab is active on mobile
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
     setMobileActivePanel('details');
     
     // Scroll carousel active item into view
