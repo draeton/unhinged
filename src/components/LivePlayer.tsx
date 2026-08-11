@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, SkipForward, SkipBack, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw } from 'lucide-react';
+import { Play, Pause, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw } from 'lucide-react';
 
 interface LivePlayerProps {
   blocks: WorkoutBlock[];

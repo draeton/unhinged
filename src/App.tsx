@@ -3,7 +3,7 @@ import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './utils/storage';
 import { audio } from './utils/audio';
-import { Play, Pause, RotateCcw, Settings, X, Volume2, VolumeX, CheckCircle } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
