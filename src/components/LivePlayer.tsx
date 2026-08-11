@@ -316,6 +316,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         }} className="hide-scrollbar">
           {allExercises.map((item, index) => {
             const isActive = index === currentIndex;
+            const isFullyComplete = (completedSets[item.exercise.id] || 0) >= item.exercise.sets;
+            const borderColor = isFullyComplete ? '#00FF9D' : (isActive ? '#00F0FF' : 'rgba(255,255,255,0.1)');
+            const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.1)' : (isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)');
+            const textColor = isFullyComplete ? '#00FF9D' : (isActive ? '#00F0FF' : '#fff');
 
             return (
               <button
@@ -329,11 +333,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   width: '100px',
                   height: '100px',
                   borderRadius: '16px',
-                  border: isActive ? '2px solid #00F0FF' : '2px solid rgba(255,255,255,0.1)',
-                  background: isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)',
+                  border: `2px solid ${borderColor}`,
+                  background: bgColor,
                   scrollSnapAlign: 'start',
                   cursor: 'pointer',
-                  opacity: isActive ? 1 : 0.6,
+                  opacity: isActive || isFullyComplete ? 1 : 0.6,
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -343,7 +347,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               >
                 <div style={{
                   fontSize: '0.75rem',
-                  color: isActive ? '#00F0FF' : '#fff',
+                  color: textColor,
                   fontWeight: '700',
                   textAlign: 'center',
                   display: '-webkit-box',
@@ -716,6 +720,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             {Array.from({ length: currentExercise.sets }).map((_, idx) => {
               const setNum = idx + 1;
               const isDone = (completedSets[currentExercise.id] || 0) >= setNum;
+              const isFullyComplete = (completedSets[currentExercise.id] || 0) >= currentExercise.sets;
+              
+              const borderColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--border-subtle)');
+              const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.15)' : (isDone ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)');
+              const textColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--text-muted)');
+
               return (
                 <button
                   key={setNum}
@@ -724,9 +734,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                     flex: '0 0 64px',
                     height: '52px',
                     borderRadius: '12px',
-                    border: isDone ? '1px solid #00F0FF' : '1px solid var(--border-subtle)',
-                    background: isDone ? 'rgba(0, 255, 157, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                    color: isDone ? '#00F0FF' : 'var(--text-muted)',
+                    border: `1px solid ${borderColor}`,
+                    background: bgColor,
+                    color: textColor,
                     fontWeight: '700',
                     fontSize: '1rem',
                     cursor: 'pointer',
