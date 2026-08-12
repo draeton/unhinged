@@ -42,6 +42,10 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
             padding: '16px', 
             fontSize: '1.1rem', 
             fontWeight: '800',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: '8px',
             ...(isWorkoutStarted && isWorkoutPaused ? {
               background: '#FFB300',
               color: '#050B14',
@@ -49,7 +53,17 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
             } : {})
           }}
         >
-          {isWorkoutStarted ? `Resume (${formatTime(totalSecondsElapsed)})` : 'Start Workout'}
+          {!isWorkoutStarted && 'Start Workout'}
+          {isWorkoutStarted && !isWorkoutPaused && (
+            <>
+              In Progress ({formatTime(totalSecondsElapsed)})
+            </>
+          )}
+          {isWorkoutStarted && isWorkoutPaused && (
+            <>
+              Paused ({formatTime(totalSecondsElapsed)})
+            </>
+          )}
         </button>
         
         <button
