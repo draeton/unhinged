@@ -5,6 +5,7 @@ export type ScreenType = 'start' | 'player' | 'blueprint' | 'history' | 'guide';
 
 interface StartScreenProps {
   onNavigate: (screen: ScreenType) => void;
+  onOpenPreWorkout: () => void;
   isWorkoutActive: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
@@ -13,6 +14,7 @@ interface StartScreenProps {
 
 export const StartScreen: React.FC<StartScreenProps> = ({
   onNavigate,
+  onOpenPreWorkout,
   isWorkoutActive,
   isWorkoutPaused,
   totalSecondsElapsed,
@@ -32,7 +34,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         
         {/* Card 1: LIVE WORKOUT (Primary Action) */}
         <div
-          onClick={() => onNavigate('player')}
+          onClick={onOpenPreWorkout}
           className="glass-panel"
           style={{
             padding: '28px',
@@ -104,49 +106,6 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             marginTop: '8px',
           }}>
             {isWorkoutActive ? 'Resume Active Session' : 'Start New Session'} →
-          </div>
-        </div>
-
-        {/* Card 2: PROGRAM BLUEPRINT */}
-        <div
-          onClick={() => onNavigate('blueprint')}
-          className="glass-panel"
-          style={{
-            padding: '28px',
-            cursor: 'pointer',
-            transition: 'all 0.25s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: '16px',
-          }}
-        >
-          <div style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
-          }}>
-            <ClipboardList size={26} />
-          </div>
-
-          <div>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Program Blueprint
-              <ChevronRight size={20} color="var(--text-muted)" />
-            </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
-              Review the full 4-block schedule, exercise descriptions, form cues, and rest times.
-            </p>
-          </div>
-
-          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-main)' }}>
-            Explore Blueprint →
           </div>
         </div>
 

@@ -21,12 +21,12 @@ describe('StartScreen Component', () => {
     expect(screen.getByText(/Resume Active Session/i)).toBeInTheDocument();
   });
 
-  it('calls onNavigate with player when start is clicked', () => {
-    const onNavigate = vi.fn();
-    render(<StartScreen {...defaultProps} onNavigate={onNavigate} />);
-    
+  it('calls onOpenPreWorkout when start is clicked', () => {
+    const onOpenPreWorkout = vi.fn();
+    render(<StartScreen onNavigate={vi.fn()} onOpenPreWorkout={onOpenPreWorkout} isWorkoutActive={false} isWorkoutPaused={false} totalSecondsElapsed={0} completedWorkoutsCount={0} />);
+
     fireEvent.click(screen.getByText(/Start New Session/i));
-    expect(onNavigate).toHaveBeenCalledWith('player');
+    expect(onOpenPreWorkout).toHaveBeenCalled();
   });
 
   it('renders completed workouts count', () => {

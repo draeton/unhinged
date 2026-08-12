@@ -5,9 +5,10 @@ import { Clock, ChevronDown, ChevronUp, ShieldAlert, Video } from 'lucide-react'
 interface RoutineOverviewProps {
   blocks: WorkoutBlock[];
   onPlayVideo: (url: string) => void;
+  isCondensed?: boolean;
 }
 
-export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlayVideo }) => {
+export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlayVideo, isCondensed }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
 
@@ -21,57 +22,67 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
   });
 
   return (
-    <div style={{ maxWidth: '1050px', margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ maxWidth: '1050px', margin: '0 auto', padding: isCondensed ? '0 16px 24px 16px' : '24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Overview Header Banner */}
-      <div className="glass-panel" style={{ padding: '28px', background: 'linear-gradient(135deg, rgba(18, 24, 38, 0.9) 0%, rgba(32, 44, 68, 0.6) 100%)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <span className="badge glow-cyan" style={{ background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
-              ⚡ OFFICIAL PROGRAM STRUCTURE
-            </span>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#FFFFFF', marginTop: '8px' }}>
-              60-Min: Pull-Ups, Hamstrings & Wrists Blueprint
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '6px', maxWidth: '680px', lineHeight: 1.5 }}>
-              A scientifically balanced routine pairing heavy upper vertical pulling and left scapular symmetry with deep hamstring compression, Jefferson curling, and wrist relief.
-            </p>
-          </div>
-        </div>
+      {!isCondensed && (
+        <>
+          {/* Overview Header Banner */}
+          <div className="glass-panel" style={{ padding: '28px', background: 'linear-gradient(135deg, rgba(18, 24, 38, 0.9) 0%, rgba(32, 44, 68, 0.6) 100%)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <span className="badge glow-cyan" style={{ background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
+                  ⚡ OFFICIAL PROGRAM STRUCTURE
+                </span>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#FFFFFF', marginTop: '8px' }}>
+                  60-Min: Pull-Ups, Hamstrings & Wrists Blueprint
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '6px', maxWidth: '680px', lineHeight: 1.5 }}>
+                  A scientifically balanced routine pairing heavy upper vertical pulling and left scapular symmetry with deep hamstring compression, Jefferson curling, and wrist relief.
+                </p>
+              </div>
+            </div>
 
-        {/* Quick Filter Buttons */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '20px' }}>
-          {[
-            { id: 'all', label: 'All 4 Blocks (60 Min)' },
-            { id: 'warmup', label: '1. Warm-up (10m)' },
-            { id: 'pullups', label: '2. Strength (20m)' },
-            { id: 'hamstrings', label: '3. Mobility & Forward Fold (25m)' },
-            { id: 'cooldown', label: '4. Cooldown (5m)' },
-          ].map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: selectedCategory === cat.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                background: selectedCategory === cat.id ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                color: selectedCategory === cat.id ? '#00F0FF' : 'var(--text-muted)',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </div>
+            {/* Quick Filter Buttons */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '20px' }}>
+              {[
+                { id: 'all', label: 'All 4 Blocks (60 Min)' },
+                { id: 'warmup', label: '1. Warm-up (10m)' },
+                { id: 'pullups', label: '2. Strength (20m)' },
+                { id: 'hamstrings', label: '3. Mobility & Forward Fold (25m)' },
+                { id: 'cooldown', label: '4. Cooldown (5m)' },
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: selectedCategory === cat.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                    background: selectedCategory === cat.id ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                    color: selectedCategory === cat.id ? '#00F0FF' : 'var(--text-muted)',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Workout Blocks List */}
-      {filteredBlocks.map((block) => (
-        <div key={block.id} className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className={isCondensed ? "glass-panel" : ""} style={{ 
+        padding: isCondensed ? '24px' : '0', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: isCondensed ? '32px' : '24px' 
+      }}>
+        {filteredBlocks.map((block) => (
+          <div key={block.id} className={!isCondensed ? "glass-panel" : ""} style={{ padding: !isCondensed ? '24px' : '0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
           {/* Block Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
@@ -219,6 +230,7 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
 
         </div>
       ))}
+      </div>
     </div>
   );
 };

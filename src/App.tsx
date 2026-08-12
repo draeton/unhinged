@@ -13,6 +13,7 @@ import { RoutineOverview } from './components/RoutineOverview';
 import { AsymmetryGuide } from './components/AsymmetryGuide';
 import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
+import { PreWorkoutDrawer } from './components/PreWorkoutDrawer';
 import { Drawer } from './components/Drawer';
 import { VideoModal } from './components/VideoModal';
 
@@ -22,13 +23,9 @@ export function App() {
   const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true' ? true : false); // Pause on resume
   const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
 
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => {
-    const savedScreen = localStorage.getItem('unhinged_currentScreen');
-    if (savedScreen === 'start' || savedScreen === 'player') {
-      return savedScreen as ScreenType;
-    }
-    return isWorkoutStarted ? 'player' : 'start';
-  });
+  const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  
   const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
@@ -46,10 +43,9 @@ export function App() {
   const wakeLockRef = useRef<any>(null);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
 
-  // Screen Wake Lock for Live Workout Drawer
   useEffect(() => {
     const requestWakeLock = async () => {
-      if (currentScreen === 'player' && 'wakeLock' in navigator) {
+      if (isPlayerOpen && 'wakeLock' in navigator) {
         try {
           wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
         } catch (err: any) {
@@ -65,14 +61,14 @@ export function App() {
       }
     };
 
-    if (currentScreen === 'player') {
+    if (isPlayerOpen) {
       requestWakeLock();
     } else {
       releaseWakeLock();
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && currentScreen === 'player') {
+      if (document.visibilityState === 'visible' && isPlayerOpen) {
         requestWakeLock();
       }
     };
@@ -83,7 +79,7 @@ export function App() {
       releaseWakeLock();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [currentScreen]);
+  }, [isPlayerOpen]);
 
 
 
@@ -134,11 +130,7 @@ export function App() {
     }
   }, [isWorkoutStarted, totalSecondsElapsed]);
 
-  // Scroll to top when changing screens
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    localStorage.setItem('unhinged_currentScreen', currentScreen);
-  }, [currentScreen]);
+
 
   // Navigate to screen
   const handleNavigate = (screen: ScreenType) => {
@@ -146,19 +138,17 @@ export function App() {
       setActiveDrawer(screen as 'blueprint' | 'guide' | 'history');
       return;
     }
-
-    if (screen === 'player') {
-      if (!isWorkoutStarted) {
-        // Start a brand new workout if none started!
-        setIsWorkoutStarted(true);
-        setTotalSecondsElapsed(0);
-        audio.playStart();
-      }
-      setIsWorkoutPaused(false);
-    }
-
-    setCurrentScreen(screen);
     setActiveDrawer(null);
+  };
+
+  const handleStartWorkout = () => {
+    if (!isWorkoutStarted) {
+      setIsWorkoutStarted(true);
+      setTotalSecondsElapsed(0);
+      audio.playStart();
+    }
+    setIsWorkoutPaused(false);
+    setIsPlayerOpen(true);
   };
 
 
@@ -171,7 +161,8 @@ export function App() {
     setIsWorkoutPaused(false);
     setTotalSecondsElapsed(0);
     clearActiveWorkoutState();
-    setCurrentScreen('start');
+    setIsPlayerOpen(false);
+    setIsPreWorkoutOpen(false);
     setActiveDrawer(null);
   };
 
@@ -225,7 +216,8 @@ export function App() {
     setTotalSecondsElapsed(0);
     clearActiveWorkoutState();
 
-    setCurrentScreen('start');
+    setIsPlayerOpen(false);
+    setIsPreWorkoutOpen(false);
     setActiveDrawer('history');
   };
 
@@ -238,29 +230,38 @@ export function App() {
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
-        {currentScreen === 'start' && (
-          <StartScreen
-            onNavigate={handleNavigate}
-            isWorkoutActive={isWorkoutStarted}
-            isWorkoutPaused={isWorkoutPaused}
-            totalSecondsElapsed={totalSecondsElapsed}
-            completedWorkoutsCount={completedWorkouts.length}
-          />
-        )}
-        {currentScreen === 'player' && (
-          <LivePlayer
-            blocks={DEFAULT_WORKOUT_BLOCKS}
-            totalSecondsElapsed={totalSecondsElapsed}
-            isWorkoutPaused={isWorkoutPaused}
-            onToggleWorkoutPause={handleToggleWorkoutPause}
-            onWorkoutComplete={handleWorkoutComplete}
-            onPlayVideo={setActiveVideoUrl}
-          />
-        )}
+        <StartScreen
+          onNavigate={handleNavigate}
+          onOpenPreWorkout={() => setIsPreWorkoutOpen(true)}
+          isWorkoutActive={isWorkoutStarted}
+          isWorkoutPaused={isWorkoutPaused}
+          totalSecondsElapsed={totalSecondsElapsed}
+          completedWorkoutsCount={completedWorkouts.length}
+        />
       </main>
 
-      <Drawer isOpen={activeDrawer === 'blueprint'} onClose={() => setActiveDrawer(null)}>
-        <RoutineOverview blocks={DEFAULT_WORKOUT_BLOCKS} onPlayVideo={setActiveVideoUrl} />
+      {/* Pre-Workout Drawer */}
+      <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)}>
+        <PreWorkoutDrawer
+          isWorkoutStarted={isWorkoutStarted}
+          isWorkoutPaused={isWorkoutPaused}
+          totalSecondsElapsed={totalSecondsElapsed}
+          onStart={handleStartWorkout}
+          onMenuClick={() => setActiveDrawer('workoutMenu')}
+          onPlayVideo={setActiveVideoUrl}
+        />
+      </Drawer>
+
+      {/* Live Player Drawer */}
+      <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)}>
+        <LivePlayer
+          blocks={DEFAULT_WORKOUT_BLOCKS}
+          totalSecondsElapsed={totalSecondsElapsed}
+          isWorkoutPaused={isWorkoutPaused}
+          onToggleWorkoutPause={handleToggleWorkoutPause}
+          onWorkoutComplete={handleWorkoutComplete}
+          onPlayVideo={setActiveVideoUrl}
+        />
       </Drawer>
 
       <Drawer isOpen={activeDrawer === 'guide'} onClose={() => setActiveDrawer(null)}>
@@ -275,19 +276,22 @@ export function App() {
 
       <Drawer isOpen={activeDrawer === 'workoutMenu'} onClose={() => setActiveDrawer(null)}>
         <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '8px', color: '#fff' }}>
-            {currentScreen === 'start' ? 'App Menu' : 'Workout Menu'}
-          </h2>
           
-          {currentScreen === 'player' && isWorkoutStarted && (
-            <>
               <button
                 className="btn-secondary"
+                disabled={!isWorkoutStarted}
                 onClick={() => {
                   handleToggleWorkoutPause();
                   setActiveDrawer(null);
                 }}
-                style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+                style={{ 
+                  justifyContent: 'flex-start', 
+                  padding: '16px', 
+                  fontSize: '1rem',
+                  background: 'rgba(255,255,255,0.04)',
+                  opacity: !isWorkoutStarted ? 0.5 : 1,
+                  cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer'
+                }}
               >
                 {isWorkoutPaused ? <Play size={20} fill="#fff" /> : <Pause size={20} fill="#fff" />}
                 <span>{isWorkoutPaused ? 'Resume Workout' : 'Pause Workout'}</span>
@@ -295,11 +299,19 @@ export function App() {
 
               <button
                 className="btn-secondary"
+                disabled={!isWorkoutStarted}
                 onClick={() => {
                   handleCompleteWorkoutClick();
                   setActiveDrawer(null);
                 }}
-                style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+                style={{ 
+                  justifyContent: 'flex-start', 
+                  padding: '16px', 
+                  fontSize: '1rem', 
+                  background: 'rgba(255,255,255,0.04)',
+                  opacity: !isWorkoutStarted ? 0.5 : 1,
+                  cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer'
+                }}
               >
                 <CheckCircle size={20} fill="#fff" stroke="#050B14" />
                 <span>Complete Workout</span>
@@ -307,30 +319,35 @@ export function App() {
 
               <button
                 className="btn-secondary"
+                disabled={!isWorkoutStarted}
                 onClick={() => {
                   handleResetWorkoutClick();
                   setActiveDrawer(null);
                 }}
-                style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)', color: '#FF3366' }}
+                style={{ 
+                  justifyContent: 'flex-start', 
+                  padding: '16px', 
+                  fontSize: '1rem', 
+                  background: 'rgba(255,255,255,0.04)', 
+                  color: '#FF3366',
+                  opacity: !isWorkoutStarted ? 0.5 : 1,
+                  cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer'
+                }}
               >
                 <RotateCcw size={20} />
                 <span>Reset Workout</span>
               </button>
-            </>
-          )}
 
-          {currentScreen === 'start' && (
-            <button
-              className="btn-secondary"
-              onClick={() => {
-                handleToggleSound();
-              }}
-              style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
-            >
-              {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
-            </button>
-          )}
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              handleToggleSound();
+            }}
+            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+          >
+            {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
+          </button>
         </div>
       </Drawer>
 

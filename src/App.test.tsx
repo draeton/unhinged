@@ -15,30 +15,34 @@ describe('App Integration', () => {
     const startButton = screen.getByText(/Start New Session/i);
     fireEvent.click(startButton);
     
-    // LivePlayer should be visible
-    expect(screen.getAllByText('1. WARM-UP (0–10 min)')[0]).toBeInTheDocument();
+    const startWorkoutButton = screen.getByText(/Start Workout/i);
+    fireEvent.click(startWorkoutButton);
     
-    // Check FAB is rendered
+    // LivePlayer should be visible
+    expect(screen.getAllByText('Wrist Mobility Sequence')[0]).toBeInTheDocument();
+    
+    // Check Menu is rendered
     expect(document.querySelector('button[title="Menu"]')).toBeInTheDocument();
   });
 
-  it('can open FAB menu and pause workout', async () => {
+  it('can open menu and pause workout', async () => {
     render(<App />);
     
     // Start
     fireEvent.click(screen.getByText(/Start New Session/i));
+    fireEvent.click(screen.getByText(/Start Workout/i));
     
-    // Open FAB
-    const fabButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
-    expect(fabButton).not.toBeNull();
-    fireEvent.click(fabButton);
+    // Open Menu
+    const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
+    expect(menuButton).not.toBeNull();
+    fireEvent.click(menuButton);
     
     // Click pause
     const pauseButton = screen.getByText('Pause Workout');
     fireEvent.click(pauseButton);
     
     // It should change to Resume
-    fireEvent.click(fabButton);
+    fireEvent.click(menuButton);
     expect(screen.getByText('Resume Workout')).toBeInTheDocument();
   });
   
@@ -48,10 +52,11 @@ describe('App Integration', () => {
     
     // Start
     fireEvent.click(screen.getByText(/Start New Session/i));
+    fireEvent.click(screen.getByText(/Start Workout/i));
     
-    // Open FAB
-    const fabButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
-    fireEvent.click(fabButton);
+    // Open Menu
+    const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
+    fireEvent.click(menuButton);
     
     // Reset
     const resetButton = screen.getByText('Reset Workout');
@@ -73,16 +78,17 @@ describe('App Integration', () => {
     vi.useRealTimers();
   });
 
-  it('completes workout correctly from FAB', async () => {
+  it('completes workout correctly from menu', async () => {
     vi.useFakeTimers();
     render(<App />);
     
     // Start
     fireEvent.click(screen.getByText(/Start New Session/i));
+    fireEvent.click(screen.getByText(/Start Workout/i));
     
-    // Open FAB
-    const fabButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
-    fireEvent.click(fabButton);
+    // Open Menu
+    const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
+    fireEvent.click(menuButton);
     
     // Complete
     const completeButton = screen.getByText('Complete Workout');

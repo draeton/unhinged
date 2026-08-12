@@ -78,7 +78,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   // On exercise change: scroll to top and ensure sets tab is active on mobile
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const drawerContainer = document.getElementById('drawer-scroll-container');
+    if (drawerContainer && typeof drawerContainer.scrollTo === 'function') {
+      drawerContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     setMobileActivePanel('details');
     
     // Scroll carousel active item into view
@@ -263,44 +268,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      
-      {/* Sticky Full-Width Header Section */}
-      <div style={{
-        position: 'sticky',
-        top: '65px',
-        zIndex: 40,
-        background: 'rgba(10, 13, 20, 0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border-subtle)',
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-      }}>
-        {/* Text Header */}
-        <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '12px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-            <span style={{ color: currentItem.blockBadgeColor, fontWeight: '700', textTransform: 'uppercase' }}>
-              {currentItem.blockTitle}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isWorkoutPaused ? '#FFB300' : '#00F0FF', fontWeight: '800', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
-              {isWorkoutPaused ? <Pause size={14} fill="#FFB300" color="#FFB300" /> : <Clock size={14} />}
-              <span>{formatTime(totalSecondsElapsed)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Global Progress Bar (Edge to Edge) */}
-        <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)' }}>
-          <div style={{
-            width: `${totalWorkoutProgress}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #00F0FF 0%, #00F0FF 50%, #00F0FF 100%)',
-            transition: 'width 0.4s ease',
-            boxShadow: '0 0 12px rgba(0, 240, 255, 0.5)'
-          }} />
-        </div>
-      </div>
 
       <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         

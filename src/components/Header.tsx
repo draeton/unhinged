@@ -67,29 +67,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Right Action Menu Group */}
-        <div style={{ position: 'relative' }}>
-          <button
-            title="Menu"
-            onClick={onMenuClick}
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '12px',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.04)',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <Settings size={22} />
-          </button>
-        </div>
       </div>
     </header>
   );

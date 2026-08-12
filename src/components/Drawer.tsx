@@ -6,12 +6,18 @@ interface DrawerProps {
   children: React.ReactNode;
 }
 
+let globalZIndex = 1000;
+
 export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => {
   const [startY, setStartY] = useState<number | null>(null);
   const [currentY, setCurrentY] = useState<number | null>(null);
+  const [zIndex, setZIndex] = useState(1000);
 
   useEffect(() => {
     if (isOpen) {
+      setZIndex(globalZIndex);
+      globalZIndex += 2;
+      
       const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
@@ -86,7 +92,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
           transition: 'opacity 0.3s ease',
-          zIndex: 998,
+          zIndex: zIndex,
           touchAction: 'none'
         }} 
         onClick={onClose}
@@ -97,14 +103,14 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           bottom: 0,
           left: 0,
           right: 0,
-          maxHeight: '95vh',
+          maxHeight: '90vh',
           background: 'var(--bg-dark)',
           borderTopLeftRadius: '24px',
           borderTopRightRadius: '24px',
           boxShadow: '0 -4px 24px rgba(0,240,255,0.1)',
           transform: `translateY(${transformY})`,
           transition: currentY !== null ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-          zIndex: 999,
+          zIndex: zIndex + 1,
           display: 'flex',
           flexDirection: 'column',
           overscrollBehavior: 'none'
@@ -119,7 +125,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
         >
           <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px' }} />
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px', overscrollBehavior: 'contain' }}>
+        <div id="drawer-scroll-container" style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px', overscrollBehavior: 'contain' }}>
           {children}
         </div>
       </div>

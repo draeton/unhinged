@@ -15,8 +15,7 @@ describe('LivePlayer Component', () => {
 
   it('renders the first block and exercise', () => {
     render(<LivePlayer {...defaultProps} />);
-    expect(screen.getAllByText(DEFAULT_WORKOUT_BLOCKS[0].title)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(DEFAULT_WORKOUT_BLOCKS[0].exercises[0].name)[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Wrist Mobility Sequence')[0]).toBeInTheDocument();
   });
 
   it('calls onToggleWorkoutPause when pause/resume is clicked', () => {

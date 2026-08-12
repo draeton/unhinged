@@ -21,7 +21,6 @@ export const clearActiveWorkoutState = () => {
   localStorage.removeItem('unhinged_isIntervalStarted');
   localStorage.removeItem('unhinged_isIntervalPaused');
   localStorage.removeItem('unhinged_completedSets');
-  localStorage.removeItem('unhinged_currentScreen');
 };
 
 export const getCompletedWorkouts = (): CompletedWorkout[] => {
