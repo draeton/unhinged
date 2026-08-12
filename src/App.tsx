@@ -9,7 +9,6 @@ import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
 import type { ScreenType } from './components/StartScreen';
 import { LivePlayer } from './components/LivePlayer';
-import { RoutineOverview } from './components/RoutineOverview';
 import { AsymmetryGuide } from './components/AsymmetryGuide';
 import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
@@ -226,7 +225,6 @@ export function App() {
       {/* Header Bar */}
       <Header
         onNavigate={handleNavigate}
-        onMenuClick={() => setActiveDrawer('workoutMenu')}
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>

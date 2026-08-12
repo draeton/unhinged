@@ -1,15 +1,12 @@
 import React from 'react';
 import type { ScreenType } from './StartScreen';
-import { Settings } from 'lucide-react';
 
 interface HeaderProps {
   onNavigate: (screen: ScreenType) => void;
-  onMenuClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onNavigate,
-  onMenuClick,
 }) => {
   return (
     <header style={{

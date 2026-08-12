@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, ClipboardList, History, ShieldAlert, ChevronRight } from 'lucide-react';
+import { Play, History, ShieldAlert, ChevronRight } from 'lucide-react';
 
 export type ScreenType = 'start' | 'player' | 'blueprint' | 'history' | 'guide';
 

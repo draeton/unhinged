@@ -5,6 +5,7 @@ import { StartScreen } from './StartScreen';
 describe('StartScreen Component', () => {
   const defaultProps = {
     onNavigate: vi.fn(),
+    onOpenPreWorkout: vi.fn(),
     isWorkoutActive: false,
     isWorkoutPaused: false,
     totalSecondsElapsed: 0,

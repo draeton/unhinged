@@ -207,8 +207,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     ? Math.max(0, Math.min(100, ((currentMaxDuration - timeLeft) / currentMaxDuration) * 100))
     : 0;
 
-  const totalWorkoutProgress = Math.min(100, Math.round((currentIndex / allExercises.length) * 100));
-
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
