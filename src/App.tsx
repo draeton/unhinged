@@ -15,6 +15,8 @@ import { CompletionModal } from './components/CompletionModal';
 import { PreWorkoutDrawer } from './components/PreWorkoutDrawer';
 import { Drawer } from './components/Drawer';
 import { VideoModal } from './components/VideoModal';
+import { CalendarDrawer } from './components/CalendarDrawer';
+import { DayDetailDrawer } from './components/DayDetailDrawer';
 
 export function App() {
   // Workout Global Timer State
@@ -25,7 +27,8 @@ export function App() {
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | null>(null);
+  const [activeDayDetail, setActiveDayDetail] = useState<string | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
 
@@ -231,10 +234,12 @@ export function App() {
         <StartScreen
           onNavigate={handleNavigate}
           onOpenPreWorkout={() => setIsPreWorkoutOpen(true)}
+          onOpenCalendar={() => setActiveDrawer('calendar')}
           isWorkoutActive={isWorkoutStarted}
           isWorkoutPaused={isWorkoutPaused}
           totalSecondsElapsed={totalSecondsElapsed}
           completedWorkoutsCount={completedWorkouts.length}
+          completedWorkouts={completedWorkouts}
         />
       </main>
 
@@ -507,6 +512,23 @@ export function App() {
         </>
       )}
 
+      {/* Calendar Month Drawer */}
+      <Drawer isOpen={activeDrawer === 'calendar'} onClose={() => setActiveDrawer(null)}>
+        <CalendarDrawer
+          completedWorkouts={completedWorkouts}
+          onDayClick={(dateStr) => setActiveDayDetail(dateStr)}
+        />
+      </Drawer>
+
+      {/* Day Detail Drawer */}
+      <Drawer isOpen={!!activeDayDetail} onClose={() => setActiveDayDetail(null)}>
+        {activeDayDetail && (
+          <DayDetailDrawer
+            dateStr={activeDayDetail}
+            completedWorkouts={completedWorkouts}
+          />
+        )}
+      </Drawer>
     </div>
   );
 }

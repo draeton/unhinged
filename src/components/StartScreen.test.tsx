@@ -6,10 +6,12 @@ describe('StartScreen Component', () => {
   const defaultProps = {
     onNavigate: vi.fn(),
     onOpenPreWorkout: vi.fn(),
+    onOpenCalendar: vi.fn(),
     isWorkoutActive: false,
     isWorkoutPaused: false,
     totalSecondsElapsed: 0,
-    completedWorkoutsCount: 5,
+    completedWorkoutsCount: 0,
+    completedWorkouts: [],
   };
 
   it('renders start button when workout is not active', () => {
@@ -24,7 +26,7 @@ describe('StartScreen Component', () => {
 
   it('calls onOpenPreWorkout when start is clicked', () => {
     const onOpenPreWorkout = vi.fn();
-    render(<StartScreen onNavigate={vi.fn()} onOpenPreWorkout={onOpenPreWorkout} isWorkoutActive={false} isWorkoutPaused={false} totalSecondsElapsed={0} completedWorkoutsCount={0} />);
+    render(<StartScreen onNavigate={vi.fn()} onOpenPreWorkout={onOpenPreWorkout} onOpenCalendar={vi.fn()} isWorkoutActive={false} isWorkoutPaused={false} totalSecondsElapsed={0} completedWorkoutsCount={0} completedWorkouts={[]} />);
 
     fireEvent.click(screen.getByText(/Start New Session/i));
     expect(onOpenPreWorkout).toHaveBeenCalled();
@@ -32,6 +34,6 @@ describe('StartScreen Component', () => {
 
   it('renders completed workouts count', () => {
     render(<StartScreen {...defaultProps} completedWorkoutsCount={12} />);
-    expect(screen.getByText(/12/)).toBeInTheDocument();
+    expect(screen.getByText(/View Workout Logs \(12\)/)).toBeInTheDocument();
   });
 });

@@ -6,9 +6,11 @@ interface RoutineOverviewProps {
   blocks: WorkoutBlock[];
   onPlayVideo: (url: string) => void;
   isCondensed?: boolean;
+  activeExerciseId?: string | null;
+  completedSetsMap?: { [id: string]: number };
 }
 
-export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlayVideo, isCondensed }) => {
+export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlayVideo, isCondensed, activeExerciseId, completedSetsMap }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
 
@@ -106,13 +108,36 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
             {block.exercises.map((ex, eIdx) => {
               const isExpanded = expandedExerciseId === ex.id;
               const isLeftScapular = ex.id === 's1';
+              
+              const isActive = activeExerciseId === ex.id;
+              const isFullyComplete = completedSetsMap ? (completedSetsMap[ex.id] || 0) >= ex.sets : false;
+              
+              let background = 'rgba(255, 255, 255, 0.03)';
+              let border = '1px solid var(--border-subtle)';
+              let titleColor = '#FFFFFF';
+              let badgeColor = 'rgba(255, 255, 255, 0.08)';
+              let badgeTextColor = 'var(--text-muted)';
+              
+              if (isFullyComplete) {
+                background = 'rgba(0, 255, 157, 0.1)';
+                border = '1px solid #00FF9D';
+                titleColor = '#00FF9D';
+                badgeColor = 'rgba(0, 255, 157, 0.2)';
+                badgeTextColor = '#00FF9D';
+              } else if (isActive) {
+                background = 'rgba(0, 240, 255, 0.1)';
+                border = '1px solid #00F0FF';
+                titleColor = '#00F0FF';
+                badgeColor = 'rgba(0, 240, 255, 0.2)';
+                badgeTextColor = '#00F0FF';
+              }
 
               return (
                 <div
                   key={ex.id}
                   style={{
-                    background: isLeftScapular ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
-                    border: isLeftScapular ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid var(--border-subtle)',
+                    background,
+                    border,
                     borderRadius: '12px',
                     padding: '16px',
                     transition: 'all 0.2s ease',
@@ -127,19 +152,19 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
                         width: '28px',
                         height: '28px',
                         borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.08)',
+                        background: badgeColor,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '0.8rem',
                         fontWeight: '700',
-                        color: 'var(--text-muted)',
+                        color: badgeTextColor,
                       }}>
                         {eIdx + 1}
                       </span>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <h4 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#FFFFFF' }}>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: '700', color: titleColor }}>
                             {ex.name}
                           </h4>
                         </div>

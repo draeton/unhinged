@@ -1,24 +1,30 @@
 import React from 'react';
 import { Play, History, ShieldAlert, ChevronRight } from 'lucide-react';
+import type { CompletedWorkout } from '../types/workout';
+import { CalendarWidget } from './CalendarWidget';
 
 export type ScreenType = 'start' | 'player' | 'blueprint' | 'history' | 'guide';
 
 interface StartScreenProps {
   onNavigate: (screen: ScreenType) => void;
   onOpenPreWorkout: () => void;
+  onOpenCalendar: () => void;
   isWorkoutActive: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
   completedWorkoutsCount: number;
+  completedWorkouts: CompletedWorkout[];
 }
 
 export const StartScreen: React.FC<StartScreenProps> = ({
   onNavigate,
   onOpenPreWorkout,
+  onOpenCalendar,
   isWorkoutActive,
   isWorkoutPaused,
   totalSecondsElapsed,
   completedWorkoutsCount,
+  completedWorkouts,
 }) => {
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -29,6 +35,11 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
+      <CalendarWidget 
+        completedWorkouts={completedWorkouts} 
+        onClick={onOpenCalendar} 
+      />
+
       {/* Main Navigation Hub Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         

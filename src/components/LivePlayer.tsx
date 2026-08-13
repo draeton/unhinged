@@ -52,7 +52,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const [completedSets, setCompletedSets] = useState<{ [exerciseId: string]: number }>(() => JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}'));
 
   // Mobile / Tablet Panel Switcher: 'details' (Panel 1) vs 'timer' (Panel 2)
-  const [mobileActivePanel, setMobileActivePanel] = useState<'details' | 'timer'>('details');
+  const [mobileActivePanel, setMobileActivePanel] = useState<'details' | 'timer'>('timer');
 
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
@@ -67,6 +67,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     localStorage.setItem('unhinged_isIntervalPaused', String(isIntervalPaused));
     localStorage.setItem('unhinged_timeOffset', String(timeOffset));
     localStorage.setItem('unhinged_completedSets', JSON.stringify(completedSets));
+    window.dispatchEvent(new Event('unhinged_sync'));
   }, [currentIndex, isResting, timeLeft, isIntervalStarted, isIntervalPaused, completedSets, timeOffset]);
 
   // Keep ref in sync so setTimeout callbacks always read the latest index
@@ -84,7 +85,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     } else if (typeof window.scrollTo === 'function') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    setMobileActivePanel('details');
+    setMobileActivePanel('timer');
     
     // Scroll carousel active item into view
     if (carouselRefs.current[currentIndex] && typeof carouselRefs.current[currentIndex]?.scrollIntoView === 'function') {
@@ -335,29 +336,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         border: '1px solid var(--border-subtle)',
       }}>
         <button
-          onClick={() => setMobileActivePanel('details')}
-          style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: '10px',
-            border: 'none',
-            background: mobileActivePanel === 'details' ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)' : 'transparent',
-            color: mobileActivePanel === 'details' ? '#050B14' : 'var(--text-muted)',
-            fontWeight: '700',
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <FileText size={16} />
-          <span>Sets</span>
-        </button>
-
-        <button
           onClick={() => setMobileActivePanel('timer')}
           style={{
             flex: 1,
@@ -378,6 +356,29 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         >
           <Clock size={16} />
           <span>Timer ({formatTime(timeLeft)})</span>
+        </button>
+
+        <button
+          onClick={() => setMobileActivePanel('details')}
+          style={{
+            flex: 1,
+            padding: '10px',
+            borderRadius: '10px',
+            border: 'none',
+            background: mobileActivePanel === 'details' ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)' : 'transparent',
+            color: mobileActivePanel === 'details' ? '#050B14' : 'var(--text-muted)',
+            fontWeight: '700',
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <FileText size={16} />
+          <span>Info</span>
         </button>
       </div>
 
@@ -527,25 +528,48 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             textAlign: 'center',
             position: 'relative',
           }}>
-            {/* Phase Badge: Active Exercise vs Rest */}
-            <div 
-              className="badge" 
-              onClick={() => setMobileActivePanel('details')}
-              style={{
-                background: isResting ? 'rgba(255, 107, 0, 0.2)' : 'rgba(0, 255, 157, 0.2)',
-                color: isResting ? 'var(--accent-orange)' : 'var(--accent-emerald)',
-                border: isResting ? '1px solid var(--accent-orange)' : '1px solid var(--accent-emerald)',
-                marginBottom: '16px',
-                fontSize: '0.85rem',
-                cursor: 'pointer'
-              }}
-            >
-              {currentExercise.name}
+            {/* Exercise Details (Name, Chips, Description) */}
+            <div style={{ textAlign: 'left', width: '100%', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', lineHeight: 1.2 }}>
+                  {currentExercise.name}
+                </h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
+                    {currentExercise.repsOrTime}
+                  </span>
+                  {currentExercise.equipment && (
+                    <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
+                      {currentExercise.equipment}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '8px', lineHeight: 1.5 }}>
+                {currentExercise.description}
+              </p>
             </div>
 
-            {/* SVG Circular Ring Timer */}
-            <div style={{ position: 'relative', width: '240px', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: 'rotate(-90deg)' }}>
+            {/* Timer Row Wrapper */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+              <button 
+                className="btn-secondary" 
+                onClick={() => handleAdjustRest(-15)} 
+                style={{ 
+                  padding: '12px 10px', 
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Minus size={18} /> 15s
+              </button>
+
+              {/* SVG Circular Ring Timer */}
+              <div style={{ position: 'relative', width: '240px', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: 'rotate(-90deg)' }}>
                 {/* Background Track Circle */}
                 <circle
                   cx="120"
@@ -588,82 +612,98 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   {isResting ? 'Rest Remaining' : 'Target Interval'}
                 </span>
               </div>
+
+              </div>
+
+            <button 
+                className="btn-secondary" 
+                onClick={() => handleAdjustRest(15)} 
+                style={{ 
+                  padding: '12px 10px', 
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Plus size={18} /> 15s
+              </button>
             </div>
 
-            {/* Quick Rest Adjust Buttons */}
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button className="btn-secondary" onClick={() => handleAdjustRest(-15)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                <Minus size={14} /> 15s
-              </button>
-              <button className="btn-secondary" onClick={() => handleAdjustRest(15)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                <Plus size={14} /> 15s
-              </button>
-            </div>
+            {/* Play / Pause Buttons */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', marginTop: '24px' }}>
+              <div /> {/* Left Spacer */}
+              
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    if (!isIntervalStarted) {
+                      // Start interval; also resume global if paused
+                      setIsIntervalStarted(true);
+                      if (isWorkoutPaused) onToggleWorkoutPause();
+                    } else if (isIntervalPaused || isWorkoutPaused) {
+                      // Resume interval; also resume global if paused
+                      setIsIntervalPaused(false);
+                      if (isWorkoutPaused) onToggleWorkoutPause();
+                    } else {
+                      // Pause interval only
+                      setIsIntervalPaused(true);
+                    }
+                  }}
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    padding: 0,
+                    justifyContent: 'center',
+                    background: !isIntervalStarted
+                      ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)'
+                      : (isIntervalPaused || isWorkoutPaused)
+                      ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)'
+                      : 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
+                    boxShadow: !isIntervalStarted
+                      ? '0 0 25px rgba(0, 255, 157, 0.5)'
+                      : (isIntervalPaused || isWorkoutPaused)
+                      ? '0 0 25px rgba(0, 240, 255, 0.5)'
+                      : '0 0 25px rgba(255, 0, 122, 0.5)'
+                  }}
+                >
+                  {!isIntervalStarted
+                    ? <Play size={28} fill="#050B14" style={{ marginLeft: '4px' }} />
+                    : (isIntervalPaused || isWorkoutPaused)
+                    ? <Play size={28} fill="#050B14" style={{ marginLeft: '4px' }} />
+                    : <Pause size={28} fill="#050B14" />}
+                </button>
+              </div>
 
-            {/* Play / Pause & Reset Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '24px' }}>
-              <button
-                className="btn-primary"
-                onClick={() => {
-                  if (!isIntervalStarted) {
-                    // Start interval; also resume global if paused
-                    setIsIntervalStarted(true);
-                    if (isWorkoutPaused) onToggleWorkoutPause();
-                  } else if (isIntervalPaused || isWorkoutPaused) {
-                    // Resume interval; also resume global if paused
+              <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: '16px' }}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    setIsIntervalStarted(false);
                     setIsIntervalPaused(false);
-                    if (isWorkoutPaused) onToggleWorkoutPause();
-                  } else {
-                    // Pause interval only
-                    setIsIntervalPaused(true);
-                  }
-                }}
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  padding: 0,
-                  justifyContent: 'center',
-                  background: !isIntervalStarted
-                    ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)'
-                    : (isIntervalPaused || isWorkoutPaused)
-                    ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)'
-                    : 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
-                  boxShadow: !isIntervalStarted
-                    ? '0 0 25px rgba(0, 255, 157, 0.5)'
-                    : (isIntervalPaused || isWorkoutPaused)
-                    ? '0 0 25px rgba(0, 240, 255, 0.5)'
-                    : '0 0 25px rgba(255, 0, 122, 0.5)'
-                }}
-              >
-                {!isIntervalStarted
-                  ? <Play size={28} fill="#050B14" style={{ marginLeft: '4px' }} />
-                  : (isIntervalPaused || isWorkoutPaused)
-                  ? <Play size={28} fill="#050B14" style={{ marginLeft: '4px' }} />
-                  : <Pause size={28} fill="#050B14" />}
-              </button>
-
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setIsIntervalStarted(false);
-                  setIsIntervalPaused(false);
-                  setTimeOffset(0);
-                  setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
-                }}
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  padding: 0,
-                  justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid var(--border-subtle)',
-                }}
-                title="Reset Timer"
-              >
-                <RotateCcw size={20} color="var(--text-main)" />
-              </button>
+                    setTimeOffset(0);
+                    setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
+                  }}
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    padding: 0,
+                    justifyContent: 'center',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-subtle)',
+                    opacity: !isIntervalStarted ? 0.3 : 1,
+                    pointerEvents: !isIntervalStarted ? 'none' : 'auto',
+                  }}
+                  disabled={!isIntervalStarted}
+                  title="Reset Timer"
+                >
+                  <RotateCcw size={20} color="var(--text-main)" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

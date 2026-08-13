@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { RoutineOverview } from './RoutineOverview';
 import { DEFAULT_WORKOUT_BLOCKS } from '../data/workoutData';
+
+const allExercises = DEFAULT_WORKOUT_BLOCKS.flatMap(block => 
+  block.exercises.map(ex => ({ exercise: ex }))
+);
 
 interface PreWorkoutDrawerProps {
   isWorkoutStarted: boolean;
@@ -26,6 +30,40 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
   onMenuClick,
   onPlayVideo,
 }) => {
+  const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
+  const [completedSets, setCompletedSets] = useState<{ [id: string]: number }>({});
+
+  useEffect(() => {
+    const syncState = () => {
+      if (isWorkoutStarted) {
+        const idxStr = localStorage.getItem('unhinged_currentIndex');
+        const idx = parseInt(idxStr || '0', 10);
+        const ex = allExercises[idx]?.exercise;
+        if (ex) {
+          setActiveExerciseId(ex.id);
+        }
+        const setsStr = localStorage.getItem('unhinged_completedSets');
+        if (setsStr) {
+          try {
+            setCompletedSets(JSON.parse(setsStr));
+          } catch (e) {
+            // ignore parsing error
+          }
+        }
+      } else {
+        setActiveExerciseId(null);
+        setCompletedSets({});
+      }
+    };
+
+    syncState();
+
+    window.addEventListener('unhinged_sync', syncState);
+    return () => {
+      window.removeEventListener('unhinged_sync', syncState);
+    };
+  }, [isWorkoutStarted]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Top Action Bar */}
@@ -88,7 +126,13 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
 
       {/* Condensed Blueprint */}
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '32px' }}>
-        <RoutineOverview blocks={DEFAULT_WORKOUT_BLOCKS} onPlayVideo={onPlayVideo} isCondensed={true} />
+        <RoutineOverview 
+          blocks={DEFAULT_WORKOUT_BLOCKS} 
+          onPlayVideo={onPlayVideo} 
+          isCondensed={true} 
+          activeExerciseId={activeExerciseId}
+          completedSetsMap={completedSets}
+        />
       </div>
     </div>
   );
