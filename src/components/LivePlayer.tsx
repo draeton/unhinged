@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
 import { Play, Pause, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw } from 'lucide-react';
+import { useWorkoutStore } from '../store/workoutStore';
 
 interface LivePlayerProps {
   blocks: WorkoutBlock[];
@@ -36,20 +37,21 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     return list;
   }, [blocks]);
 
-  const [currentIndex, setCurrentIndex] = useState<number>(() => parseInt(localStorage.getItem('unhinged_currentIndex') || '0', 10));
+  const {
+    currentIndex,
+    isResting,
+    timeLeft,
+    isIntervalStarted,
+    isIntervalPaused,
+    timeOffset,
+    completedSets,
+    setCurrentIndex,
+    updateCompletedSets,
+    setIntervalState,
+    setTimeLeft,
+  } = useWorkoutStore();
+
   const currentIndexRef = useRef<number>(currentIndex);
-  const [isResting, setIsResting] = useState<boolean>(() => localStorage.getItem('unhinged_isResting') === 'true');
-  const [timeLeft, setTimeLeft] = useState<number>(() => {
-    const val = localStorage.getItem('unhinged_timeLeft');
-    return val ? parseInt(val, 10) : (allExercises[0]?.exercise.durationSeconds || 180);
-  });
-  const [isIntervalStarted, setIsIntervalStarted] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalStarted') === 'true');
-  const [isIntervalPaused, setIsIntervalPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isIntervalPaused') === 'true');
-  const [timeOffset, setTimeOffset] = useState<number>(() => parseInt(localStorage.getItem('unhinged_timeOffset') || '0', 10));
-
-
-  // Set Tracking per exercise: { [exerciseId]: completedSetCount }
-  const [completedSets, setCompletedSets] = useState<{ [exerciseId: string]: number }>(() => JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}'));
 
   // Mobile / Tablet Panel Switcher: 'details' (Panel 1) vs 'timer' (Panel 2)
   const [mobileActivePanel, setMobileActivePanel] = useState<'details' | 'timer'>('timer');
@@ -57,18 +59,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
   const nextItem = allExercises[currentIndex + 1];
-
-  // Sync to local storage
-  useEffect(() => {
-    localStorage.setItem('unhinged_currentIndex', String(currentIndex));
-    localStorage.setItem('unhinged_isResting', String(isResting));
-    localStorage.setItem('unhinged_timeLeft', String(timeLeft));
-    localStorage.setItem('unhinged_isIntervalStarted', String(isIntervalStarted));
-    localStorage.setItem('unhinged_isIntervalPaused', String(isIntervalPaused));
-    localStorage.setItem('unhinged_timeOffset', String(timeOffset));
-    localStorage.setItem('unhinged_completedSets', JSON.stringify(completedSets));
-    window.dispatchEvent(new Event('unhinged_sync'));
-  }, [currentIndex, isResting, timeLeft, isIntervalStarted, isIntervalPaused, completedSets, timeOffset]);
 
   // Keep ref in sync so setTimeout callbacks always read the latest index
   useEffect(() => {
@@ -99,16 +89,18 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const navigateToExercise = (newIndex: number) => {
     setCurrentIndex(newIndex);
-    setIsIntervalStarted(false);
-    setIsIntervalPaused(false);
-    setIsResting(false);
+    setIntervalState({
+      isIntervalStarted: false,
+      isIntervalPaused: false,
+      isResting: false,
+    });
     setTimeLeft(allExercises[newIndex]?.exercise.durationSeconds || 180);
   };
 
   // Propagate global pause into local interval pause state
   useEffect(() => {
     if (isWorkoutPaused && isIntervalStarted && !isIntervalPaused) {
-      setIsIntervalPaused(true);
+      setIntervalState({ isIntervalPaused: true });
     }
   }, [isWorkoutPaused, isIntervalStarted, isIntervalPaused]);
 
@@ -132,7 +124,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   // Initial reset of timer duration when navigating or switching rest state
   useEffect(() => {
     if (currentExercise) {
-      setTimeOffset(0);
+      setIntervalState({ timeOffset: 0 });
       if (isResting) {
         setTimeLeft(currentExercise.restSeconds > 0 ? currentExercise.restSeconds : 30);
       } else {
@@ -150,7 +142,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             // Interval expired
             if (isResting) {
               // Finish rest -> Move to next exercise
-              setIsResting(false);
+              setIntervalState({ isResting: false });
               audio.playStart();
               if (currentIndex < allExercises.length - 1) {
                 setCurrentIndex(c => c + 1);
@@ -165,7 +157,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               // Active exercise time finished -> enter rest or advance
               const ex = currentExerciseRef.current;
               if (ex && ex.restSeconds > 0) {
-                setIsResting(true);
+                setIntervalState({ isResting: true });
                 audio.playRest();
               } else {
                 audio.playStart();
@@ -219,14 +211,16 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     const currentCount = completedSets[exId] || 0;
     const newCount = setNum === currentCount ? setNum - 1 : setNum;
 
-    setCompletedSets(prev => ({ ...prev, [exId]: newCount }));
+    updateCompletedSets(exId, newCount);
 
     // If completing a set (and not undoing), reset the active interval timer and stop it
     if (newCount > currentCount && newCount < currentExercise.sets) {
-      setIsResting(false);
+      setIntervalState({
+        isResting: false,
+        isIntervalStarted: false,
+        isIntervalPaused: false,
+      });
       setTimeLeft(currentExercise.durationSeconds || 180);
-      setIsIntervalStarted(false);
-      setIsIntervalPaused(false);
     }
 
     // AUTO ADVANCE: manually completing all sets skips directly to the next exercise
@@ -235,7 +229,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       const totalCompleted = Object.values(completedSets).reduce((a, b) => a + b, 0) + 1;
 
       setTimeout(() => {
-        setIsResting(false);
+        setIntervalState({ isResting: false });
         if (snapIndex < allExercises.length - 1) {
           audio.playStart();
           navigateToExercise(snapIndex + 1);
@@ -255,7 +249,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     const next = Math.max(5, prev + deltaSeconds);
     const actualDelta = next - prev;
     setTimeLeft(next);
-    setTimeOffset(o => o + actualDelta);
+    setIntervalState((s) => ({ timeOffset: s.timeOffset + actualDelta }));
   };
 
 
@@ -641,15 +635,16 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   onClick={() => {
                     if (!isIntervalStarted) {
                       // Start interval; also resume global if paused
-                      setIsIntervalStarted(true);
+                      setIntervalState({ isIntervalStarted: true });
                       if (isWorkoutPaused) onToggleWorkoutPause();
-                    } else if (isIntervalPaused || isWorkoutPaused) {
-                      // Resume interval; also resume global if paused
-                      setIsIntervalPaused(false);
+                    } else if (isIntervalPaused) {
+                      // Resume local & global
+                      setIntervalState({ isIntervalPaused: false });
                       if (isWorkoutPaused) onToggleWorkoutPause();
                     } else {
-                      // Pause interval only
-                      setIsIntervalPaused(true);
+                      // Pause local & global
+                      setIntervalState({ isIntervalPaused: true });
+                      if (!isWorkoutPaused) onToggleWorkoutPause();
                     }
                   }}
                   style={{
@@ -682,9 +677,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 <button
                   className="btn-secondary"
                   onClick={() => {
-                    setIsIntervalStarted(false);
-                    setIsIntervalPaused(false);
-                    setTimeOffset(0);
+                    setIntervalState({
+                      isIntervalStarted: false,
+                      isIntervalPaused: false,
+                      timeOffset: 0
+                    });
                     setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
                   }}
                   style={{

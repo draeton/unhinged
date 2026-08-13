@@ -1,9 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LivePlayer } from './LivePlayer';
+import { useWorkoutStore } from '../store/workoutStore';
 import { DEFAULT_WORKOUT_BLOCKS } from '../data/workoutData';
 
 describe('LivePlayer Component', () => {
+  beforeEach(() => {
+    useWorkoutStore.getState().resetStore();
+  });
   const defaultProps = {
     blocks: DEFAULT_WORKOUT_BLOCKS,
     totalSecondsElapsed: 0,

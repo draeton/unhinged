@@ -2,11 +2,13 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { App } from './App';
 import { clearActiveWorkoutState } from './utils/storage';
+import { useWorkoutStore } from './store/workoutStore';
 
 describe('App Integration', () => {
   beforeEach(() => {
     localStorage.clear();
     clearActiveWorkoutState();
+    useWorkoutStore.getState().resetStore();
   });
 
   it('starts a new workout and opens player drawer', async () => {

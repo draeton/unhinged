@@ -18,11 +18,19 @@ import { VideoModal } from './components/VideoModal';
 import { CalendarDrawer } from './components/CalendarDrawer';
 import { DayDetailDrawer } from './components/DayDetailDrawer';
 
+import { useWorkoutStore } from './store/workoutStore';
+
 export function App() {
-  // Workout Global Timer State
-  const [isWorkoutStarted, setIsWorkoutStarted] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true');
-  const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(() => localStorage.getItem('unhinged_isWorkoutStarted') === 'true' ? true : false); // Pause on resume
-  const [totalSecondsElapsed, setTotalSecondsElapsed] = useState<number>(() => parseInt(localStorage.getItem('unhinged_totalSecondsElapsed') || '0', 10));
+  const {
+    isWorkoutStarted,
+    isWorkoutPaused,
+    totalSecondsElapsed,
+    startWorkout,
+    pauseWorkout,
+    resumeWorkout,
+    stopWorkout,
+    incrementTotalTime
+  } = useWorkoutStore();
 
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
@@ -41,7 +49,6 @@ export function App() {
   const [showConfirmReset, setShowConfirmReset] = useState<boolean>(false);
   const [resetCountdown, setResetCountdown] = useState<number>(3);
   
-  const workoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wakeLockRef = useRef<any>(null);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
 
@@ -109,28 +116,13 @@ export function App() {
     return () => clearTimeout(timerReset);
   }, [showConfirmReset, resetCountdown]);
 
-  // Global Workout Timer counter (Counts UP while workout is active and not paused)
+  // Global Workout Timer counter
   useEffect(() => {
-    if (isWorkoutStarted && !isWorkoutPaused) {
-      workoutTimerRef.current = setInterval(() => {
-        setTotalSecondsElapsed(prev => prev + 1);
-      }, 1000);
-    } else {
-      if (workoutTimerRef.current) clearInterval(workoutTimerRef.current);
-    }
-
-    return () => {
-      if (workoutTimerRef.current) clearInterval(workoutTimerRef.current);
-    };
-  }, [isWorkoutStarted, isWorkoutPaused]);
-
-  // Persist global state
-  useEffect(() => {
-    if (isWorkoutStarted) {
-      localStorage.setItem('unhinged_isWorkoutStarted', 'true');
-      localStorage.setItem('unhinged_totalSecondsElapsed', String(totalSecondsElapsed));
-    }
-  }, [isWorkoutStarted, totalSecondsElapsed]);
+    const timer = setInterval(() => {
+      useWorkoutStore.getState().incrementTotalTime();
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
 
 
@@ -145,23 +137,21 @@ export function App() {
 
   const handleStartWorkout = () => {
     if (!isWorkoutStarted) {
-      setIsWorkoutStarted(true);
-      setTotalSecondsElapsed(0);
+      startWorkout();
       audio.playStart();
     }
-    setIsWorkoutPaused(false);
+    resumeWorkout();
     setIsPlayerOpen(true);
   };
 
 
   const handleToggleWorkoutPause = () => {
-    setIsWorkoutPaused(prev => !prev);
+    if (isWorkoutPaused) resumeWorkout();
+    else pauseWorkout();
   };
 
   const handleStopWorkout = () => {
-    setIsWorkoutStarted(false);
-    setIsWorkoutPaused(false);
-    setTotalSecondsElapsed(0);
+    stopWorkout();
     clearActiveWorkoutState();
     setIsPlayerOpen(false);
     setIsPreWorkoutOpen(false);
@@ -180,7 +170,7 @@ export function App() {
   };
 
   const handleWorkoutComplete = (durationMinutes: number, completedSets: number) => {
-    setIsWorkoutPaused(true);
+    pauseWorkout();
     setCompletionStats({ durationMinutes, completedSets });
     setShowCompletionModal(true);
     setActiveDrawer(null);
@@ -213,9 +203,7 @@ export function App() {
     setShowCompletionModal(false);
     
     // Reset workout timer state
-    setIsWorkoutStarted(false);
-    setIsWorkoutPaused(false);
-    setTotalSecondsElapsed(0);
+    stopWorkout();
     clearActiveWorkoutState();
 
     setIsPlayerOpen(false);
