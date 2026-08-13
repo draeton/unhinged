@@ -19,8 +19,10 @@ import { CalendarDrawer } from './components/CalendarDrawer';
 import { DayDetailDrawer } from './components/DayDetailDrawer';
 
 import { useWorkoutStore } from './store/workoutStore';
+import { useAuth } from './context/AuthContext';
 
 export function App() {
+  const { signOut } = useAuth();
   const {
     isWorkoutStarted,
     isWorkoutPaused,

@@ -3,6 +3,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { App } from './App';
 import { useWorkoutStore } from './store/workoutStore';
 
+vi.mock('./context/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 'test-user', email: 'test@example.com' },
+    loading: false,
+    signOut: vi.fn(),
+  }),
+}));
+
 describe('App Integration', () => {
   beforeEach(() => {
     localStorage.clear();
