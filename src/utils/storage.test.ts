@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './storage';
+import { getCompletedWorkouts, saveCompletedWorkout } from './storage';
 import type { CompletedWorkout } from '../types/workout';
 
 describe('Storage Utils', () => {
@@ -30,17 +30,4 @@ describe('Storage Utils', () => {
     expect(retrieved[0]).toEqual(workout);
   });
 
-  it('should clear active workout state from localStorage', () => {
-    localStorage.setItem('unhinged_isWorkoutStarted', 'true');
-    localStorage.setItem('unhinged_totalSecondsElapsed', '100');
-    localStorage.setItem('unhinged_currentIndex', '2');
-    localStorage.setItem('unhinged_completedSets', '{"test": 1}');
-    
-    clearActiveWorkoutState();
-    
-    expect(localStorage.getItem('unhinged_isWorkoutStarted')).toBeNull();
-    expect(localStorage.getItem('unhinged_totalSecondsElapsed')).toBeNull();
-    expect(localStorage.getItem('unhinged_currentIndex')).toBeNull();
-    expect(localStorage.getItem('unhinged_completedSets')).toBeNull();
-  });
 });

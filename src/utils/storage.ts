@@ -12,17 +12,6 @@ export interface UserSettings {
   leftScapulaAlerts: boolean;
 }
 
-export const clearActiveWorkoutState = () => {
-  localStorage.removeItem('unhinged_isWorkoutStarted');
-  localStorage.removeItem('unhinged_totalSecondsElapsed');
-  localStorage.removeItem('unhinged_currentIndex');
-  localStorage.removeItem('unhinged_isResting');
-  localStorage.removeItem('unhinged_timeLeft');
-  localStorage.removeItem('unhinged_isIntervalStarted');
-  localStorage.removeItem('unhinged_isIntervalPaused');
-  localStorage.removeItem('unhinged_completedSets');
-};
-
 export const getCompletedWorkouts = (): CompletedWorkout[] => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.COMPLETED_WORKOUTS);

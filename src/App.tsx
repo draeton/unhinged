@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
-import { getCompletedWorkouts, saveCompletedWorkout, clearActiveWorkoutState } from './utils/storage';
+import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
 import { audio } from './utils/audio';
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle } from 'lucide-react';
 
@@ -152,7 +152,6 @@ export function App() {
 
   const handleStopWorkout = () => {
     stopWorkout();
-    clearActiveWorkoutState();
     setIsPlayerOpen(false);
     setIsPreWorkoutOpen(false);
     setActiveDrawer(null);
@@ -182,7 +181,7 @@ export function App() {
   };
 
   const handleForceCompleteWorkout = () => {
-    const completedSetsDict = JSON.parse(localStorage.getItem('unhinged_completedSets') || '{}');
+    const completedSetsDict = useWorkoutStore.getState().completedSets;
     const totalSets = Object.values(completedSetsDict).reduce((a: any, b: any) => a + Number(b), 0) as number;
     const durationMinutes = Math.round(totalSecondsElapsed / 60);
     handleWorkoutComplete(durationMinutes, totalSets);
@@ -204,7 +203,6 @@ export function App() {
     
     // Reset workout timer state
     stopWorkout();
-    clearActiveWorkoutState();
 
     setIsPlayerOpen(false);
     setIsPreWorkoutOpen(false);
