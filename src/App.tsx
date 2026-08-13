@@ -30,8 +30,7 @@ export function App() {
     startWorkout,
     pauseWorkout,
     resumeWorkout,
-    stopWorkout,
-    incrementTotalTime
+    stopWorkout
   } = useWorkoutStore();
 
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
@@ -338,6 +337,18 @@ export function App() {
           >
             {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
+          </button>
+
+          <div style={{ width: '100%', height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }} />
+
+          <button
+            onClick={async () => {
+              await signOut();
+              setActiveDrawer(null);
+            }}
+            style={{ width: '100%', padding: '16px', background: 'transparent', border: '1px solid rgba(255, 0, 122, 0.3)', color: '#FF007A', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '1rem' }}
+          >
+            Sign Out
           </button>
         </div>
       </Drawer>
