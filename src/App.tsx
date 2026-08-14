@@ -270,7 +270,6 @@ export function App() {
           
               <button
                 className="btn-secondary"
-                disabled={!isWorkoutStarted}
                 onClick={() => {
                   handleToggleWorkoutPause();
                   setActiveDrawer(null);
@@ -280,8 +279,7 @@ export function App() {
                   padding: '16px', 
                   fontSize: '1rem',
                   background: 'rgba(255,255,255,0.04)',
-                  opacity: !isWorkoutStarted ? 0.5 : 1,
-                  cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer'
+                  cursor: 'pointer'
                 }}
               >
                 {isWorkoutPaused ? <Play size={20} fill="#fff" /> : <Pause size={20} fill="#fff" />}
@@ -290,7 +288,6 @@ export function App() {
 
               <button
                 className="btn-secondary"
-                disabled={!isWorkoutStarted}
                 onClick={() => {
                   handleCompleteWorkoutClick();
                   setActiveDrawer(null);
@@ -300,8 +297,7 @@ export function App() {
                   padding: '16px', 
                   fontSize: '1rem', 
                   background: 'rgba(255,255,255,0.04)',
-                  opacity: !isWorkoutStarted ? 0.5 : 1,
-                  cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer'
+                  cursor: 'pointer'
                 }}
               >
                 <CheckCircle size={20} fill="#fff" stroke="#050B14" />
@@ -310,7 +306,6 @@ export function App() {
 
               <button
                 className="btn-secondary"
-                disabled={!isWorkoutStarted}
                 onClick={() => {
                   handleResetWorkoutClick();
                   setActiveDrawer(null);
@@ -321,8 +316,7 @@ export function App() {
                   fontSize: '1rem', 
                   background: 'rgba(255,255,255,0.04)', 
                   color: '#FF3366',
-                  opacity: !isWorkoutStarted ? 0.5 : 1,
-                  cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer'
+                  cursor: 'pointer'
                 }}
               >
                 <RotateCcw size={20} />

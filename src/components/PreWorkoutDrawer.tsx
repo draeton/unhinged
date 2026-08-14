@@ -81,6 +81,7 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
         <button
           title="Menu"
           onClick={onMenuClick}
+          disabled={!isWorkoutStarted}
           style={{
             width: '54px',
             borderRadius: '12px',
@@ -90,7 +91,8 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer',
+            cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer',
+            opacity: !isWorkoutStarted ? 0.5 : 1,
             transition: 'all 0.2s ease',
           }}
         >
