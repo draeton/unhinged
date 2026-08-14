@@ -661,7 +661,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             <ExerciseInfoPanel 
               exercise={allExercises[previewIndex].exercise} 
               onPlayVideo={(url) => {
-                setPreviewIndex(null);
                 onPlayVideo(url);
               }} 
             />
