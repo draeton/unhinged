@@ -1,12 +1,15 @@
 import React from 'react';
 import type { ScreenType } from './StartScreen';
+import { Menu } from 'lucide-react';
 
 interface HeaderProps {
   onNavigate: (screen: ScreenType) => void;
+  onMenuClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onNavigate,
+  onMenuClick,
 }) => {
   return (
     <header style={{
@@ -64,6 +67,25 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Menu Button */}
+        <button
+          onClick={onMenuClick}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: '#FFFFFF',
+            cursor: 'pointer',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '12px',
+            transition: 'background 0.2s ease',
+          }}
+        >
+          <Menu size={24} />
+        </button>
       </div>
     </header>
   );

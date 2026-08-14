@@ -36,7 +36,7 @@ export function App() {
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | null>(null);
   const [activeDayDetail, setActiveDayDetail] = useState<string | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
@@ -215,6 +215,7 @@ export function App() {
       {/* Header Bar */}
       <Header
         onNavigate={handleNavigate}
+        onMenuClick={() => setActiveDrawer('appMenu')}
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
@@ -327,7 +328,11 @@ export function App() {
                 <RotateCcw size={20} />
                 <span>Reset Workout</span>
               </button>
+        </div>
+      </Drawer>
 
+      <Drawer isOpen={activeDrawer === 'appMenu'} onClose={() => setActiveDrawer(null)}>
+        <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <button
             className="btn-secondary"
             onClick={() => {
