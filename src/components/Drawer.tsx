@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface DrawerProps {
   isOpen: boolean;
@@ -86,7 +87,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
 
   const transformY = isOpen ? (currentY !== null ? `${currentY}px` : '0') : '100%';
 
-  return (
+  const drawerContent = (
     <>
       <div 
         style={{
@@ -139,4 +140,10 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
       </div>
     </>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(drawerContent, document.body);
+  }
+
+  return null;
 };
