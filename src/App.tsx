@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
+import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
+import { supabase } from './utils/supabase';
 import { audio } from './utils/audio';
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle } from 'lucide-react';
 
@@ -94,7 +96,24 @@ export function App() {
 
 
   useEffect(() => {
+    // Initial local load
     setCompletedWorkouts(getCompletedWorkouts());
+
+    // Try fetching from Supabase and update local storage & state if logged in
+    syncWorkoutsFromSupabase().then((synced) => {
+      setCompletedWorkouts(synced);
+    });
+
+    // Also re-sync when auth state changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      syncWorkoutsFromSupabase().then((synced) => {
+        setCompletedWorkouts(synced);
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -199,7 +218,10 @@ export function App() {
       exerciseLogs: [],
     };
     saveCompletedWorkout(newWorkout);
-    setCompletedWorkouts(prev => [newWorkout, ...prev]);
+    syncWorkoutToSupabase(newWorkout); // Push to Supabase async
+
+    // Update local state immediately for snappy UI
+    setCompletedWorkouts(getCompletedWorkouts());
     setShowCompletionModal(false);
     
     // Reset workout timer state
