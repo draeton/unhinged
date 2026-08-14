@@ -56,7 +56,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CalendarIcon size={18} color="#00F0FF" />
-          Weekly Consistency
+          Workout Calendar
         </h3>
       </div>
       
