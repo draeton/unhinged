@@ -352,24 +352,39 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             </div>
 
             {/* Timer Row Wrapper */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-              <button 
-                className="btn-secondary" 
-                onClick={() => handleAdjustRest(-15)} 
-                style={{ 
-                  padding: '12px 10px', 
-                  fontSize: '0.8rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <Minus size={18} /> 15s
-              </button>
-
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              
               {/* SVG Circular Ring Timer */}
               <div style={{ position: 'relative', width: '240px', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                
+                {/* -15s Button */}
+                <button 
+                  className="btn-secondary" 
+                  onClick={() => handleAdjustRest(-15)} 
+                  style={{ 
+                    position: 'absolute',
+                    top: '0',
+                    left: '-40px',
+                    zIndex: 10,
+                    padding: '0 16px',
+                    height: '48px',
+                    borderRadius: '24px',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-main)',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s ease',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+                >
+                  <Minus size={16} /> 15s
+                </button>
                 <svg width="240" height="240" viewBox="0 0 240 240" style={{ transform: 'rotate(-90deg)' }}>
                 {/* Background Track Circle */}
                 <circle
@@ -414,29 +429,45 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 </span>
               </div>
 
-              </div>
-
-            <button 
+              {/* +15s Button */}
+              <button 
                 className="btn-secondary" 
                 onClick={() => handleAdjustRest(15)} 
                 style={{ 
-                  padding: '12px 10px', 
-                  fontSize: '0.8rem',
+                  position: 'absolute',
+                  top: '0',
+                  right: '-40px',
+                  zIndex: 10,
+                  padding: '0 16px',
+                  height: '48px',
+                  borderRadius: '24px',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '6px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s ease',
                 }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
               >
-                <Plus size={18} /> 15s
+                <Plus size={16} /> 15s
               </button>
+              </div>
             </div>
 
-            {/* Play / Pause Buttons */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', marginTop: '24px' }}>
-              <div /> {/* Left Spacer */}
-              
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
+          {/* Play / Pause Buttons */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', marginTop: '24px', gap: '16px' }}>
+            
+            {/* Left Column */}
+            <div />
+
+            {/* Center Column */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button
                   className="btn-primary"
                   onClick={() => {
@@ -478,41 +509,44 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                     ? <Play size={28} fill="#050B14" style={{ marginLeft: '4px' }} />
                     : <Pause size={28} fill="#050B14" />}
                 </button>
-              </div>
+            </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: '16px' }}>
-                <button
-                  className="btn-secondary"
-                  onClick={() => {
-                    setIntervalState({
-                      isIntervalStarted: false,
-                      isIntervalPaused: false,
-                      timeOffset: 0
-                    });
-                    setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
-                  }}
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '50%',
-                    padding: 0,
-                    justifyContent: 'center',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid var(--border-subtle)',
-                    opacity: !isIntervalStarted ? 0.3 : 1,
-                    pointerEvents: !isIntervalStarted ? 'none' : 'auto',
-                  }}
-                  disabled={!isIntervalStarted}
-                  title="Reset Timer"
-                >
-                  <RotateCcw size={20} color="var(--text-main)" />
-                </button>
-              </div>
+            {/* Right Column */}
+            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+              
+              {/* Reset Button */}
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setIntervalState({
+                    isIntervalStarted: false,
+                    isIntervalPaused: false,
+                    timeOffset: 0
+                  });
+                  setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
+                }}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-subtle)',
+                  opacity: !isIntervalStarted ? 0.3 : 1,
+                  pointerEvents: !isIntervalStarted ? 'none' : 'auto',
+                }}
+                disabled={!isIntervalStarted}
+                title="Reset Timer"
+              >
+                <RotateCcw size={20} color="var(--text-main)" />
+              </button>
+
             </div>
           </div>
         </div>
-
-      </div>
 
       {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
@@ -588,6 +622,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
       </div>
 
+      </div>
+
       <Drawer isOpen={previewIndex !== null} onClose={() => setPreviewIndex(null)}>
         {previewIndex !== null && allExercises[previewIndex] && (
           <div style={{ padding: '24px 16px', paddingBottom: '40px' }}>
@@ -601,6 +637,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         )}
       </Drawer>
+    </div>
     </div>
   );
 };
