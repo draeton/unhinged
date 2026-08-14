@@ -144,8 +144,8 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
                   }}
                 >
                   <div
-                    onClick={() => toggleExpand(ex.id)}
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                    onClick={() => !isCondensed && toggleExpand(ex.id)}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: isCondensed ? 'default' : 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{
@@ -174,13 +174,15 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {isExpanded ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />}
-                    </div>
+                    {!isCondensed && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {isExpanded ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />}
+                      </div>
+                    )}
                   </div>
 
                   {/* Expanded Details */}
-                  {isExpanded && (
+                  {!isCondensed && isExpanded && (
                     <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         {isLeftScapular && (
