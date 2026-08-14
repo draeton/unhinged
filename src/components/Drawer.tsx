@@ -58,12 +58,14 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
     // Only track if touching the drag handle area to allow scrolling inside
     const target = e.target as HTMLElement;
     if (target.closest('.drawer-drag-handle')) {
+      e.stopPropagation();
       setStartY(e.touches[0].clientY);
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (startY !== null) {
+      e.stopPropagation();
       const y = e.touches[0].clientY;
       if (y > startY) {
         setCurrentY(y - startY);
@@ -71,7 +73,10 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (startY !== null || currentY !== null) {
+      e.stopPropagation();
+    }
     if (currentY !== null && currentY > 100) {
       onClose();
     }
