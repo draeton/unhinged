@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, Plus, Minus, Clock, FileText, RotateCcw } from 'lucide-react';
+import { Play, Pause, Plus, Minus, RotateCcw } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
 import { Drawer } from './Drawer';
 import { ExerciseInfoPanel } from './ExerciseInfoPanel';
@@ -55,8 +55,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const currentIndexRef = useRef<number>(currentIndex);
 
-  // Mobile / Tablet Panel Switcher: 'details' (Panel 1) vs 'timer' (Panel 2)
-  const [mobileActivePanel, setMobileActivePanel] = useState<'details' | 'timer'>('timer');
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const currentItem = allExercises[currentIndex];
@@ -78,8 +76,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     } else if (typeof window.scrollTo === 'function') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    setMobileActivePanel('timer');
-    
     // Scroll carousel active item into view
     if (carouselRefs.current[currentIndex] && typeof carouselRefs.current[currentIndex]?.scrollIntoView === 'function') {
       carouselRefs.current[currentIndex]?.scrollIntoView({
@@ -322,74 +318,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           })}
         </div>
 
-      {/* Mobile/Tablet Panel Swapper Toggle Bar */}
-      <div className="mobile-panel-toggle" style={{
-        background: 'rgba(255, 255, 255, 0.04)',
-        padding: '4px',
-        borderRadius: '14px',
-        border: '1px solid var(--border-subtle)',
-      }}>
-        <button
-          onClick={() => setMobileActivePanel('timer')}
-          style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: '10px',
-            border: 'none',
-            background: mobileActivePanel === 'timer' ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)' : 'transparent',
-            color: mobileActivePanel === 'timer' ? '#050B14' : 'var(--text-muted)',
-            fontWeight: '700',
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <Clock size={16} />
-          <span>Timer ({formatTime(timeLeft)})</span>
-        </button>
-
-        <button
-          onClick={() => setMobileActivePanel('details')}
-          style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: '10px',
-            border: 'none',
-            background: mobileActivePanel === 'details' ? 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)' : 'transparent',
-            color: mobileActivePanel === 'details' ? '#050B14' : 'var(--text-muted)',
-            fontWeight: '700',
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <FileText size={16} />
-          <span>Info</span>
-        </button>
-      </div>
-
-      {/* Main Layout Grid (Responsive Side-by-Side on Desktop, Swappable Panels on Mobile) */}
-      <div className="player-layout-grid">
-        
-        {/* PANEL 1: Exercise Info, Cues, & Interactive Set Tracker */}
-        <div className={`player-panel ${mobileActivePanel === 'details' ? 'active-mobile-panel' : 'hidden-mobile-panel'}`}
-             style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          
-          {/* Exercise Card & Info */}
-          <ExerciseInfoPanel exercise={currentExercise} onPlayVideo={onPlayVideo} />
-
-        </div>
-
-        {/* PANEL 2: Radial Timer & Controls */}
-        <div className={`player-panel ${mobileActivePanel === 'timer' ? 'active-mobile-panel' : 'hidden-mobile-panel'}`}>
+      {/* Radial Timer & Controls */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="glass-panel" style={{
             padding: '32px 24px',
             display: 'flex',
@@ -656,7 +586,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         )}
 
-        </div>
       </div>
 
       <Drawer isOpen={previewIndex !== null} onClose={() => setPreviewIndex(null)}>
