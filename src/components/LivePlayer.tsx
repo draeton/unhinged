@@ -57,6 +57,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
+
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
   const nextItem = allExercises[currentIndex + 1];
@@ -94,6 +98,28 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       isResting: false,
     });
     setTimeLeft(allExercises[newIndex]?.exercise.durationSeconds || 180);
+  };
+
+  const onTouchStartHandler = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMoveHandler = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndHandler = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentIndex < allExercises.length - 1) {
+      navigateToExercise(currentIndex + 1);
+    } else if (isRightSwipe && currentIndex > 0) {
+      navigateToExercise(currentIndex - 1);
+    }
   };
 
   // Propagate global pause into local interval pause state
@@ -319,7 +345,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         </div>
 
       {/* Radial Timer & Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div 
+        style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+        onTouchStart={onTouchStartHandler}
+        onTouchMove={onTouchMoveHandler}
+        onTouchEnd={onTouchEndHandler}
+      >
           <div className="glass-panel" style={{
             padding: '32px 24px',
             display: 'flex',
