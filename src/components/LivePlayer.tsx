@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, Plus, Minus, AlertCircle, Sparkles, ShieldAlert, Clock, FileText, Video, RotateCcw } from 'lucide-react';
+import { Play, Pause, Plus, Minus, Clock, FileText, RotateCcw } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
+import { Drawer } from './Drawer';
+import { ExerciseInfoPanel } from './ExerciseInfoPanel';
 
 interface LivePlayerProps {
   blocks: WorkoutBlock[];
@@ -55,6 +57,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   // Mobile / Tablet Panel Switcher: 'details' (Panel 1) vs 'timer' (Panel 2)
   const [mobileActivePanel, setMobileActivePanel] = useState<'details' | 'timer'>('timer');
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
@@ -254,10 +257,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
 
 
-  // Specific Asymmetry Cues
-  const isLeftScapularFocus = currentExercise.id === 's1';
-  const isHandstandFocus = currentExercise.id === 's2';
-  const isJeffersonCurlFocus = currentExercise.id === 'm3';
+  // Specific Asymmetry Cues (moved to ExerciseInfoPanel)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -287,7 +287,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 ref={(el) => {
                   carouselRefs.current[index] = el;
                 }}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => setPreviewIndex(index)}
                 style={{
                   flex: '0 0 auto',
                   width: '100px',
@@ -383,131 +383,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         <div className={`player-panel ${mobileActivePanel === 'details' ? 'active-mobile-panel' : 'hidden-mobile-panel'}`}
              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Exercise Card */}
-          <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', lineHeight: 1.2 }}>
-                  {currentExercise.name}
-                </h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                    {currentExercise.repsOrTime}
-                  </span>
-                  {currentExercise.equipment && (
-                    <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                      {currentExercise.equipment}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '8px', lineHeight: 1.5 }}>
-                {currentExercise.description}
-              </p>
-            </div>
-
-            {/* SPECIAL CUE HIGHLIGHT: Left Scapular Asymmetry Warning */}
-            {isLeftScapularFocus && (
-              <div className="left-scapula-badge" style={{ padding: '12px 16px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <ShieldAlert size={22} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontWeight: '800', fontSize: '0.88rem', letterSpacing: '0.04em' }}>
-                    LEFT SCAPULAR ASYMMETRY FOCUS
-                  </div>
-                  <div style={{ fontSize: '0.82rem', marginTop: '4px', opacity: 0.9, color: 'var(--text-main)' }}>
-                    Wrap left shoulder blade DOWN and BACK firmly into back pocket during the 3 slow scapular pull-ups before pulling chin over bar!
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SPECIAL CUE HIGHLIGHT: Handstand Parallettes Tip */}
-            {isHandstandFocus && (
-              <div style={{
-                background: 'rgba(0, 240, 255, 0.12)',
-                border: '1px solid rgba(0, 240, 255, 0.3)',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px',
-                color: '#00F0FF'
-              }}>
-                <Sparkles size={22} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontWeight: '800', fontSize: '0.88rem' }}>PRO WRIST SAFETY TIP</div>
-                  <div style={{ fontSize: '0.82rem', marginTop: '4px', color: 'var(--text-muted)' }}>
-                    If your wrists feel limited or fatigued, use parallettes or wrist support blocks to reduce wrist extension angle!
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SPECIAL CUE HIGHLIGHT: Jefferson Curl Spine Segmenting */}
-            {isJeffersonCurlFocus && (
-              <div style={{
-                background: 'rgba(0, 240, 255, 0.12)',
-                border: '1px solid rgba(0, 240, 255, 0.3)',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px',
-                color: '#00F0FF'
-              }}>
-                <AlertCircle size={22} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <div style={{ fontWeight: '800', fontSize: '0.88rem' }}>SPINAL ARTICULATION RULE</div>
-                  <div style={{ fontSize: '0.82rem', marginTop: '4px', color: 'var(--text-muted)' }}>
-                    Tuck chin to chest first, then roll down vertebra-by-vertebra. Keep weight light (5–10 lbs max).
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Form Cues List */}
-            <div style={{ background: 'rgba(0, 0, 0, 0.25)', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                Form Execution Cues
-              </div>
-              <ul style={{ paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.86rem', color: 'var(--text-main)' }}>
-                {currentExercise.formCues.map((cue, i) => (
-                  <li key={i}>{cue}</li>
-                ))}
-              </ul>
-              {currentExercise.videoUrls && currentExercise.videoUrls.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-                  {currentExercise.videoUrls.map((video, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => onPlayVideo(video.url)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '10px',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: 'none',
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        color: 'var(--accent-cyan)',
-                        textDecoration: 'none',
-                        fontWeight: '600',
-                        fontSize: '0.85rem',
-                        transition: 'background 0.2s ease',
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
-                      onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
-                    >
-                      <Video size={16} />
-                      <span>{video.title}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-          </div>
+          {/* Exercise Card & Info */}
+          <ExerciseInfoPanel exercise={currentExercise} onPlayVideo={onPlayVideo} />
 
         </div>
 
@@ -779,11 +656,22 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         )}
 
-
-
+        </div>
       </div>
 
-    </div>
+      <Drawer isOpen={previewIndex !== null} onClose={() => setPreviewIndex(null)}>
+        {previewIndex !== null && allExercises[previewIndex] && (
+          <div style={{ padding: '24px 16px', paddingBottom: '40px' }}>
+            <ExerciseInfoPanel 
+              exercise={allExercises[previewIndex].exercise} 
+              onPlayVideo={(url) => {
+                setPreviewIndex(null);
+                onPlayVideo(url);
+              }} 
+            />
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 };
