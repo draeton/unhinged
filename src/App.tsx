@@ -209,7 +209,7 @@ export function App() {
 
   const handleSaveWorkout = (rpe: number, notes: string) => {
     const newWorkout: CompletedWorkout = {
-      id: `w-${Date.now()}`,
+      id: crypto.randomUUID(),
       date: new Date().toISOString(),
       durationMinutes: completionStats.durationMinutes,
       totalSetsCompleted: completionStats.completedSets,
