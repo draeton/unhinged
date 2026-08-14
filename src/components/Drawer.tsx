@@ -100,7 +100,10 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           zIndex: zIndex,
           touchAction: 'none'
         }} 
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
       />
       <div 
         style={{
