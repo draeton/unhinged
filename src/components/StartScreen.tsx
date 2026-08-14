@@ -8,7 +8,7 @@ export type ScreenType = 'start' | 'player' | 'blueprint' | 'history' | 'guide';
 interface StartScreenProps {
   onNavigate: (screen: ScreenType) => void;
   onOpenPreWorkout: () => void;
-  onOpenCalendar: () => void;
+  onOpenCalendar: (dateStr?: string) => void;
   isWorkoutActive: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;

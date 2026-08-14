@@ -4,7 +4,7 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 
 interface CalendarWidgetProps {
   completedWorkouts: CompletedWorkout[];
-  onClick: () => void;
+  onClick: (dateStr?: string) => void;
 }
 
 export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
@@ -41,7 +41,7 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
   return (
     <div 
       className="glass-panel"
-      onClick={onClick}
+      onClick={() => onClick()}
       style={{
         padding: '20px',
         background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%)',
@@ -67,7 +67,14 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({
           const isToday = getLocalDateString(new Date()) === dateStr;
 
           return (
-            <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <div 
+              key={index} 
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: hasWorkout ? 'pointer' : 'inherit' }}
+              onClick={hasWorkout ? (e) => {
+                e.stopPropagation();
+                onClick(dateStr);
+              } : undefined}
+            >
               <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', fontWeight: '600' }}>
                 {dayNames[index]}
               </span>

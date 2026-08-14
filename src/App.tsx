@@ -222,7 +222,12 @@ export function App() {
         <StartScreen
           onNavigate={handleNavigate}
           onOpenPreWorkout={() => setIsPreWorkoutOpen(true)}
-          onOpenCalendar={() => setActiveDrawer('calendar')}
+          onOpenCalendar={(dateStr) => {
+            setActiveDrawer('calendar');
+            if (dateStr) {
+              setActiveDayDetail(dateStr);
+            }
+          }}
           isWorkoutActive={isWorkoutStarted}
           isWorkoutPaused={isWorkoutPaused}
           totalSecondsElapsed={totalSecondsElapsed}
