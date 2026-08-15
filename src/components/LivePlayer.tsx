@@ -57,9 +57,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const minSwipeDistance = 50;
+
 
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
@@ -70,7 +68,41 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.getAttribute('data-index'));
+            if (index !== currentIndexRef.current && !isNaN(index)) {
+              navigateToExercise(index);
+            }
+          }
+        });
+      },
+      {
+        root: mainCarouselContainerRef.current,
+        threshold: 0.85,
+      }
+    );
+
+    const currentRefs = mainCarouselItemRefs.current;
+    currentRefs.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      currentRefs.forEach((el) => {
+        if (el) observer.unobserve(el);
+      });
+      observer.disconnect();
+    };
+  }, []);
+
   const carouselRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const mainCarouselContainerRef = useRef<HTMLDivElement | null>(null);
+  const mainCarouselItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // On exercise change: scroll to top and ensure sets tab is active on mobile
   useEffect(() => {
@@ -88,6 +120,14 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         inline: 'center'
       });
     }
+    // Scroll main carousel into view
+    if (mainCarouselItemRefs.current[currentIndex] && typeof mainCarouselItemRefs.current[currentIndex]?.scrollIntoView === 'function') {
+      mainCarouselItemRefs.current[currentIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
   }, [currentIndex]);
 
   const navigateToExercise = (newIndex: number) => {
@@ -100,27 +140,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     setTimeLeft(allExercises[newIndex]?.exercise.durationSeconds || 180);
   };
 
-  const onTouchStartHandler = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMoveHandler = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEndHandler = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && currentIndex < allExercises.length - 1) {
-      navigateToExercise(currentIndex + 1);
-    } else if (isRightSwipe && currentIndex > 0) {
-      navigateToExercise(currentIndex - 1);
-    }
-  };
 
   // Propagate global pause into local interval pause state
   useEffect(() => {
@@ -345,18 +364,20 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         </div>
 
       {/* Radial Timer & Controls */}
+      {/* Radial Timer & Controls Carousel */}
       <div 
-        style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-        onTouchStart={onTouchStartHandler}
-        onTouchMove={onTouchMoveHandler}
-        onTouchEnd={onTouchEndHandler}
+        ref={mainCarouselContainerRef}
+        style={{ 
+          display: 'flex', 
+          overflowX: 'auto', 
+          overflowY: 'hidden',
+          scrollSnapType: 'x mandatory',
+          margin: '0 -16px', 
+          padding: '0 16px',
+          scrollBehavior: 'smooth'
+        }}
+        className="hide-scrollbar"
       >
-          <div style={{
-          display: 'flex',
-          width: `${allExercises.length * 100}%`,
-          transform: `translateX(-${(currentIndex / allExercises.length) * 100}%)`,
-          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-        }}>
           {allExercises.map((carouselItem, idx) => {
             const isThisActive = idx === currentIndex;
             const itemTimeLeft = isThisActive ? timeLeft : (carouselItem.exercise.durationSeconds || 180);
@@ -364,16 +385,22 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             const itemIsResting = isThisActive ? isResting : false;
 
             return (
-              <div key={idx} style={{ 
-                width: `${100 / allExercises.length}%`, 
-                padding: '0 8px',
-                pointerEvents: isThisActive ? 'auto' : 'none',
-                opacity: isThisActive ? 1 : 0.4,
-                transition: 'opacity 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-              }}>
+              <div 
+                key={idx} 
+                data-index={idx}
+                ref={(el) => { mainCarouselItemRefs.current[idx] = el; }}
+                style={{ 
+                  flex: '0 0 100%', 
+                  padding: '0 8px',
+                  scrollSnapAlign: 'center',
+                  pointerEvents: isThisActive ? 'auto' : 'none',
+                  opacity: isThisActive ? 1 : 0.4,
+                  transition: 'opacity 0.3s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px'
+                }}
+              >
 <div className="glass-panel" style={{
             padding: '32px 24px',
             display: 'flex',
@@ -666,11 +693,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         </div>
 
-        
               </div>
             );
           })}
-        </div>
 
       {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
