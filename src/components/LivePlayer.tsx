@@ -369,7 +369,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 padding: '0 8px',
                 pointerEvents: isThisActive ? 'auto' : 'none',
                 opacity: isThisActive ? 1 : 0.4,
-                transition: 'opacity 0.3s ease'
+                transition: 'opacity 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
               }}>
 <div className="glass-panel" style={{
             padding: '32px 24px',
