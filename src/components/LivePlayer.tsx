@@ -73,24 +73,89 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const mainCarouselItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const thumbnailScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Touch swipe handling for the main carousel (one step at a time)
-  const touchStartXRef = useRef<number | null>(null);
+  // Drag-based carousel state
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSnapping, setIsSnapping] = useState(false);
+  const dragStartXRef = useRef<number | null>(null);
+  const dragStartTimeRef = useRef<number>(0);
+  const containerWidthRef = useRef<number>(0);
 
-  const handleCarouselTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
+  const handleDragStart = (clientX: number) => {
+    setIsSnapping(false);
+    setIsDragging(true);
+    dragStartXRef.current = clientX;
+    dragStartTimeRef.current = Date.now();
+    if (mainCarouselContainerRef.current) {
+      containerWidthRef.current = mainCarouselContainerRef.current.offsetWidth;
+    }
   };
 
-  const handleCarouselTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
-    touchStartXRef.current = null;
-
-    const threshold = 50;
-    if (deltaX < -threshold && currentIndex < allExercises.length - 1) {
-      navigateToExercise(currentIndex + 1);
-    } else if (deltaX > threshold && currentIndex > 0) {
-      navigateToExercise(currentIndex - 1);
+  const handleDragMove = (clientX: number) => {
+    if (dragStartXRef.current === null) return;
+    let delta = clientX - dragStartXRef.current;
+    // Apply rubber-band resistance at edges
+    if ((currentIndex === 0 && delta > 0) || (currentIndex === allExercises.length - 1 && delta < 0)) {
+      delta = delta * 0.25;
     }
+    setDragOffset(delta);
+  };
+
+  const handleDragEnd = () => {
+    if (dragStartXRef.current === null) return;
+    const elapsed = Date.now() - dragStartTimeRef.current;
+    const velocity = Math.abs(dragOffset) / Math.max(elapsed, 1);
+    const containerW = containerWidthRef.current || 1;
+    const threshold = containerW * 0.2; // 20% of width to snap
+    const velocityThreshold = 0.4; // px/ms — a fast flick
+
+    dragStartXRef.current = null;
+    setIsDragging(false);
+
+    if ((Math.abs(dragOffset) > threshold || velocity > velocityThreshold) && dragOffset < 0 && currentIndex < allExercises.length - 1) {
+      setIsSnapping(true);
+      setDragOffset(0);
+      navigateToExercise(currentIndex + 1);
+    } else if ((Math.abs(dragOffset) > threshold || velocity > velocityThreshold) && dragOffset > 0 && currentIndex > 0) {
+      setIsSnapping(true);
+      setDragOffset(0);
+      navigateToExercise(currentIndex - 1);
+    } else {
+      // Spring back
+      setIsSnapping(true);
+      setDragOffset(0);
+    }
+    // Clear snapping flag after transition
+    setTimeout(() => setIsSnapping(false), 350);
+  };
+
+  // Touch handlers
+  const handleCarouselTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.touches[0].clientX);
+  };
+  const handleCarouselTouchMove = (e: React.TouchEvent) => {
+    handleDragMove(e.touches[0].clientX);
+  };
+  const handleCarouselTouchEnd = () => {
+    handleDragEnd();
+  };
+
+  // Mouse handlers (for desktop testing)
+  const handleCarouselMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientX);
+  };
+  const handleCarouselMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    handleDragMove(e.clientX);
+  };
+  const handleCarouselMouseUp = () => {
+    if (!isDragging) return;
+    handleDragEnd();
+  };
+  const handleCarouselMouseLeave = () => {
+    if (!isDragging) return;
+    handleDragEnd();
   };
 
   // On exercise change: scroll both carousels to the active item
@@ -109,13 +174,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         }
       }
     }, 150);
-    // Scroll main carousel to the active item
-    const mainItem = mainCarouselItemRefs.current[currentIndex];
-    const mainContainer = mainCarouselContainerRef.current;
-    if (mainItem && mainContainer) {
-      const scrollLeft = mainItem.offsetLeft - mainContainer.offsetWidth / 2 + mainItem.offsetWidth / 2;
-      mainContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-    }
   }, [currentIndex]);
 
   const navigateToExercise = (newIndex: number) => {
@@ -355,20 +413,46 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       <div 
         ref={mainCarouselContainerRef}
         onTouchStart={handleCarouselTouchStart}
+        onTouchMove={handleCarouselTouchMove}
         onTouchEnd={handleCarouselTouchEnd}
+        onMouseDown={handleCarouselMouseDown}
+        onMouseMove={handleCarouselMouseMove}
+        onMouseUp={handleCarouselMouseUp}
+        onMouseLeave={handleCarouselMouseLeave}
         style={{ 
-          display: 'flex', 
-          overflowX: 'hidden', 
-          overflowY: 'hidden',
+          overflow: 'hidden', 
           margin: '0 -16px', 
           padding: '0 16px',
+          touchAction: 'pan-y',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
         }}
       >
+        <div style={{
+          display: 'flex',
+          width: '100%',
+          transform: `translateX(calc(${-currentIndex * 100}% + ${dragOffset}px))`,
+          transition: (!isDragging && isSnapping) ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+          willChange: isDragging ? 'transform' : 'auto',
+        }}>
           {allExercises.map((carouselItem, idx) => {
             const isThisActive = idx === currentIndex;
+            const isNeighbor = Math.abs(idx - currentIndex) === 1;
             const itemTimeLeft = isThisActive ? timeLeft : (carouselItem.exercise.durationSeconds || 180);
             const itemProgressPercent = isThisActive ? progressPercent : 0;
             const itemIsResting = isThisActive ? isResting : false;
+
+            // Calculate dynamic opacity based on drag direction
+            let itemOpacity = 0.4;
+            if (isThisActive) {
+              itemOpacity = isDragging ? Math.max(0.4, 1 - Math.abs(dragOffset) / (containerWidthRef.current || 400) * 0.6) : 1;
+            } else if (isNeighbor && isDragging) {
+              const towards = (dragOffset < 0 && idx === currentIndex + 1) || (dragOffset > 0 && idx === currentIndex - 1);
+              if (towards) {
+                itemOpacity = Math.min(1, 0.4 + Math.abs(dragOffset) / (containerWidthRef.current || 400) * 0.6);
+              }
+            }
 
             return (
               <div 
@@ -378,10 +462,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 style={{ 
                   flex: '0 0 100%', 
                   padding: '0 8px',
-
                   pointerEvents: isThisActive ? 'auto' : 'none',
-                  opacity: isThisActive ? 1 : 0.4,
-                  transition: 'opacity 0.3s ease',
+                  opacity: itemOpacity,
+                  transition: isDragging ? 'none' : 'opacity 0.3s ease',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '16px'
@@ -657,7 +740,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   key={setNum}
                   onClick={() => handleToggleSet(setNum)}
                   style={{
-                    flex: '0 0 64px',
+                    flex: '0 0 52px',
                     height: '52px',
                     borderRadius: '12px',
                     border: `1px solid ${borderColor}`,
@@ -682,6 +765,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               </div>
             );
           })}
+        </div>
+      </div>
 
       {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
@@ -726,7 +811,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         )}
       </Drawer>
-    </div>
     </div>
   );
 };

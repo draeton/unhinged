@@ -254,7 +254,7 @@ export function App() {
           isWorkoutActive={isWorkoutStarted}
           isWorkoutPaused={isWorkoutPaused}
           totalSecondsElapsed={totalSecondsElapsed}
-          completedWorkoutsCount={completedWorkouts.length}
+
           completedWorkouts={completedWorkouts}
         />
       </main>
