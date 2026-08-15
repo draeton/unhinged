@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, Plus, Minus, RotateCcw } from 'lucide-react';
+import { Play, Pause, Plus, Minus, RotateCcw, Info } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
 import { Drawer } from './Drawer';
 import { ExerciseInfoPanel } from './ExerciseInfoPanel';
@@ -363,9 +363,29 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             {/* Exercise Details (Name, Chips, Description) */}
             <div style={{ textAlign: 'left', width: '100%', marginBottom: '32px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', lineHeight: 1.2 }}>
-                  {currentExercise.name}
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', lineHeight: 1.2 }}>
+                    {currentExercise.name}
+                  </h2>
+                  <button
+                    onClick={() => setPreviewIndex(currentIndex)}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: 'var(--accent-cyan)',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <Info size={18} />
+                  </button>
+                </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
                     {currentExercise.repsOrTime}
