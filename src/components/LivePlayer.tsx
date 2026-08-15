@@ -309,7 +309,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 ref={(el) => {
                   carouselRefs.current[index] = el;
                 }}
-                onClick={() => setPreviewIndex(index)}
+                onClick={() => navigateToExercise(index)}
                 style={{
                   flex: '0 0 auto',
                   width: '100px',
