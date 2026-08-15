@@ -13,6 +13,7 @@ interface LivePlayerProps {
   onToggleWorkoutPause: () => void;
   onWorkoutComplete: (totalMinutes: number, completedSets: number) => void;
   onPlayVideo: (url: string) => void;
+  drawerScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const LivePlayer: React.FC<LivePlayerProps> = ({
@@ -22,6 +23,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   onToggleWorkoutPause,
   onWorkoutComplete,
   onPlayVideo,
+  drawerScrollRef,
 }) => {
   // Flatten exercises with block metadata
   const allExercises = React.useMemo(() => {
@@ -57,8 +59,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
-
-
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
   const nextItem = allExercises[currentIndex + 1];
@@ -68,65 +68,53 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     currentIndexRef.current = currentIndex;
   }, [currentIndex]);
 
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = Number(entry.target.getAttribute('data-index'));
-            if (index !== currentIndexRef.current && !isNaN(index)) {
-              navigateToExercise(index);
-            }
-          }
-        });
-      },
-      {
-        root: mainCarouselContainerRef.current,
-        threshold: 0.85,
-      }
-    );
-
-    const currentRefs = mainCarouselItemRefs.current;
-    currentRefs.forEach((el) => {
-      if (el) observer.observe(el);
-    });
-
-    return () => {
-      currentRefs.forEach((el) => {
-        if (el) observer.unobserve(el);
-      });
-      observer.disconnect();
-    };
-  }, []);
-
   const carouselRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const mainCarouselContainerRef = useRef<HTMLDivElement | null>(null);
   const mainCarouselItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const thumbnailScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // On exercise change: scroll to top and ensure sets tab is active on mobile
+  // Touch swipe handling for the main carousel (one step at a time)
+  const touchStartXRef = useRef<number | null>(null);
+
+  const handleCarouselTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleCarouselTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    touchStartXRef.current = null;
+
+    const threshold = 50;
+    if (deltaX < -threshold && currentIndex < allExercises.length - 1) {
+      navigateToExercise(currentIndex + 1);
+    } else if (deltaX > threshold && currentIndex > 0) {
+      navigateToExercise(currentIndex - 1);
+    }
+  };
+
+  // On exercise change: scroll both carousels to the active item
   useEffect(() => {
-    const drawerContainer = document.getElementById('drawer-scroll-container');
-    if (drawerContainer && typeof drawerContainer.scrollTo === 'function') {
-      drawerContainer.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (typeof window.scrollTo === 'function') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Debounce thumbnail carousel scroll so rapid changes coalesce into one scroll
+    if (thumbnailScrollTimeoutRef.current) {
+      clearTimeout(thumbnailScrollTimeoutRef.current);
     }
-    // Scroll carousel active item into view
-    if (carouselRefs.current[currentIndex] && typeof carouselRefs.current[currentIndex]?.scrollIntoView === 'function') {
-      carouselRefs.current[currentIndex]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
-      });
-    }
-    // Scroll main carousel into view
-    if (mainCarouselItemRefs.current[currentIndex] && typeof mainCarouselItemRefs.current[currentIndex]?.scrollIntoView === 'function') {
-      mainCarouselItemRefs.current[currentIndex]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
-      });
+    thumbnailScrollTimeoutRef.current = setTimeout(() => {
+      const carouselBtn = carouselRefs.current[currentIndex];
+      if (carouselBtn) {
+        const container = carouselBtn.parentElement;
+        if (container) {
+          const scrollLeft = carouselBtn.offsetLeft - container.offsetWidth / 2 + carouselBtn.offsetWidth / 2;
+          container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+        }
+      }
+    }, 150);
+    // Scroll main carousel to the active item
+    const mainItem = mainCarouselItemRefs.current[currentIndex];
+    const mainContainer = mainCarouselContainerRef.current;
+    if (mainItem && mainContainer) {
+      const scrollLeft = mainItem.offsetLeft - mainContainer.offsetWidth / 2 + mainItem.offsetWidth / 2;
+      mainContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
   }, [currentIndex]);
 
@@ -312,7 +300,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           gap: '12px',
           padding: '0 4px',
           width: '100%',
-          scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
         }} className="hide-scrollbar">
           {allExercises.map((item, index) => {
@@ -336,7 +323,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   borderRadius: '16px',
                   border: `2px solid ${borderColor}`,
                   background: bgColor,
-                  scrollSnapAlign: 'start',
+
                   cursor: 'pointer',
                   opacity: isActive || isFullyComplete ? 1 : 0.6,
                   transition: 'all 0.2s ease',
@@ -367,21 +354,20 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       {/* Radial Timer & Controls Carousel */}
       <div 
         ref={mainCarouselContainerRef}
+        onTouchStart={handleCarouselTouchStart}
+        onTouchEnd={handleCarouselTouchEnd}
         style={{ 
           display: 'flex', 
-          overflowX: 'auto', 
+          overflowX: 'hidden', 
           overflowY: 'hidden',
-          scrollSnapType: 'x mandatory',
           margin: '0 -16px', 
           padding: '0 16px',
-          scrollBehavior: 'smooth'
         }}
-        className="hide-scrollbar"
       >
           {allExercises.map((carouselItem, idx) => {
             const isThisActive = idx === currentIndex;
             const itemTimeLeft = isThisActive ? timeLeft : (carouselItem.exercise.durationSeconds || 180);
-            const itemProgressPercent = isThisActive ? progressPercent : 100;
+            const itemProgressPercent = isThisActive ? progressPercent : 0;
             const itemIsResting = isThisActive ? isResting : false;
 
             return (
@@ -392,7 +378,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 style={{ 
                   flex: '0 0 100%', 
                   padding: '0 8px',
-                  scrollSnapAlign: 'center',
+
                   pointerEvents: isThisActive ? 'auto' : 'none',
                   opacity: isThisActive ? 1 : 0.4,
                   transition: 'opacity 0.3s ease',
@@ -507,7 +493,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   strokeDasharray={628.3}
                   strokeDashoffset={628.3 - (628.3 * itemProgressPercent) / 100}
                   strokeLinecap="round"
-                  style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                  style={{ transition: (isThisActive && isIntervalStarted) ? 'stroke-dashoffset 0.5s ease' : 'none' }}
                 />
               </svg>
 

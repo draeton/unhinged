@@ -37,6 +37,7 @@ export function App() {
 
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const playerDrawerScrollRef = useRef<HTMLDivElement | null>(null);
   
   const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | null>(null);
   const [activeDayDetail, setActiveDayDetail] = useState<string | null>(null);
@@ -271,7 +272,7 @@ export function App() {
       </Drawer>
 
       {/* Live Player Drawer */}
-      <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)}>
+      <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)} scrollRef={playerDrawerScrollRef}>
         <LivePlayer
           blocks={DEFAULT_WORKOUT_BLOCKS}
           totalSecondsElapsed={totalSecondsElapsed}
@@ -279,6 +280,7 @@ export function App() {
           onToggleWorkoutPause={handleToggleWorkoutPause}
           onWorkoutComplete={handleWorkoutComplete}
           onPlayVideo={setActiveVideoUrl}
+          drawerScrollRef={playerDrawerScrollRef}
         />
       </Drawer>
 

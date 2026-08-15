@@ -5,11 +5,12 @@ interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 let globalZIndex = 1000;
 
-export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => {
+export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrollRef }) => {
   const [startY, setStartY] = useState<number | null>(null);
   const [currentY, setCurrentY] = useState<number | null>(null);
   const [zIndex, setZIndex] = useState(1000);
@@ -112,7 +113,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
           bottom: 0,
           left: 0,
           right: 0,
-          maxHeight: '90vh',
+          maxHeight: '94vh',
           background: 'var(--bg-dark)',
           borderTopLeftRadius: '24px',
           borderTopRightRadius: '24px',
@@ -134,7 +135,7 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children }) => 
         >
           <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px' }} />
         </div>
-        <div id="drawer-scroll-container" style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px', overscrollBehavior: 'contain' }}>
+        <div ref={scrollRef} id="drawer-scroll-container" style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px', overscrollBehavior: 'contain' }}>
           {children}
         </div>
       </div>
