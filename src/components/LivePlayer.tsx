@@ -61,7 +61,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
-  const nextItem = allExercises[currentIndex + 1];
 
   // Keep ref in sync so setTimeout callbacks always read the latest index
   useEffect(() => {
@@ -521,6 +520,51 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               </p>
             </div>
 
+            {/* Interactive Set Tracker */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  Set Progress ({completedSets[carouselItem.exercise.id] || 0} / {carouselItem.exercise.sets} completed)
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
+                {Array.from({ length: carouselItem.exercise.sets }).map((_, setIdx) => {
+                  const setNum = setIdx + 1;
+                  const isDone = (completedSets[carouselItem.exercise.id] || 0) >= setNum;
+                  const isFullyComplete = (completedSets[carouselItem.exercise.id] || 0) >= carouselItem.exercise.sets;
+                  
+                  const borderColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--border-subtle)');
+                  const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.15)' : (isDone ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)');
+                  const textColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--text-muted)');
+
+                  return (
+                    <button
+                      key={setNum}
+                      onClick={() => handleToggleSet(setNum)}
+                      style={{
+                        flex: '0 0 52px',
+                        height: '52px',
+                        borderRadius: '12px',
+                        border: `1px solid ${borderColor}`,
+                        background: bgColor,
+                        color: textColor,
+                        fontWeight: '700',
+                        fontSize: '1rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {setNum}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Timer Row Wrapper */}
             <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
               
@@ -717,50 +761,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             </div>
           </div>
         </div>
-{/* Interactive Set Tracker — own container */}
-        <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Set Progress ({completedSets[carouselItem.exercise.id] || 0} / {carouselItem.exercise.sets} completed)
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
-            {Array.from({ length: carouselItem.exercise.sets }).map((_, setIdx) => {
-              const setNum = setIdx + 1;
-              const isDone = (completedSets[carouselItem.exercise.id] || 0) >= setNum;
-              const isFullyComplete = (completedSets[carouselItem.exercise.id] || 0) >= carouselItem.exercise.sets;
-              
-              const borderColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--border-subtle)');
-              const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.15)' : (isDone ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)');
-              const textColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--text-muted)');
-
-              return (
-                <button
-                  key={setNum}
-                  onClick={() => handleToggleSet(setNum)}
-                  style={{
-                    flex: '0 0 52px',
-                    height: '52px',
-                    borderRadius: '12px',
-                    border: `1px solid ${borderColor}`,
-                    background: bgColor,
-                    color: textColor,
-                    fontWeight: '700',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {setNum}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
               </div>
             );
@@ -768,34 +768,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         </div>
       </div>
 
-      {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-        
-        {/* Next Up Preview Teaser */}
-        {nextItem && (
-          <div className="glass-panel" style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700' }}>
-                NEXT UP PREVIEW
-              </div>
-              <div style={{ fontWeight: '700', fontSize: '0.95rem', color: '#FFFFFF', marginTop: '2px' }}>
-                {nextItem.exercise.name}
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--accent-cyan)' }}>
-                {nextItem.exercise.repsOrTime}
-              </span>
-              {nextItem.exercise.equipment && (
-                <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                  {nextItem.exercise.equipment}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-      </div>
 
       </div>
 

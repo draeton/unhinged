@@ -1,0 +1,16 @@
+{
+  "name": "Unhinged Fitness",
+  "short_name": "Unhinged",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0A0D14",
+  "background_color": "#0A0D14",
+  "icons": [
+    {
+      "src": "/icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
