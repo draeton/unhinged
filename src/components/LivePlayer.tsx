@@ -299,9 +299,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           {allExercises.map((item, index) => {
             const isActive = index === currentIndex;
             const isFullyComplete = (completedSets[item.exercise.id] || 0) >= item.exercise.sets;
-            const borderColor = isFullyComplete ? '#00FF9D' : (isActive ? '#00F0FF' : 'rgba(255,255,255,0.1)');
-            const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.1)' : (isActive ? 'rgba(0, 240, 255, 0.1)' : 'var(--bg-card)');
-            const textColor = isFullyComplete ? '#00FF9D' : (isActive ? '#00F0FF' : '#fff');
+            const borderColor = isFullyComplete ? '#00FF9D' : 'rgba(255,255,255,0.1)';
+            const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.1)' : 'var(--bg-card)';
+            const textColor = isFullyComplete ? '#00FF9D' : '#fff';
 
             return (
               <button
