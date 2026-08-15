@@ -618,27 +618,19 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             </div>
           </div>
         </div>
-              </div>
-            );
-          })}
-        </div>
-
-      {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-        
-        {/* Interactive Set Tracker — own container */}
+{/* Interactive Set Tracker — own container */}
         <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Set Progress ({completedSets[currentExercise.id] || 0} / {currentExercise.sets} completed)
+              Set Progress ({completedSets[carouselItem.exercise.id] || 0} / {carouselItem.exercise.sets} completed)
             </span>
           </div>
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '4px' }}>
-            {Array.from({ length: currentExercise.sets }).map((_, idx) => {
-              const setNum = idx + 1;
-              const isDone = (completedSets[currentExercise.id] || 0) >= setNum;
-              const isFullyComplete = (completedSets[currentExercise.id] || 0) >= currentExercise.sets;
+            {Array.from({ length: carouselItem.exercise.sets }).map((_, setIdx) => {
+              const setNum = setIdx + 1;
+              const isDone = (completedSets[carouselItem.exercise.id] || 0) >= setNum;
+              const isFullyComplete = (completedSets[carouselItem.exercise.id] || 0) >= carouselItem.exercise.sets;
               
               const borderColor = isFullyComplete ? '#00FF9D' : (isDone ? '#00F0FF' : 'var(--border-subtle)');
               const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.15)' : (isDone ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)');
@@ -671,6 +663,15 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           </div>
         </div>
 
+        
+              </div>
+            );
+          })}
+        </div>
+
+      {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+        
         {/* Next Up Preview Teaser */}
         {nextItem && (
           <div className="glass-panel" style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
