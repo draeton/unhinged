@@ -351,7 +351,27 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         onTouchMove={onTouchMoveHandler}
         onTouchEnd={onTouchEndHandler}
       >
-          <div className="glass-panel" style={{
+          <div style={{
+          display: 'flex',
+          width: `${allExercises.length * 100}%`,
+          transform: `translateX(-${(currentIndex / allExercises.length) * 100}%)`,
+          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        }}>
+          {allExercises.map((carouselItem, idx) => {
+            const isThisActive = idx === currentIndex;
+            const itemTimeLeft = isThisActive ? timeLeft : (carouselItem.exercise.durationSeconds || 180);
+            const itemProgressPercent = isThisActive ? progressPercent : 100;
+            const itemIsResting = isThisActive ? isResting : false;
+
+            return (
+              <div key={idx} style={{ 
+                width: `${100 / allExercises.length}%`, 
+                padding: '0 8px',
+                pointerEvents: isThisActive ? 'auto' : 'none',
+                opacity: isThisActive ? 1 : 0.4,
+                transition: 'opacity 0.3s ease'
+              }}>
+<div className="glass-panel" style={{
             padding: '32px 24px',
             display: 'flex',
             flexDirection: 'column',
@@ -365,10 +385,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FFFFFF', lineHeight: 1.2 }}>
-                    {currentExercise.name}
+                    {carouselItem.exercise.name}
                   </h2>
                   <button
-                    onClick={() => setPreviewIndex(currentIndex)}
+                    onClick={() => setPreviewIndex(idx)}
                     style={{
                       background: 'rgba(255, 255, 255, 0.08)',
                       border: 'none',
@@ -388,17 +408,17 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                    {currentExercise.repsOrTime}
+                    {carouselItem.exercise.repsOrTime}
                   </span>
-                  {currentExercise.equipment && (
+                  {carouselItem.exercise.equipment && (
                     <span className="badge" style={{ background: 'rgba(255, 255, 255, 0.08)', color: 'var(--text-muted)' }}>
-                      {currentExercise.equipment}
+                      {carouselItem.exercise.equipment}
                     </span>
                   )}
                 </div>
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginTop: '8px', lineHeight: 1.5 }}>
-                {currentExercise.description}
+                {carouselItem.exercise.description}
               </p>
             </div>
 
@@ -451,11 +471,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   cx="120"
                   cy="120"
                   r="100"
-                  stroke={isResting ? '#00F0FF' : currentItem.blockBadgeColor}
+                  stroke={itemIsResting ? '#00F0FF' : carouselItem.blockBadgeColor}
                   strokeWidth="12"
                   fill="transparent"
                   strokeDasharray={628.3}
-                  strokeDashoffset={628.3 - (628.3 * progressPercent) / 100}
+                  strokeDashoffset={628.3 - (628.3 * itemProgressPercent) / 100}
                   strokeLinecap="round"
                   style={{ transition: 'stroke-dashoffset 0.5s ease' }}
                 />
@@ -470,13 +490,13 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   fontWeight: '900',
                   letterSpacing: '-0.04em',
                   lineHeight: 1,
-                  color: isResting ? '#00F0FF' : '#FFFFFF',
-                  textShadow: isResting ? '0 0 20px rgba(255, 107, 0, 0.5)' : '0 0 20px rgba(0, 240, 255, 0.4)'
+                  color: itemIsResting ? '#00F0FF' : '#FFFFFF',
+                  textShadow: itemIsResting ? '0 0 20px rgba(255, 107, 0, 0.5)' : '0 0 20px rgba(0, 240, 255, 0.4)'
                 }}>
-                  {formatTime(timeLeft)}
+                  {formatTime(itemTimeLeft)}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  {isResting ? 'Rest Remaining' : 'Target Interval'}
+                  {itemIsResting ? 'Rest Remaining' : 'Target Interval'}
                 </span>
               </div>
 
@@ -574,7 +594,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                     isIntervalPaused: false,
                     timeOffset: 0
                   });
-                  setTimeLeft(isResting ? (currentExercise?.restSeconds || 30) : (currentExercise?.durationSeconds || 180));
+                  setTimeLeft(itemIsResting ? (carouselItem.exercise?.restSeconds || 30) : (carouselItem.exercise?.durationSeconds || 180));
                 }}
                 style={{
                   width: '48px',
@@ -597,6 +617,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
             </div>
           </div>
+        </div>
+              </div>
+            );
+          })}
         </div>
 
       {/* Globally Visible Shared Bottom Controls (Always visible on mobile across tabs) */}
