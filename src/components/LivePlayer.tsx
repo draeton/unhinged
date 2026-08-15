@@ -13,7 +13,7 @@ interface LivePlayerProps {
   onToggleWorkoutPause: () => void;
   onWorkoutComplete: (totalMinutes: number, completedSets: number) => void;
   onPlayVideo: (url: string) => void;
-  drawerScrollRef?: React.RefObject<HTMLDivElement | null>;
+
 }
 
 export const LivePlayer: React.FC<LivePlayerProps> = ({
@@ -23,7 +23,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   onToggleWorkoutPause,
   onWorkoutComplete,
   onPlayVideo,
-  drawerScrollRef,
+
 }) => {
   // Flatten exercises with block metadata
   const allExercises = React.useMemo(() => {
