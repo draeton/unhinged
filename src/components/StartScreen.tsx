@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, History, ShieldAlert, ChevronRight } from 'lucide-react';
+import { Play, ShieldAlert, ChevronRight } from 'lucide-react';
 import type { CompletedWorkout } from '../types/workout';
 import { CalendarWidget } from './CalendarWidget';
 
@@ -12,7 +12,7 @@ interface StartScreenProps {
   isWorkoutActive: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
-  completedWorkoutsCount: number;
+
   completedWorkouts: CompletedWorkout[];
 }
 
@@ -23,7 +23,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   isWorkoutActive,
   isWorkoutPaused,
   totalSecondsElapsed,
-  completedWorkoutsCount,
+
   completedWorkouts,
 }) => {
   const formatTime = (secs: number) => {
@@ -163,48 +163,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
         </div>
 
-        {/* Card 4: LOGS & STATS */}
-        <div
-          onClick={() => onNavigate('history')}
-          className="glass-panel"
-          style={{
-            padding: '28px',
-            cursor: 'pointer',
-            transition: 'all 0.25s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: '16px',
-          }}
-        >
-          <div style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
-          }}>
-            <History size={26} />
-          </div>
 
-          <div>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Logs & Stats
-              <ChevronRight size={20} color="var(--text-muted)" />
-            </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
-              Track completed sessions, total minutes logged, set volumes, and personal exertion ratings.
-            </p>
-          </div>
-
-          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-main)' }}>
-            View Workout Logs ({completedWorkoutsCount}) →
-          </div>
-        </div>
 
       </div>
 
