@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useWorkoutStore } from './workoutStore';
 
 describe('workoutStore timers', () => {
@@ -85,5 +85,63 @@ describe('workoutStore timers', () => {
     useWorkoutStore.getState().startTimer('m2:work', 120);
 
     expect(useWorkoutStore.getState().timers['m1:rest'].isStarted).toBe(true);
+  });
+});
+
+describe('workoutStore global elapsed time', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    useWorkoutStore.getState().resetStore();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('reflects real elapsed time on refresh, even without any ticks in between (throttled/backgrounded)', () => {
+    useWorkoutStore.getState().startWorkout();
+
+    // Simulate the tab being backgrounded for 45s with zero intervening refreshes.
+    vi.setSystemTime(new Date('2026-01-01T00:00:45.000Z'));
+    useWorkoutStore.getState().refreshElapsedTime();
+
+    expect(useWorkoutStore.getState().totalSecondsElapsed).toBe(45);
+  });
+
+  it('does not advance while paused, and resumes counting from the correct base', () => {
+    useWorkoutStore.getState().startWorkout();
+
+    vi.setSystemTime(new Date('2026-01-01T00:00:10.000Z'));
+    useWorkoutStore.getState().pauseWorkout();
+    expect(useWorkoutStore.getState().totalSecondsElapsed).toBe(10);
+
+    // Time passes while paused — should not count.
+    vi.setSystemTime(new Date('2026-01-01T00:05:10.000Z'));
+    useWorkoutStore.getState().refreshElapsedTime();
+    expect(useWorkoutStore.getState().totalSecondsElapsed).toBe(10);
+
+    // Resume, then more time passes.
+    useWorkoutStore.getState().resumeWorkout();
+    vi.setSystemTime(new Date('2026-01-01T00:05:25.000Z'));
+    useWorkoutStore.getState().refreshElapsedTime();
+
+    // 10s before the pause + 15s after resuming.
+    expect(useWorkoutStore.getState().totalSecondsElapsed).toBe(25);
+  });
+
+  it('is a no-op when the workout has not started', () => {
+    useWorkoutStore.getState().refreshElapsedTime();
+    expect(useWorkoutStore.getState().totalSecondsElapsed).toBe(0);
+  });
+
+  it('is a no-op while paused', () => {
+    useWorkoutStore.getState().startWorkout();
+    useWorkoutStore.getState().pauseWorkout();
+
+    vi.setSystemTime(new Date('2026-01-01T01:00:00.000Z'));
+    useWorkoutStore.getState().refreshElapsedTime();
+
+    expect(useWorkoutStore.getState().totalSecondsElapsed).toBe(0);
   });
 });

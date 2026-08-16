@@ -19,6 +19,10 @@ interface WorkoutState {
   isWorkoutStarted: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
+  // Epoch ms when the current running segment began (null while paused/not started).
+  workoutStartedAt: number | null;
+  // Total ms elapsed across all previously-completed running segments (i.e. excluding time spent paused).
+  accumulatedMs: number;
 
   // Live Player Progress
   currentIndex: number;
@@ -32,7 +36,10 @@ interface WorkoutState {
   pauseWorkout: () => void;
   resumeWorkout: () => void;
   stopWorkout: () => void;
-  incrementTotalTime: () => void;
+  // Recomputes totalSecondsElapsed from workoutStartedAt/accumulatedMs. Call on a tick and
+  // whenever the app regains focus, so the displayed duration reflects real elapsed wall time
+  // even if setInterval ticks were throttled/missed while backgrounded.
+  refreshElapsedTime: () => void;
 
   setCurrentIndex: (updater: number | ((prev: number) => number)) => void;
   updateCompletedSets: (exerciseId: string, count: number) => void;
@@ -51,6 +58,8 @@ const initialState = {
   isWorkoutStarted: false,
   isWorkoutPaused: false,
   totalSecondsElapsed: 0,
+  workoutStartedAt: null as number | null,
+  accumulatedMs: 0,
 
   currentIndex: 0,
   completedSets: {},
@@ -67,21 +76,32 @@ export const useWorkoutStore = create<WorkoutState>()(
         isWorkoutStarted: true,
         isWorkoutPaused: false,
         totalSecondsElapsed: 0,
+        workoutStartedAt: Date.now(),
+        accumulatedMs: 0,
       }),
 
-      pauseWorkout: () => set({ isWorkoutPaused: true }),
+      pauseWorkout: () => set((state) => {
+        if (state.isWorkoutPaused || !state.workoutStartedAt) return { isWorkoutPaused: true };
+        const accumulatedMs = state.accumulatedMs + (Date.now() - state.workoutStartedAt);
+        return {
+          isWorkoutPaused: true,
+          workoutStartedAt: null,
+          accumulatedMs,
+          totalSecondsElapsed: Math.floor(accumulatedMs / 1000),
+        };
+      }),
 
-      resumeWorkout: () => set({ isWorkoutPaused: false }),
+      resumeWorkout: () => set({ isWorkoutPaused: false, workoutStartedAt: Date.now() }),
 
       stopWorkout: () => set({
         ...initialState,
       }),
 
-      incrementTotalTime: () => set((state) => {
-        if (state.isWorkoutStarted && !state.isWorkoutPaused) {
-          return { totalSecondsElapsed: state.totalSecondsElapsed + 1 };
-        }
-        return state;
+      refreshElapsedTime: () => set((state) => {
+        if (!state.isWorkoutStarted || state.isWorkoutPaused || !state.workoutStartedAt) return state;
+        const totalSecondsElapsed = Math.floor((state.accumulatedMs + (Date.now() - state.workoutStartedAt)) / 1000);
+        if (totalSecondsElapsed === state.totalSecondsElapsed) return state;
+        return { totalSecondsElapsed };
       }),
 
       setCurrentIndex: (updater) => set((state) => ({
