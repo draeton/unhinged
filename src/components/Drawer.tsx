@@ -86,7 +86,8 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrol
     setCurrentY(null);
   };
 
-  const transformY = isOpen ? (currentY !== null ? `${currentY}px` : '0') : '100%';
+  // Push past 100% when closed so the sheet's box-shadow blur doesn't peek above the viewport edge.
+  const transformY = isOpen ? (currentY !== null ? `${currentY}px` : '0') : 'calc(100% + 40px)';
 
   const drawerContent = (
     <>
