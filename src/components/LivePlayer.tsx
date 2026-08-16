@@ -219,9 +219,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           {allExercises.map((item, index) => {
             const isActive = index === currentIndex;
             const isFullyComplete = (completedSets[item.exercise.id] || 0) >= item.exercise.sets;
-            const borderColor = isFullyComplete ? '#00FF9D' : 'rgba(255,255,255,0.1)';
-            const bgColor = isFullyComplete ? 'rgba(0, 255, 157, 0.1)' : 'var(--bg-card)';
-            const textColor = isFullyComplete ? '#00FF9D' : '#fff';
+            const borderColor = isActive ? '#00F0FF' : isFullyComplete ? '#00FF9D' : 'rgba(255,255,255,0.1)';
+            const bgColor = isActive ? 'rgba(0, 240, 255, 0.12)' : isFullyComplete ? 'rgba(0, 255, 157, 0.1)' : 'var(--bg-card)';
+            const textColor = isActive ? '#00F0FF' : isFullyComplete ? '#00FF9D' : '#fff';
 
             return (
               <button
@@ -237,7 +237,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   borderRadius: '16px',
                   border: `2px solid ${borderColor}`,
                   background: bgColor,
-
+                  boxShadow: isActive ? '0 0 16px rgba(0, 240, 255, 0.35)' : 'none',
                   cursor: 'pointer',
                   opacity: isActive || isFullyComplete ? 1 : 0.6,
                   transition: 'all 0.2s ease',
