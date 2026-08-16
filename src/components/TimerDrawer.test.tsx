@@ -1,11 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TimerDrawer } from './TimerDrawer';
 import { useWorkoutStore } from '../store/workoutStore';
 
 describe('TimerDrawer', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
     useWorkoutStore.getState().resetStore();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   const defaultProps = {
@@ -29,7 +35,10 @@ describe('TimerDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Start Timer' }));
 
     const timer = useWorkoutStore.getState().timers['m1:work'];
-    expect(timer).toEqual({ remainingSeconds: 90, totalSeconds: 90, isStarted: true, isPaused: false });
+    expect(timer).toEqual({
+      remainingSeconds: 90, totalSeconds: 90, isStarted: true, isPaused: false,
+      startedAt: Date.now(), accumulatedMs: 0,
+    });
     expect(screen.getByRole('button', { name: 'Pause Timer' })).toBeInTheDocument();
   });
 
@@ -46,13 +55,15 @@ describe('TimerDrawer', () => {
 
   it('resets a started timer back to its configured duration and stops it', () => {
     useWorkoutStore.getState().startTimer('m1:work', 90);
-    useWorkoutStore.getState().tickTimer('m1:work');
+    vi.setSystemTime(new Date('2026-01-01T00:00:01.000Z'));
     render(<TimerDrawer {...defaultProps} />);
 
     fireEvent.click(screen.getByTitle('Reset Timer'));
     const timer = useWorkoutStore.getState().timers['m1:work'];
     expect(timer.remainingSeconds).toBe(90);
     expect(timer.isStarted).toBe(false);
+    expect(timer.startedAt).toBeNull();
+    expect(timer.accumulatedMs).toBe(0);
   });
 
   it('disables Reset before the timer has been started', () => {

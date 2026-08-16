@@ -6,6 +6,16 @@ export interface TimerRuntimeState {
   totalSeconds: number;
   isStarted: boolean;
   isPaused: boolean;
+  // Epoch ms when the current running segment began (null while paused/not started).
+  startedAt: number | null;
+  // Ms counted down across all previously-completed running segments (i.e. excluding paused time).
+  accumulatedMs: number;
+}
+
+export function computeRemainingSeconds(timer: TimerRuntimeState): number {
+  const runningMs = timer.startedAt ? Date.now() - timer.startedAt : 0;
+  const elapsedMs = timer.accumulatedMs + runningMs;
+  return Math.max(0, timer.totalSeconds - Math.floor(elapsedMs / 1000));
 }
 
 // Timer keys are `${exerciseId}:${'work' | 'rest'}` (see TimerDrawer's timerKey helper).
@@ -48,7 +58,9 @@ interface WorkoutState {
   pauseTimer: (key: string) => void;
   resumeTimer: (key: string) => void;
   resetTimer: (key: string) => void;
-  tickTimer: (key: string) => void;
+  // Recomputes a running timer's remainingSeconds from startedAt/accumulatedMs. Call on a tick
+  // and on visibilitychange/focus so it reflects real elapsed time even after being backgrounded.
+  refreshTimer: (key: string) => void;
   expireTimer: (key: string) => void;
 
   resetStore: () => void;
@@ -118,7 +130,14 @@ export const useWorkoutStore = create<WorkoutState>()(
       startTimer: (key, totalSeconds) => set((state) => {
         const timers = {
           ...state.timers,
-          [key]: { remainingSeconds: totalSeconds, totalSeconds, isStarted: true, isPaused: false },
+          [key]: {
+            remainingSeconds: totalSeconds,
+            totalSeconds,
+            isStarted: true,
+            isPaused: false,
+            startedAt: Date.now(),
+            accumulatedMs: 0,
+          },
         };
 
         // Starting one of an exercise's timers resets its sibling (work <-> rest), if it was started.
@@ -126,7 +145,14 @@ export const useWorkoutStore = create<WorkoutState>()(
         const siblingKey = `${exerciseId}:${type === 'work' ? 'rest' : 'work'}`;
         const sibling = state.timers[siblingKey];
         if (sibling?.isStarted) {
-          timers[siblingKey] = { ...sibling, remainingSeconds: sibling.totalSeconds, isStarted: false, isPaused: false };
+          timers[siblingKey] = {
+            ...sibling,
+            remainingSeconds: sibling.totalSeconds,
+            isStarted: false,
+            isPaused: false,
+            startedAt: null,
+            accumulatedMs: 0,
+          };
         }
 
         return { timers };
@@ -134,14 +160,26 @@ export const useWorkoutStore = create<WorkoutState>()(
 
       pauseTimer: (key) => set((state) => {
         const timer = state.timers[key];
-        if (!timer) return state;
-        return { timers: { ...state.timers, [key]: { ...timer, isPaused: true } } };
+        if (!timer || timer.isPaused || !timer.startedAt) return state;
+        const accumulatedMs = timer.accumulatedMs + (Date.now() - timer.startedAt);
+        return {
+          timers: {
+            ...state.timers,
+            [key]: {
+              ...timer,
+              isPaused: true,
+              startedAt: null,
+              accumulatedMs,
+              remainingSeconds: Math.max(0, timer.totalSeconds - Math.floor(accumulatedMs / 1000)),
+            },
+          },
+        };
       }),
 
       resumeTimer: (key) => set((state) => {
         const timer = state.timers[key];
         if (!timer) return state;
-        return { timers: { ...state.timers, [key]: { ...timer, isPaused: false } } };
+        return { timers: { ...state.timers, [key]: { ...timer, isPaused: false, startedAt: Date.now() } } };
       }),
 
       resetTimer: (key) => set((state) => {
@@ -150,15 +188,23 @@ export const useWorkoutStore = create<WorkoutState>()(
         return {
           timers: {
             ...state.timers,
-            [key]: { ...timer, remainingSeconds: timer.totalSeconds, isStarted: false, isPaused: false },
+            [key]: {
+              ...timer,
+              remainingSeconds: timer.totalSeconds,
+              isStarted: false,
+              isPaused: false,
+              startedAt: null,
+              accumulatedMs: 0,
+            },
           },
         };
       }),
 
-      tickTimer: (key) => set((state) => {
+      refreshTimer: (key) => set((state) => {
         const timer = state.timers[key];
-        if (!timer) return state;
-        const remainingSeconds = Math.max(0, timer.remainingSeconds - 1);
+        if (!timer || !timer.isStarted || timer.isPaused) return state;
+        const remainingSeconds = computeRemainingSeconds(timer);
+        if (remainingSeconds === timer.remainingSeconds) return state;
         return { timers: { ...state.timers, [key]: { ...timer, remainingSeconds } } };
       }),
 
@@ -168,7 +214,7 @@ export const useWorkoutStore = create<WorkoutState>()(
         return {
           timers: {
             ...state.timers,
-            [key]: { ...timer, remainingSeconds: 0, isStarted: false, isPaused: false },
+            [key]: { ...timer, remainingSeconds: 0, isStarted: false, isPaused: false, startedAt: null },
           },
         };
       }),
