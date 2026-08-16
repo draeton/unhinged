@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { WorkoutBlock, Exercise } from '../types/workout';
 import { audio } from '../utils/audio';
-import { Play, Pause, Info } from 'lucide-react';
+import { Clock, Info } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
 import { Drawer } from './Drawer';
 import { ExerciseInfoPanel } from './ExerciseInfoPanel';
-import { TimerDrawer, type TimerType } from './TimerDrawer';
+import { TimerDrawer, timerKey, type TimerType } from './TimerDrawer';
 import { useTimerTicker } from '../hooks/useTimerTicker';
 
 interface LivePlayerProps {
@@ -49,10 +49,24 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     timers,
     setCurrentIndex,
     updateCompletedSets,
+    startTimer,
+    resumeTimer,
+    resetTimer,
   } = useWorkoutStore();
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [openTimer, setOpenTimer] = useState<{ exerciseId: string; type: TimerType } | null>(null);
+
+  const handlePlayTimer = (exerciseId: string, type: TimerType, configuredSeconds: number) => {
+    const key = timerKey(exerciseId, type);
+    const timer = timers[key];
+    if (!timer || !timer.isStarted) {
+      startTimer(key, timer?.totalSeconds ?? configuredSeconds);
+    } else if (timer.isPaused) {
+      resumeTimer(key);
+    }
+    setOpenTimer({ exerciseId, type });
+  };
 
   const currentItem = allExercises[currentIndex];
   const currentExercise = currentItem?.exercise;
@@ -170,6 +184,12 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   }, [currentIndex]);
 
   const navigateToExercise = (newIndex: number) => {
+    if (newIndex !== currentIndex && currentExercise) {
+      const workKey = timerKey(currentExercise.id, 'work');
+      const restKey = timerKey(currentExercise.id, 'rest');
+      if (timers[workKey]?.isStarted) resetTimer(workKey);
+      if (timers[restKey]?.isStarted) resetTimer(restKey);
+    }
     setCurrentIndex(newIndex);
   };
 
@@ -410,7 +430,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   isActive={!!workTimer?.isStarted}
                   isPaused={!!workTimer?.isPaused}
                   remainingSeconds={workTimer?.remainingSeconds ?? exercise.workSeconds}
-                  onClick={() => setOpenTimer({ exerciseId: exercise.id, type: 'work' })}
+                  onClick={() => handlePlayTimer(exercise.id, 'work', exercise.workSeconds!)}
                 />
               )}
               {exercise.restSeconds != null && (
@@ -419,7 +439,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
                   isActive={!!restTimer?.isStarted}
                   isPaused={!!restTimer?.isPaused}
                   remainingSeconds={restTimer?.remainingSeconds ?? exercise.restSeconds}
-                  onClick={() => setOpenTimer({ exerciseId: exercise.id, type: 'rest' })}
+                  onClick={() => handlePlayTimer(exercise.id, 'rest', exercise.restSeconds!)}
                 />
               )}
             </div>
@@ -506,9 +526,7 @@ const TimerLaunchButton: React.FC<{
         background: `linear-gradient(135deg, ${colorHex} 0%, ${colorHex} 100%)`,
         boxShadow: isRunning ? `0 0 25px ${colorHex}80` : `0 0 12px ${colorHex}40`,
       }}>
-        {isRunning
-          ? <Pause size={26} fill="#050B14" color="#050B14" />
-          : <Play size={26} fill="#050B14" color="#050B14" style={{ marginLeft: '3px' }} />}
+        <Clock size={26} color="#050B14" />
       </div>
       <span style={{ fontSize: '0.78rem', fontWeight: '700', color: colorHex, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         {TIMER_BUTTON_LABELS[type]}{isActive ? ` · ${formatShortTime(remainingSeconds)}` : ''}

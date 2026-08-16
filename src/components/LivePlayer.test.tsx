@@ -45,22 +45,114 @@ describe('LivePlayer Component', () => {
     expect(within(panel).queryByRole('button', { name: 'Rest' })).not.toBeInTheDocument();
   });
 
-  it('opens the rest timer drawer, showing the configured duration, when Rest is tapped', () => {
+  it('opens the rest timer drawer and starts the timer when Rest is tapped', () => {
     render(<LivePlayer {...defaultProps} />);
     const panel = panelFor('Wrist Mobility Sequence');
     fireEvent.click(within(panel).getByRole('button', { name: 'Rest' }));
 
     expect(screen.getByText('Rest Timer')).toBeInTheDocument();
     expect(screen.getByText('1:00')).toBeInTheDocument();
+    expect(useWorkoutStore.getState().timers['w1:rest']).toEqual({
+      remainingSeconds: 60, totalSeconds: 60, isStarted: true, isPaused: false,
+    });
   });
 
-  it('opens the work timer drawer when Work is tapped', () => {
+  it('opens the work timer drawer and starts the timer when Work is tapped', () => {
     render(<LivePlayer {...defaultProps} />);
     const panel = panelFor('Pike Pulses / Active Compression');
     fireEvent.click(within(panel).getByRole('button', { name: 'Work' }));
 
     expect(screen.getByText('Work Timer')).toBeInTheDocument();
     expect(screen.getByText('1:30')).toBeInTheDocument();
+    expect(useWorkoutStore.getState().timers['m1:work']).toEqual({
+      remainingSeconds: 90, totalSeconds: 90, isStarted: true, isPaused: false,
+    });
+  });
+
+  it('resumes a paused timer (without resetting elapsed time) when its card button is tapped again', () => {
+    useWorkoutStore.getState().startTimer('w1:rest', 60);
+    useWorkoutStore.getState().tickTimer('w1:rest');
+    useWorkoutStore.getState().pauseTimer('w1:rest');
+
+    render(<LivePlayer {...defaultProps} />);
+    const panel = panelFor('Wrist Mobility Sequence');
+    fireEvent.click(within(panel).getByRole('button', { name: /Rest/ }));
+
+    const timer = useWorkoutStore.getState().timers['w1:rest'];
+    expect(timer.isPaused).toBe(false);
+    expect(timer.remainingSeconds).toBe(59);
+  });
+
+  it('leaves an already-running timer untouched when its card button is tapped again', () => {
+    useWorkoutStore.getState().startTimer('w1:rest', 60);
+    useWorkoutStore.getState().tickTimer('w1:rest');
+
+    render(<LivePlayer {...defaultProps} />);
+    const panel = panelFor('Wrist Mobility Sequence');
+    fireEvent.click(within(panel).getByRole('button', { name: /Rest/ }));
+
+    const timer = useWorkoutStore.getState().timers['w1:rest'];
+    expect(timer.isStarted).toBe(true);
+    expect(timer.remainingSeconds).toBe(59);
+  });
+
+  it('starting the work timer from its card button resets an already-started rest timer', () => {
+    useWorkoutStore.getState().startTimer('m1:rest', 60);
+    useWorkoutStore.getState().tickTimer('m1:rest');
+
+    render(<LivePlayer {...defaultProps} />);
+    const panel = panelFor('Pike Pulses / Active Compression');
+    fireEvent.click(within(panel).getByRole('button', { name: /Work/ }));
+
+    expect(useWorkoutStore.getState().timers['m1:work'].isStarted).toBe(true);
+    expect(useWorkoutStore.getState().timers['m1:rest']).toEqual({
+      remainingSeconds: 60, totalSeconds: 60, isStarted: false, isPaused: false,
+    });
+  });
+
+  it('stops an active rest timer for the exercise being left when navigating away', () => {
+    useWorkoutStore.getState().startTimer('w1:rest', 60);
+    useWorkoutStore.getState().tickTimer('w1:rest');
+    useWorkoutStore.getState().tickTimer('w1:rest');
+
+    render(<LivePlayer {...defaultProps} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Pike Pulses / Active Compression' }));
+
+    expect(useWorkoutStore.getState().timers['w1:rest']).toEqual({
+      remainingSeconds: 60, totalSeconds: 60, isStarted: false, isPaused: false,
+    });
+    expect(useWorkoutStore.getState().currentIndex).toBe(5);
+  });
+
+  it('stops a paused work timer for the exercise being left when navigating away', () => {
+    useWorkoutStore.getState().setCurrentIndex(5); // m1
+    useWorkoutStore.getState().startTimer('m1:work', 90);
+    useWorkoutStore.getState().pauseTimer('m1:work');
+
+    render(<LivePlayer {...defaultProps} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Wrist Mobility Sequence' }));
+
+    expect(useWorkoutStore.getState().timers['m1:work']).toEqual({
+      remainingSeconds: 90, totalSeconds: 90, isStarted: false, isPaused: false,
+    });
+  });
+
+  it('does not touch other exercises\' timers when navigating', () => {
+    useWorkoutStore.getState().startTimer('m1:rest', 60);
+
+    render(<LivePlayer {...defaultProps} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Pike Pulses / Active Compression' }));
+
+    expect(useWorkoutStore.getState().timers['m1:rest'].isStarted).toBe(true);
+  });
+
+  it('leaves a running timer untouched when tapping the already-active exercise', () => {
+    useWorkoutStore.getState().startTimer('w1:rest', 60);
+
+    render(<LivePlayer {...defaultProps} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Wrist Mobility Sequence' }));
+
+    expect(useWorkoutStore.getState().timers['w1:rest'].isStarted).toBe(true);
   });
 
   it('tapping a set marks progress without navigating the carousel', () => {

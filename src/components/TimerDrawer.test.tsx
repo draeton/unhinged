@@ -44,17 +44,6 @@ describe('TimerDrawer', () => {
     expect(useWorkoutStore.getState().timers['m1:work'].isPaused).toBe(false);
   });
 
-  it('adjusts the remaining time by +/-15s once a timer exists', () => {
-    useWorkoutStore.getState().startTimer('m1:work', 90);
-    render(<TimerDrawer {...defaultProps} />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Add 15 seconds' }));
-    expect(useWorkoutStore.getState().timers['m1:work'].remainingSeconds).toBe(105);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Subtract 15 seconds' }));
-    expect(useWorkoutStore.getState().timers['m1:work'].remainingSeconds).toBe(90);
-  });
-
   it('resets a started timer back to its configured duration and stops it', () => {
     useWorkoutStore.getState().startTimer('m1:work', 90);
     useWorkoutStore.getState().tickTimer('m1:work');

@@ -44,18 +44,46 @@ describe('workoutStore timers', () => {
     expect(timer.isStarted).toBe(false);
   });
 
-  it('adjusts a running timer by +/-15s, never below 5s', () => {
-    useWorkoutStore.getState().startTimer('m1:rest', 10);
-    useWorkoutStore.getState().adjustTimer('m1:rest', -15);
-    expect(useWorkoutStore.getState().timers['m1:rest'].remainingSeconds).toBe(5);
-
-    useWorkoutStore.getState().adjustTimer('m1:rest', 15);
-    expect(useWorkoutStore.getState().timers['m1:rest'].remainingSeconds).toBe(20);
-  });
-
   it('clears all timers on resetStore', () => {
     useWorkoutStore.getState().startTimer('m1:rest', 60);
     useWorkoutStore.getState().resetStore();
     expect(useWorkoutStore.getState().timers).toEqual({});
+  });
+
+  it('starting the rest timer resets a started work timer for the same exercise', () => {
+    useWorkoutStore.getState().startTimer('m1:work', 90);
+    useWorkoutStore.getState().tickTimer('m1:work');
+    useWorkoutStore.getState().tickTimer('m1:work');
+
+    useWorkoutStore.getState().startTimer('m1:rest', 60);
+
+    const work = useWorkoutStore.getState().timers['m1:work'];
+    expect(work).toEqual({ remainingSeconds: 90, totalSeconds: 90, isStarted: false, isPaused: false });
+    expect(useWorkoutStore.getState().timers['m1:rest']).toEqual({
+      remainingSeconds: 60, totalSeconds: 60, isStarted: true, isPaused: false,
+    });
+  });
+
+  it('starting the work timer resets a started (even paused) rest timer for the same exercise', () => {
+    useWorkoutStore.getState().startTimer('m1:rest', 60);
+    useWorkoutStore.getState().tickTimer('m1:rest');
+    useWorkoutStore.getState().pauseTimer('m1:rest');
+
+    useWorkoutStore.getState().startTimer('m1:work', 90);
+
+    const rest = useWorkoutStore.getState().timers['m1:rest'];
+    expect(rest).toEqual({ remainingSeconds: 60, totalSeconds: 60, isStarted: false, isPaused: false });
+  });
+
+  it('does not touch a sibling timer that was never started', () => {
+    useWorkoutStore.getState().startTimer('m1:work', 90);
+    expect(useWorkoutStore.getState().timers['m1:rest']).toBeUndefined();
+  });
+
+  it('does not reset timers belonging to a different exercise', () => {
+    useWorkoutStore.getState().startTimer('m1:rest', 60);
+    useWorkoutStore.getState().startTimer('m2:work', 120);
+
+    expect(useWorkoutStore.getState().timers['m1:rest'].isStarted).toBe(true);
   });
 });

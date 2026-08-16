@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, Plus, Minus, RotateCcw } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 import { useWorkoutStore, type TimerRuntimeState } from '../store/workoutStore';
 import { Drawer } from './Drawer';
 import { RingTimer } from './RingTimer';
@@ -49,7 +49,7 @@ export const TimerDrawer: React.FC<TimerDrawerProps> = ({
 }) => {
   const key = timerKeyFor(exerciseId, type);
   const timer = useWorkoutStore((s) => s.timers[key]);
-  const { startTimer, pauseTimer, resumeTimer, resetTimer, adjustTimer } = useWorkoutStore();
+  const { startTimer, pauseTimer, resumeTimer, resetTimer } = useWorkoutStore();
 
   const effective: TimerRuntimeState = timer ?? {
     remainingSeconds: configuredSeconds,
@@ -83,32 +83,7 @@ export const TimerDrawer: React.FC<TimerDrawerProps> = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', position: 'relative' }}>
-          <button
-            className="btn-secondary"
-            aria-label="Subtract 15 seconds"
-            onClick={() => adjustTimer(key, -15)}
-            style={{
-              position: 'absolute',
-              left: '-40px',
-              zIndex: 10,
-              padding: '0 16px',
-              height: '48px',
-              borderRadius: '24px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid var(--border-subtle)',
-              color: 'var(--text-main)',
-              cursor: 'pointer',
-            }}
-          >
-            <Minus size={16} /> 15s
-          </button>
-
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <RingTimer
             progressPercent={progressPercent}
             colorHex={colorHex}
@@ -116,31 +91,6 @@ export const TimerDrawer: React.FC<TimerDrawerProps> = ({
             centerSubLabel={effective.isStarted && !effective.isPaused ? 'Counting Down' : 'Ready'}
             animate={effective.isStarted && !effective.isPaused}
           />
-
-          <button
-            className="btn-secondary"
-            aria-label="Add 15 seconds"
-            onClick={() => adjustTimer(key, 15)}
-            style={{
-              position: 'absolute',
-              right: '-40px',
-              zIndex: 10,
-              padding: '0 16px',
-              height: '48px',
-              borderRadius: '24px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid var(--border-subtle)',
-              color: 'var(--text-main)',
-              cursor: 'pointer',
-            }}
-          >
-            <Plus size={16} /> 15s
-          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', gap: '16px' }}>

@@ -8,6 +8,12 @@ export interface TimerRuntimeState {
   isPaused: boolean;
 }
 
+// Timer keys are `${exerciseId}:${'work' | 'rest'}` (see TimerDrawer's timerKey helper).
+function parseTimerKey(key: string): { exerciseId: string; type: string } {
+  const idx = key.lastIndexOf(':');
+  return { exerciseId: key.slice(0, idx), type: key.slice(idx + 1) };
+}
+
 interface WorkoutState {
   // Workout Status
   isWorkoutStarted: boolean;
@@ -35,7 +41,6 @@ interface WorkoutState {
   pauseTimer: (key: string) => void;
   resumeTimer: (key: string) => void;
   resetTimer: (key: string) => void;
-  adjustTimer: (key: string, deltaSeconds: number) => void;
   tickTimer: (key: string) => void;
   expireTimer: (key: string) => void;
 
@@ -90,12 +95,22 @@ export const useWorkoutStore = create<WorkoutState>()(
         }
       })),
 
-      startTimer: (key, totalSeconds) => set((state) => ({
-        timers: {
+      startTimer: (key, totalSeconds) => set((state) => {
+        const timers = {
           ...state.timers,
           [key]: { remainingSeconds: totalSeconds, totalSeconds, isStarted: true, isPaused: false },
-        },
-      })),
+        };
+
+        // Starting one of an exercise's timers resets its sibling (work <-> rest), if it was started.
+        const { exerciseId, type } = parseTimerKey(key);
+        const siblingKey = `${exerciseId}:${type === 'work' ? 'rest' : 'work'}`;
+        const sibling = state.timers[siblingKey];
+        if (sibling?.isStarted) {
+          timers[siblingKey] = { ...sibling, remainingSeconds: sibling.totalSeconds, isStarted: false, isPaused: false };
+        }
+
+        return { timers };
+      }),
 
       pauseTimer: (key) => set((state) => {
         const timer = state.timers[key];
@@ -116,23 +131,6 @@ export const useWorkoutStore = create<WorkoutState>()(
           timers: {
             ...state.timers,
             [key]: { ...timer, remainingSeconds: timer.totalSeconds, isStarted: false, isPaused: false },
-          },
-        };
-      }),
-
-      adjustTimer: (key, deltaSeconds) => set((state) => {
-        const timer = state.timers[key];
-        if (!timer) return state;
-        const nextRemaining = Math.max(5, timer.remainingSeconds + deltaSeconds);
-        const actualDelta = nextRemaining - timer.remainingSeconds;
-        return {
-          timers: {
-            ...state.timers,
-            [key]: {
-              ...timer,
-              remainingSeconds: nextRemaining,
-              totalSeconds: timer.totalSeconds + actualDelta,
-            },
           },
         };
       }),
