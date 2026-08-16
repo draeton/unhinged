@@ -1,12 +1,18 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { LivePlayer } from './LivePlayer';
 import { useWorkoutStore } from '../store/workoutStore';
 import { DEFAULT_WORKOUT_BLOCKS } from '../data/workoutData';
 
 describe('LivePlayer Component', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
     useWorkoutStore.getState().resetStore();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   const defaultProps = {
@@ -54,6 +60,7 @@ describe('LivePlayer Component', () => {
     expect(screen.getByText('1:00')).toBeInTheDocument();
     expect(useWorkoutStore.getState().timers['w1:rest']).toEqual({
       remainingSeconds: 60, totalSeconds: 60, isStarted: true, isPaused: false,
+      startedAt: Date.now(), accumulatedMs: 0,
     });
   });
 
@@ -66,12 +73,13 @@ describe('LivePlayer Component', () => {
     expect(screen.getByText('1:30')).toBeInTheDocument();
     expect(useWorkoutStore.getState().timers['m1:work']).toEqual({
       remainingSeconds: 90, totalSeconds: 90, isStarted: true, isPaused: false,
+      startedAt: Date.now(), accumulatedMs: 0,
     });
   });
 
   it('resumes a paused timer (without resetting elapsed time) when its card button is tapped again', () => {
     useWorkoutStore.getState().startTimer('w1:rest', 60);
-    useWorkoutStore.getState().tickTimer('w1:rest');
+    vi.setSystemTime(new Date('2026-01-01T00:00:01.000Z'));
     useWorkoutStore.getState().pauseTimer('w1:rest');
 
     render(<LivePlayer {...defaultProps} />);
@@ -85,7 +93,8 @@ describe('LivePlayer Component', () => {
 
   it('leaves an already-running timer untouched when its card button is tapped again', () => {
     useWorkoutStore.getState().startTimer('w1:rest', 60);
-    useWorkoutStore.getState().tickTimer('w1:rest');
+    const originalStartedAt = useWorkoutStore.getState().timers['w1:rest'].startedAt;
+    vi.setSystemTime(new Date('2026-01-01T00:00:01.000Z'));
 
     render(<LivePlayer {...defaultProps} />);
     const panel = panelFor('Wrist Mobility Sequence');
@@ -93,12 +102,13 @@ describe('LivePlayer Component', () => {
 
     const timer = useWorkoutStore.getState().timers['w1:rest'];
     expect(timer.isStarted).toBe(true);
-    expect(timer.remainingSeconds).toBe(59);
+    // Untouched, i.e. not re-started: still counting from its original start time.
+    expect(timer.startedAt).toBe(originalStartedAt);
   });
 
   it('starting the work timer from its card button resets an already-started rest timer', () => {
     useWorkoutStore.getState().startTimer('m1:rest', 60);
-    useWorkoutStore.getState().tickTimer('m1:rest');
+    vi.setSystemTime(new Date('2026-01-01T00:00:02.000Z'));
 
     render(<LivePlayer {...defaultProps} />);
     const panel = panelFor('Pike Pulses / Active Compression');
@@ -107,19 +117,20 @@ describe('LivePlayer Component', () => {
     expect(useWorkoutStore.getState().timers['m1:work'].isStarted).toBe(true);
     expect(useWorkoutStore.getState().timers['m1:rest']).toEqual({
       remainingSeconds: 60, totalSeconds: 60, isStarted: false, isPaused: false,
+      startedAt: null, accumulatedMs: 0,
     });
   });
 
   it('stops an active rest timer for the exercise being left when navigating away', () => {
     useWorkoutStore.getState().startTimer('w1:rest', 60);
-    useWorkoutStore.getState().tickTimer('w1:rest');
-    useWorkoutStore.getState().tickTimer('w1:rest');
+    vi.setSystemTime(new Date('2026-01-01T00:00:02.000Z'));
 
     render(<LivePlayer {...defaultProps} />);
     fireEvent.click(screen.getByRole('button', { name: 'Pike Pulses / Active Compression' }));
 
     expect(useWorkoutStore.getState().timers['w1:rest']).toEqual({
       remainingSeconds: 60, totalSeconds: 60, isStarted: false, isPaused: false,
+      startedAt: null, accumulatedMs: 0,
     });
     expect(useWorkoutStore.getState().currentIndex).toBe(5);
   });
@@ -134,6 +145,7 @@ describe('LivePlayer Component', () => {
 
     expect(useWorkoutStore.getState().timers['m1:work']).toEqual({
       remainingSeconds: 90, totalSeconds: 90, isStarted: false, isPaused: false,
+      startedAt: null, accumulatedMs: 0,
     });
   });
 

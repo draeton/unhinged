@@ -137,12 +137,24 @@ export function App() {
     return () => clearTimeout(timerReset);
   }, [showConfirmReset, resetCountdown]);
 
-  // Global Workout Timer counter
+  // Global Workout Timer counter — derived from actual start/pause timestamps (see
+  // refreshElapsedTime) so it stays accurate even if the interval is throttled while the
+  // app is backgrounded; also refresh immediately when the app regains focus.
   useEffect(() => {
-    const timer = setInterval(() => {
-      useWorkoutStore.getState().incrementTotalTime();
-    }, 1000);
-    return () => clearInterval(timer);
+    const refresh = () => useWorkoutStore.getState().refreshElapsedTime();
+    const timer = setInterval(refresh, 1000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', refresh);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', refresh);
+    };
   }, []);
 
 
