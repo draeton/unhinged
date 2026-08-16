@@ -15,8 +15,8 @@ export interface Exercise {
   id: string;
   name: string;
   category: Category;
-  durationSeconds: number; // For timed holds or estimated set time
-  restSeconds: number;
+  workSeconds: number | null; // Timed hold/work duration; null = no work timer
+  restSeconds: number | null; // Rest-between-sets duration; null = no rest timer
   sets: number;
   repsOrTime: string;
   targetMuscles: TargetMuscle[];

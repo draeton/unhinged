@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface TimerRuntimeState {
+  remainingSeconds: number;
+  totalSeconds: number;
+  isStarted: boolean;
+  isPaused: boolean;
+}
+
 interface WorkoutState {
   // Workout Status
   isWorkoutStarted: boolean;
@@ -11,12 +18,8 @@ interface WorkoutState {
   currentIndex: number;
   completedSets: { [exerciseId: string]: number };
 
-  // Interval Timer State
-  isResting: boolean;
-  timeLeft: number;
-  isIntervalStarted: boolean;
-  isIntervalPaused: boolean;
-  timeOffset: number;
+  // Work/Rest Timer State, keyed by `${exerciseId}:${'work' | 'rest'}`
+  timers: { [key: string]: TimerRuntimeState };
 
   // Actions
   startWorkout: () => void;
@@ -27,8 +30,15 @@ interface WorkoutState {
 
   setCurrentIndex: (updater: number | ((prev: number) => number)) => void;
   updateCompletedSets: (exerciseId: string, count: number) => void;
-  setIntervalState: (updater: Partial<WorkoutState> | ((state: WorkoutState) => Partial<WorkoutState>)) => void;
-  setTimeLeft: (updater: number | ((prev: number) => number)) => void;
+
+  startTimer: (key: string, totalSeconds: number) => void;
+  pauseTimer: (key: string) => void;
+  resumeTimer: (key: string) => void;
+  resetTimer: (key: string) => void;
+  adjustTimer: (key: string, deltaSeconds: number) => void;
+  tickTimer: (key: string) => void;
+  expireTimer: (key: string) => void;
+
   resetStore: () => void;
 }
 
@@ -36,15 +46,11 @@ const initialState = {
   isWorkoutStarted: false,
   isWorkoutPaused: false,
   totalSecondsElapsed: 0,
-  
+
   currentIndex: 0,
   completedSets: {},
-  
-  isResting: false,
-  timeLeft: 0,
-  isIntervalStarted: false,
-  isIntervalPaused: false,
-  timeOffset: 0,
+
+  timers: {} as { [key: string]: TimerRuntimeState },
 };
 
 export const useWorkoutStore = create<WorkoutState>()(
@@ -59,9 +65,9 @@ export const useWorkoutStore = create<WorkoutState>()(
       }),
 
       pauseWorkout: () => set({ isWorkoutPaused: true }),
-      
+
       resumeWorkout: () => set({ isWorkoutPaused: false }),
-      
+
       stopWorkout: () => set({
         ...initialState,
       }),
@@ -77,10 +83,6 @@ export const useWorkoutStore = create<WorkoutState>()(
         currentIndex: typeof updater === 'function' ? updater(state.currentIndex) : updater
       })),
 
-      setTimeLeft: (updater) => set((state) => ({
-        timeLeft: typeof updater === 'function' ? updater(state.timeLeft) : updater
-      })),
-
       updateCompletedSets: (exerciseId, count) => set((state) => ({
         completedSets: {
           ...state.completedSets,
@@ -88,9 +90,69 @@ export const useWorkoutStore = create<WorkoutState>()(
         }
       })),
 
-      setIntervalState: (updater) => set((state) => {
-        const updates = typeof updater === 'function' ? updater(state) : updater;
-        return { ...state, ...updates };
+      startTimer: (key, totalSeconds) => set((state) => ({
+        timers: {
+          ...state.timers,
+          [key]: { remainingSeconds: totalSeconds, totalSeconds, isStarted: true, isPaused: false },
+        },
+      })),
+
+      pauseTimer: (key) => set((state) => {
+        const timer = state.timers[key];
+        if (!timer) return state;
+        return { timers: { ...state.timers, [key]: { ...timer, isPaused: true } } };
+      }),
+
+      resumeTimer: (key) => set((state) => {
+        const timer = state.timers[key];
+        if (!timer) return state;
+        return { timers: { ...state.timers, [key]: { ...timer, isPaused: false } } };
+      }),
+
+      resetTimer: (key) => set((state) => {
+        const timer = state.timers[key];
+        if (!timer) return state;
+        return {
+          timers: {
+            ...state.timers,
+            [key]: { ...timer, remainingSeconds: timer.totalSeconds, isStarted: false, isPaused: false },
+          },
+        };
+      }),
+
+      adjustTimer: (key, deltaSeconds) => set((state) => {
+        const timer = state.timers[key];
+        if (!timer) return state;
+        const nextRemaining = Math.max(5, timer.remainingSeconds + deltaSeconds);
+        const actualDelta = nextRemaining - timer.remainingSeconds;
+        return {
+          timers: {
+            ...state.timers,
+            [key]: {
+              ...timer,
+              remainingSeconds: nextRemaining,
+              totalSeconds: timer.totalSeconds + actualDelta,
+            },
+          },
+        };
+      }),
+
+      tickTimer: (key) => set((state) => {
+        const timer = state.timers[key];
+        if (!timer) return state;
+        const remainingSeconds = Math.max(0, timer.remainingSeconds - 1);
+        return { timers: { ...state.timers, [key]: { ...timer, remainingSeconds } } };
+      }),
+
+      expireTimer: (key) => set((state) => {
+        const timer = state.timers[key];
+        if (!timer) return state;
+        return {
+          timers: {
+            ...state.timers,
+            [key]: { ...timer, remainingSeconds: 0, isStarted: false, isPaused: false },
+          },
+        };
       }),
 
       resetStore: () => set({

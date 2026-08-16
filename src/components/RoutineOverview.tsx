@@ -190,9 +190,11 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
                             LEFT SCAPULA FOCUS
                           </span>
                         )}
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'rgba(0,0,0,0.3)', padding: '4px 10px', borderRadius: '12px', display: 'flex', alignItems: 'center' }}>
-                          Rest: {ex.restSeconds}s
-                        </span>
+                        {ex.restSeconds != null && (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', background: 'rgba(0,0,0,0.3)', padding: '4px 10px', borderRadius: '12px', display: 'flex', alignItems: 'center' }}>
+                            Rest: {ex.restSeconds}s
+                          </span>
+                        )}
                       </div>
                       <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
                         {ex.description}

@@ -275,10 +275,6 @@ export function App() {
       <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)}>
         <LivePlayer
           blocks={DEFAULT_WORKOUT_BLOCKS}
-          totalSecondsElapsed={totalSecondsElapsed}
-          isWorkoutPaused={isWorkoutPaused}
-          onToggleWorkoutPause={handleToggleWorkoutPause}
-          onWorkoutComplete={handleWorkoutComplete}
           onPlayVideo={setActiveVideoUrl}
         />
       </Drawer>
