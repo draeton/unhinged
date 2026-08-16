@@ -19,8 +19,12 @@ TypeScript + Vite, Zustand for in-session state (persisted to `localStorage`), S
 | `npm run test:watch` | Vitest in watch mode |
 | `npm run lint` | Oxlint |
 
-There is no CI. Build and test are only ever verified locally, by whoever (or whatever) is
-pushing — always run both before opening or updating a PR.
+There is no CI for build/test — those are only ever verified locally, by whoever (or whatever) is
+pushing — always run both before opening or updating a PR. The one exception is
+`.github/workflows/supabase-migrations.yml`, which auto-applies new `supabase/migrations/*.sql`
+files to the linked Supabase project on merge to `main` — see `README.md`'s CI section. This
+doesn't change the "run build/test locally before pushing" rule; it's a separate, narrowly-scoped
+automation for schema changes only.
 
 ## Workflow conventions
 
