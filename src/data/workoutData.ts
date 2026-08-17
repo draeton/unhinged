@@ -11,8 +11,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     exercises: [
       {
         id: 'w1',
+        userId: 'seed',
         name: 'Wrist Mobility Sequence',
-        category: 'warmup',
         workSeconds: null,
         restSeconds: 60,
         sets: 1,
@@ -34,8 +34,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 'w2',
+        userId: 'seed',
         name: 'Scapular & Lat Prep',
-        category: 'warmup',
         workSeconds: null,
         restSeconds: 60,
         sets: 2,
@@ -56,8 +56,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 'w3',
+        userId: 'seed',
         name: "World's Greatest Stretch",
-        category: 'warmup',
         workSeconds: null,
         restSeconds: 60,
         sets: 1,
@@ -87,8 +87,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     exercises: [
       {
         id: 's1',
+        userId: 'seed',
         name: 'Pull-Up & Asymmetry Focus',
-        category: 'pullups',
         workSeconds: null,
         restSeconds: 90,
         sets: 5,
@@ -105,8 +105,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 's2',
+        userId: 'seed',
         name: 'Handstand Prep & Balance',
-        category: 'pullups',
         workSeconds: null,
         restSeconds: 90,
         sets: 4,
@@ -134,8 +134,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     exercises: [
       {
         id: 'm1',
+        userId: 'seed',
         name: 'Pike Pulses / Active Compression',
-        category: 'hamstrings',
         workSeconds: 90,
         restSeconds: 60,
         sets: 1,
@@ -155,8 +155,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 'm2',
+        userId: 'seed',
         name: 'PNF Hamstring Stretch',
-        category: 'hamstrings',
         workSeconds: 120,
         restSeconds: 60,
         sets: 3,
@@ -176,8 +176,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 'm3',
+        userId: 'seed',
         name: 'Modified Jefferson Curls',
-        category: 'hamstrings',
         workSeconds: null,
         restSeconds: 60,
         sets: 3,
@@ -197,8 +197,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 'm4',
+        userId: 'seed',
         name: 'Deep Psoas & Hip Opening (Couch Stretch)',
-        category: 'hamstrings',
         workSeconds: 120,
         restSeconds: 60,
         sets: 1,
@@ -218,8 +218,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
       },
       {
         id: 'm5',
+        userId: 'seed',
         name: 'Passive Forward Fold',
-        category: 'hamstrings',
         workSeconds: 120,
         restSeconds: 60,
         sets: 1,
@@ -246,8 +246,8 @@ export const DEFAULT_WORKOUT_BLOCKS: WorkoutBlock[] = [
     exercises: [
       {
         id: 'c1',
+        userId: 'seed',
         name: 'Child’s Pose with Wrist Relief',
-        category: 'cooldown',
         workSeconds: 300,
         restSeconds: null,
         sets: 1,
