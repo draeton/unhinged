@@ -5,7 +5,7 @@ import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
 import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
 import { supabase } from './utils/supabase';
 import { audio } from './utils/audio';
-import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell, ListTree } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
@@ -20,6 +20,7 @@ import { VideoModal } from './components/VideoModal';
 import { CalendarDrawer } from './components/CalendarDrawer';
 import { DayDetailDrawer } from './components/DayDetailDrawer';
 import { ExerciseLibraryDrawer } from './components/ExerciseLibraryDrawer';
+import { ProgramListDrawer } from './components/ProgramListDrawer';
 
 import { useWorkoutStore } from './store/workoutStore';
 import { useAuth } from './context/AuthContext';
@@ -40,7 +41,7 @@ export function App() {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | 'exerciseLibrary' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | 'exerciseLibrary' | 'programs' | null>(null);
   const [activeDayDetail, setActiveDayDetail] = useState<string | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
@@ -377,6 +378,15 @@ export function App() {
 
           <button
             className="btn-secondary"
+            onClick={() => setActiveDrawer('programs')}
+            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+          >
+            <ListTree size={20} />
+            <span>Programs</span>
+          </button>
+
+          <button
+            className="btn-secondary"
             onClick={() => setActiveDrawer('exerciseLibrary')}
             style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
           >
@@ -577,6 +587,11 @@ export function App() {
       {/* Exercise Library Drawer */}
       <Drawer isOpen={activeDrawer === 'exerciseLibrary'} onClose={() => setActiveDrawer(null)}>
         {user && <ExerciseLibraryDrawer userId={user.id} />}
+      </Drawer>
+
+      {/* Programs Drawer */}
+      <Drawer isOpen={activeDrawer === 'programs'} onClose={() => setActiveDrawer(null)}>
+        {user && <ProgramListDrawer userId={user.id} />}
       </Drawer>
     </div>
   );
