@@ -99,7 +99,7 @@ Actions**:
 | Secret | Where to find it |
 |---|---|
 | `SUPABASE_ACCESS_TOKEN` | Supabase dashboard → Account → Access Tokens |
-| `SUPABASE_PROJECT_REF` | The project's dashboard URL, or `supabase/config.toml`'s `project_id` |
+| `SUPABASE_PROJECT_REF` | The project's dashboard URL (`supabase.com/dashboard/project/<ref>`), or Project Settings → General → "Reference ID". **Not** `supabase/config.toml`'s `project_id` — that's just a local disambiguation label (defaults to the folder name), not the actual project ref. |
 | `SUPABASE_DB_PASSWORD` | The project's Postgres password (dashboard → Database → Settings; resettable if lost) |
 
 This workflow pushes directly to the linked (production) project on every merge that touches a
