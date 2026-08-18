@@ -107,7 +107,8 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, progra
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {block.exercises.map((ex, eIdx) => {
               const isExpanded = expandedExerciseId === ex.id;
-              const isLeftScapular = ex.id === 's1';
+              // Matched by name, not id -- see the same rationale in ExerciseInfoPanel.tsx.
+              const isLeftScapular = ex.name === 'Pull-Up & Asymmetry Focus';
               
               const isActive = activeExerciseId === ex.id;
               const isFullyComplete = completedSetsMap ? (completedSetsMap[ex.id] || 0) >= ex.sets : false;
