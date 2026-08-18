@@ -2,6 +2,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { App } from './App';
 import { useWorkoutStore } from './store/workoutStore';
+import { RESOLVED_TEST_PROGRAM } from './test-utils/fixtures';
 
 vi.mock('./context/AuthContext', () => ({
   useAuth: () => ({
@@ -9,6 +10,19 @@ vi.mock('./context/AuthContext', () => ({
     loading: false,
     signOut: vi.fn(),
   }),
+}));
+
+vi.mock('./hooks/useActiveProgram', () => ({
+  useActiveProgram: () => ({
+    program: RESOLVED_TEST_PROGRAM,
+    loading: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}));
+
+vi.mock('./services/programBootstrap', () => ({
+  bootstrapDefaultProgramIfNeeded: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('App Integration', () => {

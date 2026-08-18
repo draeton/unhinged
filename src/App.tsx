@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
 import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
 import { supabase } from './utils/supabase';
 import { audio } from './utils/audio';
-import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell } from 'lucide-react';
+import { useActiveProgram } from './hooks/useActiveProgram';
+import { bootstrapDefaultProgramIfNeeded } from './services/programBootstrap';
+import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell, ListTree } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
@@ -20,6 +21,7 @@ import { VideoModal } from './components/VideoModal';
 import { CalendarDrawer } from './components/CalendarDrawer';
 import { DayDetailDrawer } from './components/DayDetailDrawer';
 import { ExerciseLibraryDrawer } from './components/ExerciseLibraryDrawer';
+import { ProgramListDrawer } from './components/ProgramListDrawer';
 
 import { useWorkoutStore } from './store/workoutStore';
 import { useAuth } from './context/AuthContext';
@@ -36,11 +38,13 @@ export function App() {
     stopWorkout
   } = useWorkoutStore();
 
+  const { program: activeProgram, refetch: refetchActiveProgram } = useActiveProgram(user?.id ?? null);
+
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | 'exerciseLibrary' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | 'exerciseLibrary' | 'programs' | null>(null);
   const [activeDayDetail, setActiveDayDetail] = useState<string | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
@@ -107,15 +111,22 @@ export function App() {
     });
 
     // Also re-sync when auth state changes (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       syncWorkoutsFromSupabase().then((synced) => {
         setCompletedWorkouts(synced);
       });
+
+      if (session?.user) {
+        bootstrapDefaultProgramIfNeeded(session.user.id).then(() => {
+          refetchActiveProgram();
+        });
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -170,6 +181,7 @@ export function App() {
   };
 
   const handleStartWorkout = () => {
+    if (!activeProgram || activeProgram.blocks.length === 0) return;
     if (!isWorkoutStarted) {
       startWorkout();
       audio.playStart();
@@ -275,6 +287,8 @@ export function App() {
       {/* Pre-Workout Drawer */}
       <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)}>
         <PreWorkoutDrawer
+          blocks={activeProgram?.blocks ?? []}
+          programName={activeProgram?.name}
           isWorkoutStarted={isWorkoutStarted}
           isWorkoutPaused={isWorkoutPaused}
           totalSecondsElapsed={totalSecondsElapsed}
@@ -287,7 +301,7 @@ export function App() {
       {/* Live Player Drawer */}
       <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)}>
         <LivePlayer
-          blocks={DEFAULT_WORKOUT_BLOCKS}
+          blocks={activeProgram?.blocks ?? []}
           onPlayVideo={setActiveVideoUrl}
         />
       </Drawer>
@@ -373,6 +387,15 @@ export function App() {
           >
             {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
+          </button>
+
+          <button
+            className="btn-secondary"
+            onClick={() => setActiveDrawer('programs')}
+            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
+          >
+            <ListTree size={20} />
+            <span>Programs</span>
           </button>
 
           <button
@@ -577,6 +600,11 @@ export function App() {
       {/* Exercise Library Drawer */}
       <Drawer isOpen={activeDrawer === 'exerciseLibrary'} onClose={() => setActiveDrawer(null)}>
         {user && <ExerciseLibraryDrawer userId={user.id} />}
+      </Drawer>
+
+      {/* Programs Drawer */}
+      <Drawer isOpen={activeDrawer === 'programs'} onClose={() => setActiveDrawer(null)}>
+        {user && <ProgramListDrawer userId={user.id} />}
       </Drawer>
     </div>
   );

@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import type { WorkoutBlock } from '../types/workout';
+import type { ResolvedBlock } from '../types/program';
 import { Clock, ChevronDown, ChevronUp, ShieldAlert, Video } from 'lucide-react';
 
 interface RoutineOverviewProps {
-  blocks: WorkoutBlock[];
+  blocks: ResolvedBlock[];
+  programName?: string;
   onPlayVideo: (url: string) => void;
   isCondensed?: boolean;
   activeExerciseId?: string | null;
   completedSetsMap?: { [id: string]: number };
 }
 
-export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlayVideo, isCondensed, activeExerciseId, completedSetsMap }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, programName, onPlayVideo, isCondensed, activeExerciseId, completedSetsMap }) => {
+  // Filtering by block *instance* (id), not by blockType -- a program can have more than
+  // one block of the same type (e.g. two "mobility" blocks), and those shouldn't merge
+  // under a single filter chip.
+  const [selectedBlockId, setSelectedBlockId] = useState<string>('all');
   const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
@@ -19,9 +23,11 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
   };
 
   const filteredBlocks = blocks.filter(b => {
-    if (selectedCategory === 'all') return true;
-    return b.category === selectedCategory;
+    if (selectedBlockId === 'all') return true;
+    return b.id === selectedBlockId;
   });
+
+  const totalDurationMinutes = blocks.reduce((sum, b) => sum + b.durationMinutes, 0);
 
   return (
     <div style={{ maxWidth: '1050px', margin: '0 auto', padding: isCondensed ? '0 16px 24px 16px' : '24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -33,35 +39,29 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <span className="badge glow-cyan" style={{ background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
-                  ⚡ OFFICIAL PROGRAM STRUCTURE
+                  ⚡ YOUR PROGRAM
                 </span>
                 <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#FFFFFF', marginTop: '8px' }}>
-                  60-Min: Pull-Ups, Hamstrings & Wrists Blueprint
+                  {programName || 'Workout Program'}
                 </h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '6px', maxWidth: '680px', lineHeight: 1.5 }}>
-                  A scientifically balanced routine pairing heavy upper vertical pulling and left scapular symmetry with deep hamstring compression, Jefferson curling, and wrist relief.
-                </p>
               </div>
             </div>
 
             {/* Quick Filter Buttons */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '20px' }}>
               {[
-                { id: 'all', label: 'All 4 Blocks (60 Min)' },
-                { id: 'warmup', label: '1. Warm-up (10m)' },
-                { id: 'pullups', label: '2. Strength (20m)' },
-                { id: 'hamstrings', label: '3. Mobility & Forward Fold (25m)' },
-                { id: 'cooldown', label: '4. Cooldown (5m)' },
+                { id: 'all', label: `All ${blocks.length} Block${blocks.length === 1 ? '' : 's'} (${totalDurationMinutes} Min)` },
+                ...blocks.map(b => ({ id: b.id, label: `${b.title} (${b.durationMinutes}m)` })),
               ].map(cat => (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => setSelectedBlockId(cat.id)}
                   style={{
                     padding: '8px 16px',
                     borderRadius: '20px',
-                    border: selectedCategory === cat.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                    background: selectedCategory === cat.id ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
-                    color: selectedCategory === cat.id ? '#00F0FF' : 'var(--text-muted)',
+                    border: selectedBlockId === cat.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                    background: selectedBlockId === cat.id ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                    color: selectedBlockId === cat.id ? '#00F0FF' : 'var(--text-muted)',
                     fontSize: '0.85rem',
                     fontWeight: '600',
                     cursor: 'pointer',
@@ -107,7 +107,8 @@ export const RoutineOverview: React.FC<RoutineOverviewProps> = ({ blocks, onPlay
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {block.exercises.map((ex, eIdx) => {
               const isExpanded = expandedExerciseId === ex.id;
-              const isLeftScapular = ex.id === 's1';
+              // Matched by name, not id -- see the same rationale in ExerciseInfoPanel.tsx.
+              const isLeftScapular = ex.name === 'Pull-Up & Asymmetry Focus';
               
               const isActive = activeExerciseId === ex.id;
               const isFullyComplete = completedSetsMap ? (completedSetsMap[ex.id] || 0) >= ex.sets : false;

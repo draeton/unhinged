@@ -2,7 +2,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { LivePlayer } from './LivePlayer';
 import { useWorkoutStore } from '../store/workoutStore';
-import { DEFAULT_WORKOUT_BLOCKS } from '../data/workoutData';
+import { RESOLVED_TEST_BLOCKS } from '../test-utils/fixtures';
 
 describe('LivePlayer Component', () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('LivePlayer Component', () => {
   });
 
   const defaultProps = {
-    blocks: DEFAULT_WORKOUT_BLOCKS,
+    blocks: RESOLVED_TEST_BLOCKS,
     onPlayVideo: vi.fn(),
   };
 
