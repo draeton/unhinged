@@ -17,7 +17,7 @@ interface ExerciseRow {
   video_urls: { title: string; url: string }[];
 }
 
-const rowToExercise = (row: ExerciseRow): Exercise => ({
+export const rowToExercise = (row: ExerciseRow): Exercise => ({
   id: row.id,
   userId: row.user_id,
   name: row.name,

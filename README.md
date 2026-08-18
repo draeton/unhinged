@@ -22,13 +22,25 @@ src/
   AppWrapper.tsx        # Auth gate: shows AuthScreen, a loading state, or App
   context/AuthContext.tsx   # Wraps Supabase auth session/user state
   store/workoutStore.ts     # Zustand store: workout progress, set completion, per-exercise timers
-  data/workoutData.ts       # Static workout definition (blocks + exercises)
-  types/workout.ts          # Exercise/WorkoutBlock/timer/history types
+  types/
+    workout.ts               # Exercise (library entity), timer/history types
+    program.ts                # Program/ProgramBlock/BlockExercise + the ResolvedBlock/
+                               # ResolvedExercise runtime shapes the player actually consumes
+  services/
+    exercises.ts              # CRUD for the user's exercise library (Supabase-backed)
+    programs.ts                # CRUD for programs/blocks/placements + getResolvedProgram
+    resolveExercise.ts          # Merges a library exercise's defaults with a placement's overrides
+    programBootstrap.ts          # Clones the seeded template program for a brand-new user
+  hooks/
+    useActiveProgram.ts        # Loads/caches the user's currently-active program
+    useTimerTicker.ts           # Background interval that drives all running work/rest timers
   components/            # UI: StartScreen, LivePlayer (exercise carousel), TimerDrawer,
-                          # RingTimer, PreWorkoutDrawer, HistoryStats, CalendarDrawer, etc.
-  hooks/useTimerTicker.ts   # Background interval that drives all running work/rest timers
+                          # RingTimer, PreWorkoutDrawer, HistoryStats, CalendarDrawer,
+                          # ProgramListDrawer/ProgramEditorDrawer/BlockEditorDrawer,
+                          # ExerciseLibraryDrawer/ExerciseEditorDrawer, etc.
   utils/
-    storage.ts              # localStorage persistence (completed workouts, PRs, settings)
+    storage.ts              # localStorage persistence (completed workouts, PRs, settings,
+                             # active-program pointer + a read-only cache for offline continuity)
     supabase.ts              # Supabase client
     supabaseSync.ts           # Push/pull completed workouts to/from Supabase
     audio.ts                  # Web Audio countdown beeps / chimes
@@ -38,6 +50,7 @@ src/
 - The active workout session (current exercise index, completed sets, running timers) lives in a Zustand store persisted to `localStorage`, so an in-progress workout survives a page reload.
 - Each exercise can have an independent **work** timer and/or **rest** timer (see `Exercise.workSeconds` / `restSeconds`, nullable — a `null` value hides that timer's button). Timers are started manually from `LivePlayer` and run in a `TimerDrawer`; `useTimerTicker` ticks all running timers once a second.
 - Finished workouts are local-first: saved to `localStorage` immediately, then opportunistically synced to Supabase (`completed_workouts` table) when the user is signed in, so history works offline and across devices.
+- Programs/blocks/exercises are the opposite: **Supabase-only** for editing (fetched on demand, written directly, no local merge logic) — see "Programs" under Integrations below. The one exception is `useActiveProgram`, which caches the *resolved* active program in `localStorage` purely so an in-progress workout can keep running if connectivity drops mid-session.
 
 ## Integrations
 

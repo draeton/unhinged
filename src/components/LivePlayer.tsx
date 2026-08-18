@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { WorkoutBlock, Exercise } from '../types/workout';
+import type { ResolvedBlock, ResolvedExercise } from '../types/program';
 import { audio } from '../utils/audio';
 import { Clock, Info } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -9,7 +9,7 @@ import { TimerDrawer, timerKey, type TimerType } from './TimerDrawer';
 import { useTimerTicker } from '../hooks/useTimerTicker';
 
 interface LivePlayerProps {
-  blocks: WorkoutBlock[];
+  blocks: ResolvedBlock[];
   onPlayVideo: (url: string) => void;
 }
 
@@ -29,13 +29,13 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 }) => {
   // Flatten exercises with block metadata
   const allExercises = React.useMemo(() => {
-    const list: { exercise: Exercise; blockTitle: string; blockCategory: string; blockBadgeColor: string }[] = [];
+    const list: { exercise: ResolvedExercise; blockTitle: string; blockType: string; blockBadgeColor: string }[] = [];
     blocks.forEach(b => {
       b.exercises.forEach(e => {
         list.push({
           exercise: e,
           blockTitle: b.title,
-          blockCategory: b.category,
+          blockType: b.blockType,
           blockBadgeColor: b.badgeColor,
         });
       });

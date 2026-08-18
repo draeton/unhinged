@@ -1,16 +1,24 @@
 import React from 'react';
-import type { Exercise } from '../types/workout';
+import type { ResolvedExercise } from '../types/program';
 import { AlertCircle, Sparkles, ShieldAlert, Video } from 'lucide-react';
 
 interface ExerciseInfoPanelProps {
-  exercise: Exercise;
+  exercise: ResolvedExercise;
   onPlayVideo: (url: string) => void;
 }
 
 export const ExerciseInfoPanel: React.FC<ExerciseInfoPanelProps> = ({ exercise, onPlayVideo }) => {
-  const isLeftScapularFocus = exercise.id === 's1';
-  const isHandstandFocus = exercise.id === 'm2';
-  const isJeffersonCurlFocus = exercise.id === 'm3';
+  // Matched by name, not id: once exercises are seeded into Supabase they get generated
+  // UUIDs, so a literal id check like the old `exercise.id === 's1'` would never match
+  // again. Name is the only stable, human-meaningful field left to key off -- the
+  // trade-off is that renaming a matching exercise silently drops its special-case tip,
+  // which is acceptable for a cosmetic bonus badge.
+  const isLeftScapularFocus = exercise.name === 'Pull-Up & Asymmetry Focus';
+  // Previously checked id 'm2' ("PNF Hamstring Stretch"), but the tip content below is
+  // about handstand parallettes/wrist support -- a pre-existing mismatch, not something
+  // introduced here. Rewired to the exercise it's actually about.
+  const isHandstandFocus = exercise.name === 'Handstand Prep & Balance';
+  const isJeffersonCurlFocus = exercise.name === 'Modified Jefferson Curls';
 
   return (
     <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
