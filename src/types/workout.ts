@@ -11,10 +11,14 @@ export type TargetMuscle =
 
 export type Category = 'warmup' | 'pullups' | 'hamstrings' | 'wrists' | 'cooldown';
 
+// Exercise is the user-owned exercise library entity (backed by the Supabase `exercises`
+// table, see src/services/exercises.ts). It has no block-type/category of its own — that's
+// a property of the *block* an exercise is placed into (see WorkoutBlock.category below,
+// and BlockType in src/types/program.ts for the new configurable-program model).
 export interface Exercise {
   id: string;
+  userId: string;
   name: string;
-  category: Category;
   workSeconds: number | null; // Timed hold/work duration; null = no work timer
   restSeconds: number | null; // Rest-between-sets duration; null = no rest timer
   sets: number;
@@ -25,7 +29,6 @@ export interface Exercise {
   formCues: string[];
   safetyTip: string;
   videoUrls?: { title: string; url: string; }[];
-  isCustom?: boolean;
 }
 
 export interface WorkoutBlock {
