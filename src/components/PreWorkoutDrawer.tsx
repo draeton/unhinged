@@ -1,14 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Settings } from 'lucide-react';
 import { RoutineOverview } from './RoutineOverview';
-import { DEFAULT_WORKOUT_BLOCKS } from '../data/workoutData';
+import type { ResolvedBlock } from '../types/program';
 import { useWorkoutStore } from '../store/workoutStore';
 
-const allExercises = DEFAULT_WORKOUT_BLOCKS.flatMap(block => 
-  block.exercises.map(ex => ({ exercise: ex }))
-);
-
 interface PreWorkoutDrawerProps {
+  blocks: ResolvedBlock[];
+  programName?: string;
   isWorkoutStarted: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
@@ -24,6 +22,8 @@ const formatTime = (totalSeconds: number) => {
 };
 
 export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
+  blocks,
+  programName,
   isWorkoutStarted,
   isWorkoutPaused,
   totalSecondsElapsed,
@@ -33,6 +33,13 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
 }) => {
   const currentIndex = useWorkoutStore((state) => state.currentIndex);
   const completedSets = useWorkoutStore((state) => state.completedSets);
+
+  const allExercises = useMemo(
+    () => blocks.flatMap(block => block.exercises.map(ex => ({ exercise: ex }))),
+    [blocks]
+  );
+
+  const hasProgram = blocks.length > 0;
 
   const activeExerciseId = isWorkoutStarted
     ? allExercises[currentIndex]?.exercise.id || null
@@ -48,16 +55,18 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
       }}>
         <button
           onClick={onStart}
+          disabled={!hasProgram && !isWorkoutStarted}
           className="btn-primary glow-cyan"
-          style={{ 
-            flex: 1, 
-            padding: '16px', 
-            fontSize: '1.1rem', 
+          style={{
+            flex: 1,
+            padding: '16px',
+            fontSize: '1.1rem',
             fontWeight: '800',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
             gap: '8px',
+            ...(!hasProgram && !isWorkoutStarted ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
             ...(isWorkoutStarted && isWorkoutPaused ? {
               background: '#FFB300',
               color: '#050B14',
@@ -65,7 +74,7 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
             } : {})
           }}
         >
-          {!isWorkoutStarted && 'Start Workout'}
+          {!isWorkoutStarted && (hasProgram ? 'Start Workout' : 'Loading program...')}
           {isWorkoutStarted && !isWorkoutPaused && (
             <>
               In Progress ({formatTime(totalSecondsElapsed)})
@@ -102,10 +111,11 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
 
       {/* Condensed Blueprint */}
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '32px' }}>
-        <RoutineOverview 
-          blocks={DEFAULT_WORKOUT_BLOCKS} 
-          onPlayVideo={onPlayVideo} 
-          isCondensed={true} 
+        <RoutineOverview
+          blocks={blocks}
+          programName={programName}
+          onPlayVideo={onPlayVideo}
+          isCondensed={true}
           activeExerciseId={activeExerciseId}
           completedSetsMap={completedSets}
         />

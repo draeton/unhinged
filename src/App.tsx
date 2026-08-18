@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { DEFAULT_WORKOUT_BLOCKS } from './data/workoutData';
 import type { CompletedWorkout } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
 import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
 import { supabase } from './utils/supabase';
 import { audio } from './utils/audio';
+import { useActiveProgram } from './hooks/useActiveProgram';
+import { bootstrapDefaultProgramIfNeeded } from './services/programBootstrap';
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell, ListTree } from 'lucide-react';
 
 import { Header } from './components/Header';
@@ -36,6 +37,8 @@ export function App() {
     resumeWorkout,
     stopWorkout
   } = useWorkoutStore();
+
+  const { program: activeProgram, refetch: refetchActiveProgram } = useActiveProgram(user?.id ?? null);
 
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
@@ -108,15 +111,22 @@ export function App() {
     });
 
     // Also re-sync when auth state changes (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       syncWorkoutsFromSupabase().then((synced) => {
         setCompletedWorkouts(synced);
       });
+
+      if (session?.user) {
+        bootstrapDefaultProgramIfNeeded(session.user.id).then(() => {
+          refetchActiveProgram();
+        });
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -171,6 +181,7 @@ export function App() {
   };
 
   const handleStartWorkout = () => {
+    if (!activeProgram || activeProgram.blocks.length === 0) return;
     if (!isWorkoutStarted) {
       startWorkout();
       audio.playStart();
@@ -276,6 +287,8 @@ export function App() {
       {/* Pre-Workout Drawer */}
       <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)}>
         <PreWorkoutDrawer
+          blocks={activeProgram?.blocks ?? []}
+          programName={activeProgram?.name}
           isWorkoutStarted={isWorkoutStarted}
           isWorkoutPaused={isWorkoutPaused}
           totalSecondsElapsed={totalSecondsElapsed}
@@ -288,7 +301,7 @@ export function App() {
       {/* Live Player Drawer */}
       <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)}>
         <LivePlayer
-          blocks={DEFAULT_WORKOUT_BLOCKS}
+          blocks={activeProgram?.blocks ?? []}
           onPlayVideo={setActiveVideoUrl}
         />
       </Drawer>

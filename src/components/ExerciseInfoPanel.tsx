@@ -1,9 +1,9 @@
 import React from 'react';
-import type { Exercise } from '../types/workout';
+import type { ResolvedExercise } from '../types/program';
 import { AlertCircle, Sparkles, ShieldAlert, Video } from 'lucide-react';
 
 interface ExerciseInfoPanelProps {
-  exercise: Exercise;
+  exercise: ResolvedExercise;
   onPlayVideo: (url: string) => void;
 }
 

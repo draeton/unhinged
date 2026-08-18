@@ -9,12 +9,11 @@ export type TargetMuscle =
   | 'wrist_extensors' 
   | 'grip';
 
-export type Category = 'warmup' | 'pullups' | 'hamstrings' | 'wrists' | 'cooldown';
-
 // Exercise is the user-owned exercise library entity (backed by the Supabase `exercises`
 // table, see src/services/exercises.ts). It has no block-type/category of its own — that's
-// a property of the *block* an exercise is placed into (see WorkoutBlock.category below,
-// and BlockType in src/types/program.ts for the new configurable-program model).
+// a property of the *block* an exercise is placed into (see BlockType in
+// src/types/program.ts, which also defines ResolvedBlock/ResolvedExercise — the runtime
+// shapes actually consumed by the live player and routine overview).
 export interface Exercise {
   id: string;
   userId: string;
@@ -29,16 +28,6 @@ export interface Exercise {
   formCues: string[];
   safetyTip: string;
   videoUrls?: { title: string; url: string; }[];
-}
-
-export interface WorkoutBlock {
-  id: string;
-  title: string;
-  subtitle: string;
-  durationMinutes: number;
-  category: Category;
-  badgeColor: string;
-  exercises: Exercise[];
 }
 
 export interface SetLog {
