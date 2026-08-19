@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { DayDetailDrawer } from './DayDetailDrawer';
 import type { CompletedWorkout } from '../types/workout';
@@ -42,5 +42,42 @@ describe('DayDetailDrawer workout titles', () => {
     );
     expect(screen.getByText('Program A #1')).toBeInTheDocument();
     expect(screen.getByText('Program B #2')).toBeInTheDocument();
+  });
+});
+
+describe('DayDetailDrawer stats row', () => {
+  it('renders RPE in the same row as duration and sets', () => {
+    render(<DayDetailDrawer dateStr="2026-01-01" completedWorkouts={[workoutOn('2026-01-01', { rpe: 8 })]} />);
+
+    const minsRow = screen.getByText('45 mins').closest('div')!.parentElement!;
+    expect(within(minsRow).getByText('8/10')).toBeInTheDocument();
+  });
+
+  it('omits RPE entirely when not set', () => {
+    render(<DayDetailDrawer dateStr="2026-01-01" completedWorkouts={[workoutOn('2026-01-01', { rpe: 0 })]} />);
+    expect(screen.queryByText(/\/10/)).not.toBeInTheDocument();
+  });
+});
+
+describe('DayDetailDrawer set-completion diagram', () => {
+  it('renders the diagram when a workout has exercise logs', () => {
+    render(
+      <DayDetailDrawer
+        dateStr="2026-01-01"
+        completedWorkouts={[
+          workoutOn('2026-01-01', {
+            exerciseLogs: [
+              { exerciseId: 'ex-1', exerciseName: 'Pull-Ups', sets: [{ setNumber: 1, reps: 0, weightLbs: 0, completed: false }] },
+            ],
+          }),
+        ]}
+      />
+    );
+    expect(screen.getByLabelText('Pull-Ups: not completed')).toBeInTheDocument();
+  });
+
+  it('omits the diagram for older workouts with no exercise logs', () => {
+    render(<DayDetailDrawer dateStr="2026-01-01" completedWorkouts={[workoutOn('2026-01-01')]} />);
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });

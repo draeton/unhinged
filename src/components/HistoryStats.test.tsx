@@ -24,3 +24,26 @@ describe('HistoryStats session titles', () => {
     expect(screen.getByText('Workout — Session #1')).toBeInTheDocument();
   });
 });
+
+describe('HistoryStats set-completion diagram', () => {
+  it('renders the diagram when a workout has exercise logs', () => {
+    render(
+      <HistoryStats
+        workouts={[
+          {
+            ...baseWorkout,
+            exerciseLogs: [
+              { exerciseId: 'ex-1', exerciseName: 'Pull-Ups', sets: [{ setNumber: 1, reps: 0, weightLbs: 0, completed: true }] },
+            ],
+          },
+        ]}
+      />
+    );
+    expect(screen.getByLabelText('Pull-Ups: completed')).toBeInTheDocument();
+  });
+
+  it('omits the diagram for older workouts with no exercise logs', () => {
+    render(<HistoryStats workouts={[baseWorkout]} />);
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+});
