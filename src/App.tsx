@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { CompletedWorkout, ExerciseLog } from './types/workout';
-import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
+import type { Program } from './types/program';
+import { getCompletedWorkouts, saveCompletedWorkout, setActiveProgramId } from './utils/storage';
 import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
 import { supabase } from './utils/supabase';
 import { audio } from './utils/audio';
 import { useActiveProgram } from './hooks/useActiveProgram';
 import { bootstrapDefaultProgramIfNeeded } from './services/programBootstrap';
+import { listPrograms } from './services/programs';
 import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell, ListTree } from 'lucide-react';
 
 import { Header } from './components/Header';
@@ -40,6 +42,21 @@ export function App() {
   } = useWorkoutStore();
 
   const { program: activeProgram, error: activeProgramError, refetch: refetchActiveProgram } = useActiveProgram(user?.id ?? null);
+
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const refreshPrograms = useCallback(() => {
+    if (!user) {
+      setPrograms([]);
+      return;
+    }
+    listPrograms(user.id)
+      .then(setPrograms)
+      .catch(err => console.error('Failed to load programs:', err));
+  }, [user]);
+
+  useEffect(() => {
+    refreshPrograms();
+  }, [refreshPrograms]);
 
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
@@ -120,6 +137,9 @@ export function App() {
       if (session?.user) {
         bootstrapDefaultProgramIfNeeded(session.user.id).then(() => {
           refetchActiveProgram();
+          // Called directly (not via the refreshPrograms callback) to avoid this
+          // mount-only effect's stale closure over `user` -- session.user.id is fresh.
+          listPrograms(session.user.id).then(setPrograms).catch(err => console.error('Failed to load programs:', err));
         });
       }
     });
@@ -179,6 +199,16 @@ export function App() {
       return;
     }
     setActiveDrawer(null);
+  };
+
+  const handleSelectProgram = (programId: string) => {
+    setActiveProgramId(programId);
+    refetchActiveProgram();
+    setIsPreWorkoutOpen(true);
+  };
+
+  const handleResumeActiveWorkout = () => {
+    setIsPreWorkoutOpen(true);
   };
 
   const handleStartWorkout = () => {
@@ -293,7 +323,10 @@ export function App() {
       <main style={{ flex: 1, paddingBottom: '60px' }}>
         <StartScreen
           onNavigate={handleNavigate}
-          onOpenPreWorkout={() => setIsPreWorkoutOpen(true)}
+          programs={programs}
+          activeProgramId={activeProgram?.id ?? null}
+          onSelectProgram={handleSelectProgram}
+          onResumeActiveWorkout={handleResumeActiveWorkout}
           onOpenCalendar={(dateStr) => {
             setActiveDrawer('calendar');
             if (dateStr) {
@@ -629,7 +662,7 @@ export function App() {
       </Drawer>
 
       {/* Programs Drawer */}
-      <Drawer isOpen={activeDrawer === 'programs'} onClose={() => setActiveDrawer(null)}>
+      <Drawer isOpen={activeDrawer === 'programs'} onClose={() => { setActiveDrawer(null); refreshPrograms(); }}>
         {user && <ProgramListDrawer userId={user.id} />}
       </Drawer>
     </div>

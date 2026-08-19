@@ -1,4 +1,4 @@
-import type { ResolvedBlock, ResolvedProgram } from '../types/program';
+import type { Program, ResolvedBlock, ResolvedProgram } from '../types/program';
 
 // A minimal ResolvedBlock[]/ResolvedProgram fixture for component tests. Mirrors the
 // exercise ids/names/timer configs the app originally shipped with (11 exercises across
@@ -86,4 +86,17 @@ export const RESOLVED_TEST_PROGRAM: ResolvedProgram = {
   id: 'test-program',
   name: 'Test Program',
   blocks: RESOLVED_TEST_BLOCKS,
+};
+
+// The Program-list-row counterpart to RESOLVED_TEST_PROGRAM -- same id/name, since
+// App.tsx's home-screen program picker (listPrograms) and its active-program fetch
+// (useActiveProgram) are two independent reads that must agree on which program is
+// "the" one for component tests to click through a realistic flow.
+export const TEST_PROGRAM: Program = {
+  id: 'test-program',
+  userId: 'test-user',
+  name: 'Test Program',
+  description: '',
+  createdAt: '',
+  updatedAt: '',
 };

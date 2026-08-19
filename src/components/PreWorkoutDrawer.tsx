@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Play, Pause } from 'lucide-react';
 import { RoutineOverview } from './RoutineOverview';
 import type { ResolvedBlock } from '../types/program';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -117,14 +117,12 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
         >
           {!isWorkoutStarted && !hasError && (hasProgram ? 'Start Workout' : 'Loading program...')}
           {!isWorkoutStarted && hasError && 'Couldn’t load your program — tap to retry'}
-          {isWorkoutStarted && !isWorkoutPaused && (
+          {isWorkoutStarted && (
             <>
-              In Progress ({formatTime(totalSecondsElapsed)})
-            </>
-          )}
-          {isWorkoutStarted && isWorkoutPaused && (
-            <>
-              Paused ({formatTime(totalSecondsElapsed)})
+              {isWorkoutPaused ? <Pause size={18} fill="#050B14" /> : <Play size={18} fill="#050B14" style={{ marginLeft: '-2px' }} />}
+              <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+                {isWorkoutPaused ? 'Paused' : 'In Progress'} · {formatTime(totalSecondsElapsed)}
+              </span>
             </>
           )}
         </button>
