@@ -14,7 +14,6 @@ import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
 import type { ScreenType } from './components/StartScreen';
 import { LivePlayer } from './components/LivePlayer';
-import { AsymmetryGuide } from './components/AsymmetryGuide';
 import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
 import { PreWorkoutDrawer } from './components/PreWorkoutDrawer';
@@ -62,7 +61,7 @@ export function App() {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   
-  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'guide' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | 'exerciseLibrary' | 'programs' | null>(null);
+  const [activeDrawer, setActiveDrawer] = useState<'blueprint' | 'history' | 'workoutMenu' | 'calendar' | 'appMenu' | 'exerciseLibrary' | 'programs' | null>(null);
   const [activeDayDetail, setActiveDayDetail] = useState<string | null>(null);
   const [soundMuted, setSoundMuted] = useState<boolean>(false);
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([]);
@@ -194,8 +193,8 @@ export function App() {
 
   // Navigate to screen
   const handleNavigate = (screen: ScreenType) => {
-    if (screen === 'blueprint' || screen === 'guide' || screen === 'history') {
-      setActiveDrawer(screen as 'blueprint' | 'guide' | 'history');
+    if (screen === 'blueprint' || screen === 'history') {
+      setActiveDrawer(screen as 'blueprint' | 'history');
       return;
     }
     setActiveDrawer(null);
@@ -322,7 +321,6 @@ export function App() {
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
         <StartScreen
-          onNavigate={handleNavigate}
           programs={programs}
           activeProgramId={activeProgram?.id ?? null}
           onSelectProgram={handleSelectProgram}
@@ -363,10 +361,6 @@ export function App() {
           blocks={activeProgram?.blocks ?? []}
           onPlayVideo={setActiveVideoUrl}
         />
-      </Drawer>
-
-      <Drawer isOpen={activeDrawer === 'guide'} onClose={() => setActiveDrawer(null)}>
-        <AsymmetryGuide />
       </Drawer>
 
       <Drawer isOpen={activeDrawer === 'history'} onClose={() => setActiveDrawer(null)}>

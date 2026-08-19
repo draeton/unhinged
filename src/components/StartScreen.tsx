@@ -1,13 +1,12 @@
 import React from 'react';
-import { Play, ShieldAlert, ChevronRight, Pause } from 'lucide-react';
+import { Play, ChevronRight, Pause } from 'lucide-react';
 import type { CompletedWorkout } from '../types/workout';
 import type { Program } from '../types/program';
 import { CalendarWidget } from './CalendarWidget';
 
-export type ScreenType = 'start' | 'player' | 'blueprint' | 'history' | 'guide';
+export type ScreenType = 'start' | 'player' | 'blueprint' | 'history';
 
 interface StartScreenProps {
-  onNavigate: (screen: ScreenType) => void;
   programs: Program[];
   // The program the running/last-run workout belongs to -- null before a program has
   // ever loaded. Only meaningful while isWorkoutActive.
@@ -29,7 +28,6 @@ const formatTime = (secs: number) => {
 };
 
 export const StartScreen: React.FC<StartScreenProps> = ({
-  onNavigate,
   programs,
   activeProgramId,
   onSelectProgram,
@@ -109,49 +107,6 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             </div>
           );
         })}
-
-        {/* Form & Scapula Guide */}
-        <div
-          onClick={() => onNavigate('guide')}
-          className="glass-panel"
-          style={{
-            padding: '28px',
-            cursor: 'pointer',
-            transition: 'all 0.25s ease',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            gap: '16px',
-          }}
-        >
-          <div style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
-          }}>
-            <ShieldAlert size={26} />
-          </div>
-
-          <div>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              Form & Scapula Guide
-              <ChevronRight size={20} color="var(--text-muted)" />
-            </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
-              Master left shoulder blade wrapping, handstand parallettes wrist relief, and Jefferson curl rules.
-            </p>
-          </div>
-
-          <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-main)' }}>
-            Read Biomechanics →
-          </div>
-        </div>
 
       </div>
 

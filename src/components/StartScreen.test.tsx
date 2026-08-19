@@ -23,7 +23,6 @@ const programB: Program = {
 
 describe('StartScreen Component', () => {
   const defaultProps = {
-    onNavigate: vi.fn(),
     programs: [programA],
     activeProgramId: null,
     onSelectProgram: vi.fn(),
