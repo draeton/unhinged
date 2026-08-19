@@ -37,7 +37,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700' }}>
                   <CheckCircle size={16} color="#00F0FF" />
-                  Workout {index + 1}
+                  {w.programName ?? 'Workout'}{dayWorkouts.length > 1 ? ` #${index + 1}` : ''}
                 </div>
                 {w.rpe ? <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>RPE: <strong style={{ color: '#fff' }}>{w.rpe}/10</strong></div> : null}
               </div>

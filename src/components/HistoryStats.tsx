@@ -93,7 +93,7 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
               }}>
                 <div>
                   <div style={{ fontWeight: '700', fontSize: '1rem', color: '#FFFFFF' }}>
-                    UNHINGED 60-Min Session #{workouts.length - idx}
+                    {w.programName ?? 'Workout'} — Session #{workouts.length - idx}
                   </div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                     {new Date(w.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
