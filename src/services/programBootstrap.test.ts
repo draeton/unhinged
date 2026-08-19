@@ -7,12 +7,13 @@ vi.mock('./programs', () => ({
   listPrograms: vi.fn(),
 }));
 vi.mock('../utils/storage', () => ({
+  getActiveProgramId: vi.fn(),
   setActiveProgramId: vi.fn(),
 }));
 
 import { supabase } from '../utils/supabase';
 import { listPrograms } from './programs';
-import { setActiveProgramId } from '../utils/storage';
+import { getActiveProgramId, setActiveProgramId } from '../utils/storage';
 import { bootstrapDefaultProgramIfNeeded } from './programBootstrap';
 
 describe('bootstrapDefaultProgramIfNeeded', () => {
@@ -30,8 +31,19 @@ describe('bootstrapDefaultProgramIfNeeded', () => {
     expect(setActiveProgramId).toHaveBeenCalledWith('new-program-id');
   });
 
-  it('does nothing when the user already has programs', async () => {
+  it('points this device at the first existing program if it has none set locally', async () => {
+    (listPrograms as any).mockResolvedValue([{ id: 'existing-1' }, { id: 'existing-2' }]);
+    (getActiveProgramId as any).mockReturnValue(null);
+
+    await bootstrapDefaultProgramIfNeeded('user-1');
+
+    expect(supabase.rpc).not.toHaveBeenCalled();
+    expect(setActiveProgramId).toHaveBeenCalledWith('existing-1');
+  });
+
+  it('does nothing when the user already has programs and this device already has an active one set', async () => {
     (listPrograms as any).mockResolvedValue([{ id: 'existing' }]);
+    (getActiveProgramId as any).mockReturnValue('already-active');
 
     await bootstrapDefaultProgramIfNeeded('user-1');
 

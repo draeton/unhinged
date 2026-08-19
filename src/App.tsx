@@ -38,7 +38,7 @@ export function App() {
     stopWorkout
   } = useWorkoutStore();
 
-  const { program: activeProgram, refetch: refetchActiveProgram } = useActiveProgram(user?.id ?? null);
+  const { program: activeProgram, error: activeProgramError, refetch: refetchActiveProgram } = useActiveProgram(user?.id ?? null);
 
   const [isPreWorkoutOpen, setIsPreWorkoutOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
@@ -289,6 +289,8 @@ export function App() {
         <PreWorkoutDrawer
           blocks={activeProgram?.blocks ?? []}
           programName={activeProgram?.name}
+          activeProgramError={activeProgramError}
+          onRetryActiveProgram={refetchActiveProgram}
           isWorkoutStarted={isWorkoutStarted}
           isWorkoutPaused={isWorkoutPaused}
           totalSecondsElapsed={totalSecondsElapsed}
