@@ -170,6 +170,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             alignItems: 'center',
             gap: '10px',
             padding: '14px 20px',
+            width: 'max-content',
+            whiteSpace: 'nowrap',
             borderRadius: '12px',
             border: 'none',
             cursor: 'pointer',
@@ -180,8 +182,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             boxShadow: isWorkoutPaused ? '0 4px 24px rgba(255, 179, 0, 0.5)' : '0 4px 24px rgba(0, 240, 255, 0.5)',
           }}
         >
-          {isWorkoutPaused ? <Pause size={18} fill="#050B14" /> : <Play size={18} fill="#050B14" style={{ marginLeft: '-2px' }} />}
-          <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+          {isWorkoutPaused ? <Pause size={18} fill="#050B14" style={{ flexShrink: 0 }} /> : <Play size={18} fill="#050B14" style={{ marginLeft: '-2px', flexShrink: 0 }} />}
+          <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
             {isWorkoutPaused ? 'Paused' : 'In Progress'} · {formatTime(totalSecondsElapsed)}
           </span>
         </button>
