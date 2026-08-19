@@ -163,19 +163,20 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           style={{
             position: 'fixed',
             bottom: '24px',
-            right: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
             zIndex: 60,
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
             padding: '14px 20px',
-            borderRadius: '999px',
+            borderRadius: '12px',
             border: 'none',
             cursor: 'pointer',
             background: isWorkoutPaused ? '#FFB300' : 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
             color: '#050B14',
             fontWeight: '800',
-            fontSize: '0.92rem',
+            fontSize: '1rem',
             boxShadow: isWorkoutPaused ? '0 4px 24px rgba(255, 179, 0, 0.5)' : '0 4px 24px rgba(0, 240, 255, 0.5)',
           }}
         >
