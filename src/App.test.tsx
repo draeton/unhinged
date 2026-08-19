@@ -26,6 +26,14 @@ vi.mock('./services/programBootstrap', () => ({
   bootstrapDefaultProgramIfNeeded: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Inlined rather than imported from fixtures -- vi.mock factories are hoisted above
+// imports, so a fixture import wouldn't be initialized yet when this factory runs.
+vi.mock('./services/programs', () => ({
+  listPrograms: vi.fn().mockResolvedValue([
+    { id: 'test-program', userId: 'test-user', name: 'Test Program', description: '', createdAt: '', updatedAt: '' },
+  ]),
+}));
+
 describe('App Integration', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -35,7 +43,7 @@ describe('App Integration', () => {
   it('starts a new workout and opens player drawer', async () => {
     render(<App />);
     
-    const startButton = screen.getByText(/Start New Session/i);
+    const startButton = await screen.findByText(/Start New Session/i);
     fireEvent.click(startButton);
     
     const startWorkoutButton = screen.getByText(/Start Workout/i);
@@ -52,9 +60,9 @@ describe('App Integration', () => {
     render(<App />);
     
     // Start
-    fireEvent.click(screen.getByText(/Start New Session/i));
+    fireEvent.click(await screen.findByText(/Start New Session/i));
     fireEvent.click(screen.getByText(/Start Workout/i));
-    
+
     // Open Menu
     const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
     expect(menuButton).not.toBeNull();
@@ -70,17 +78,18 @@ describe('App Integration', () => {
   });
   
   it('resets workout correctly', async () => {
-    vi.useFakeTimers();
     render(<App />);
-    
-    // Start
-    fireEvent.click(screen.getByText(/Start New Session/i));
+
+    // Start (fake timers activated only after this async lookup resolves --
+    // findByText's internal polling needs real timers to ever settle)
+    fireEvent.click(await screen.findByText(/Start New Session/i));
+    vi.useFakeTimers();
     fireEvent.click(screen.getByText(/Start Workout/i));
-    
+
     // Open Menu
     const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
     fireEvent.click(menuButton);
-    
+
     // Reset
     const resetButton = screen.getByText('Reset Workout');
     fireEvent.click(resetButton);
@@ -102,17 +111,18 @@ describe('App Integration', () => {
   });
 
   it('completes workout correctly from menu', async () => {
-    vi.useFakeTimers();
     render(<App />);
-    
-    // Start
-    fireEvent.click(screen.getByText(/Start New Session/i));
+
+    // Start (fake timers activated only after this async lookup resolves --
+    // findByText's internal polling needs real timers to ever settle)
+    fireEvent.click(await screen.findByText(/Start New Session/i));
+    vi.useFakeTimers();
     fireEvent.click(screen.getByText(/Start Workout/i));
-    
+
     // Open Menu
     const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
     fireEvent.click(menuButton);
-    
+
     // Complete
     const completeButton = screen.getByText('Complete Workout');
     fireEvent.click(completeButton);
@@ -138,11 +148,12 @@ describe('App Integration', () => {
   });
 
   it('saves a per-exercise, per-set completion snapshot when the workout is saved', async () => {
-    vi.useFakeTimers();
     render(<App />);
 
-    // Start
-    fireEvent.click(screen.getByText(/Start New Session/i));
+    // Start (fake timers activated only after this async lookup resolves --
+    // findByText's internal polling needs real timers to ever settle)
+    fireEvent.click(await screen.findByText(/Start New Session/i));
+    vi.useFakeTimers();
     fireEvent.click(screen.getByText(/Start Workout/i));
 
     // Mark set 1 of the first exercise (w1, 1 set total) as complete. Disambiguate from
