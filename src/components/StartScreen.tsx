@@ -176,7 +176,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             background: isWorkoutPaused ? '#FFB300' : 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
             color: '#050B14',
             fontWeight: '800',
-            fontSize: '1rem',
+            fontSize: '1.1rem',
             boxShadow: isWorkoutPaused ? '0 4px 24px rgba(255, 179, 0, 0.5)' : '0 4px 24px rgba(0, 240, 255, 0.5)',
           }}
         >
