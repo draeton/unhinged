@@ -7,6 +7,8 @@ import { useWorkoutStore } from '../store/workoutStore';
 interface PreWorkoutDrawerProps {
   blocks: ResolvedBlock[];
   programName?: string;
+  activeProgramError?: string | null;
+  onRetryActiveProgram?: () => void;
   isWorkoutStarted: boolean;
   isWorkoutPaused: boolean;
   totalSecondsElapsed: number;
@@ -24,6 +26,8 @@ const formatTime = (totalSeconds: number) => {
 export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
   blocks,
   programName,
+  activeProgramError,
+  onRetryActiveProgram,
   isWorkoutStarted,
   isWorkoutPaused,
   totalSecondsElapsed,
@@ -40,6 +44,9 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
   );
 
   const hasProgram = blocks.length > 0;
+  // Distinguish "still loading" from "failed to load" -- both look like "no program
+  // yet" from the blocks array alone, but only one of them is worth retrying.
+  const hasError = !hasProgram && !!activeProgramError;
 
   const activeExerciseId = isWorkoutStarted
     ? allExercises[currentIndex]?.exercise.id || null
@@ -54,8 +61,8 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
         gap: '12px',
       }}>
         <button
-          onClick={onStart}
-          disabled={!hasProgram && !isWorkoutStarted}
+          onClick={hasError && onRetryActiveProgram ? onRetryActiveProgram : onStart}
+          disabled={!hasProgram && !isWorkoutStarted && !hasError}
           className="btn-primary glow-cyan"
           style={{
             flex: 1,
@@ -66,7 +73,8 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
             alignItems: 'center',
             justifyContent: 'flex-start',
             gap: '8px',
-            ...(!hasProgram && !isWorkoutStarted ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+            ...(!hasProgram && !isWorkoutStarted && !hasError ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+            ...(hasError ? { background: '#FF3366', boxShadow: '0 0 20px rgba(255, 51, 102, 0.4)' } : {}),
             ...(isWorkoutStarted && isWorkoutPaused ? {
               background: '#FFB300',
               color: '#050B14',
@@ -74,7 +82,8 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
             } : {})
           }}
         >
-          {!isWorkoutStarted && (hasProgram ? 'Start Workout' : 'Loading program...')}
+          {!isWorkoutStarted && !hasError && (hasProgram ? 'Start Workout' : 'Loading program...')}
+          {!isWorkoutStarted && hasError && 'Couldn’t load your program — tap to retry'}
           {isWorkoutStarted && !isWorkoutPaused && (
             <>
               In Progress ({formatTime(totalSecondsElapsed)})
