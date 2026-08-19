@@ -27,6 +27,8 @@ describe('StartScreen Component', () => {
     activeProgramId: null,
     onSelectProgram: vi.fn(),
     onResumeActiveWorkout: vi.fn(),
+    onOpenPrograms: vi.fn(),
+    onOpenExerciseLibrary: vi.fn(),
     onOpenCalendar: vi.fn(),
     isWorkoutActive: false,
     isWorkoutPaused: false,
@@ -111,5 +113,21 @@ describe('StartScreen Component', () => {
   it('does not show the floating resume button when no workout is active', () => {
     render(<StartScreen {...defaultProps} isWorkoutActive={false} />);
     expect(screen.queryByText(/In Progress ·/i)).not.toBeInTheDocument();
+  });
+
+  it('opens program management when the Programs row is clicked', () => {
+    const onOpenPrograms = vi.fn();
+    render(<StartScreen {...defaultProps} onOpenPrograms={onOpenPrograms} />);
+
+    fireEvent.click(screen.getByText('Programs'));
+    expect(onOpenPrograms).toHaveBeenCalled();
+  });
+
+  it('opens the exercise library when the Exercise Library row is clicked', () => {
+    const onOpenExerciseLibrary = vi.fn();
+    render(<StartScreen {...defaultProps} onOpenExerciseLibrary={onOpenExerciseLibrary} />);
+
+    fireEvent.click(screen.getByText('Exercise Library'));
+    expect(onOpenExerciseLibrary).toHaveBeenCalled();
   });
 });
