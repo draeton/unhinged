@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, ChevronRight, Pause } from 'lucide-react';
+import { Play, ChevronRight, Pause, ListTree, Dumbbell } from 'lucide-react';
 import type { CompletedWorkout } from '../types/workout';
 import type { Program } from '../types/program';
 import { CalendarWidget } from './CalendarWidget';
@@ -13,6 +13,8 @@ interface StartScreenProps {
   activeProgramId: string | null;
   onSelectProgram: (programId: string) => void;
   onResumeActiveWorkout: () => void;
+  onOpenPrograms: () => void;
+  onOpenExerciseLibrary: () => void;
   onOpenCalendar: (dateStr?: string) => void;
   isWorkoutActive: boolean;
   isWorkoutPaused: boolean;
@@ -32,6 +34,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   activeProgramId,
   onSelectProgram,
   onResumeActiveWorkout,
+  onOpenPrograms,
+  onOpenExerciseLibrary,
   onOpenCalendar,
   isWorkoutActive,
   isWorkoutPaused,
@@ -108,6 +112,48 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           );
         })}
 
+      </div>
+
+      {/* Manage programs / exercise library -- secondary/muted styling to read as
+          management actions, distinct from the cyan workout-start cards above. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <button
+          onClick={onOpenPrograms}
+          className="glass-panel"
+          style={{
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            cursor: 'pointer',
+            width: '100%',
+            textAlign: 'left',
+            fontFamily: 'var(--font-main)',
+          }}
+        >
+          <ListTree size={20} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: '1rem', fontWeight: '700', color: '#FFFFFF' }}>Programs</span>
+          <ChevronRight size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+        </button>
+
+        <button
+          onClick={onOpenExerciseLibrary}
+          className="glass-panel"
+          style={{
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            cursor: 'pointer',
+            width: '100%',
+            textAlign: 'left',
+            fontFamily: 'var(--font-main)',
+          }}
+        >
+          <Dumbbell size={20} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: '1rem', fontWeight: '700', color: '#FFFFFF' }}>Exercise Library</span>
+          <ChevronRight size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+        </button>
       </div>
 
       {/* Floating "back to active workout" button -- always reachable regardless of

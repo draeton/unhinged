@@ -8,7 +8,7 @@ import { audio } from './utils/audio';
 import { useActiveProgram } from './hooks/useActiveProgram';
 import { bootstrapDefaultProgramIfNeeded } from './services/programBootstrap';
 import { listPrograms } from './services/programs';
-import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle, Dumbbell, ListTree } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle } from 'lucide-react';
 
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
@@ -325,6 +325,8 @@ export function App() {
           activeProgramId={activeProgram?.id ?? null}
           onSelectProgram={handleSelectProgram}
           onResumeActiveWorkout={handleResumeActiveWorkout}
+          onOpenPrograms={() => setActiveDrawer('programs')}
+          onOpenExerciseLibrary={() => setActiveDrawer('exerciseLibrary')}
           onOpenCalendar={(dateStr) => {
             setActiveDrawer('calendar');
             if (dateStr) {
@@ -440,24 +442,6 @@ export function App() {
           >
             {soundMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             <span>{soundMuted ? 'Sound Off' : 'Sound On'}</span>
-          </button>
-
-          <button
-            className="btn-secondary"
-            onClick={() => setActiveDrawer('programs')}
-            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
-          >
-            <ListTree size={20} />
-            <span>Programs</span>
-          </button>
-
-          <button
-            className="btn-secondary"
-            onClick={() => setActiveDrawer('exerciseLibrary')}
-            style={{ justifyContent: 'flex-start', padding: '16px', fontSize: '1rem', background: 'rgba(255,255,255,0.04)' }}
-          >
-            <Dumbbell size={20} />
-            <span>Exercise Library</span>
           </button>
 
           <div style={{ width: '100%', height: '1px', background: 'var(--border-subtle)', margin: '8px 0' }} />
