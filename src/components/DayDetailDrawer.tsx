@@ -40,7 +40,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
                   <CheckCircle size={16} color="#00F0FF" />
                   {w.programName ?? 'Workout'}{dayWorkouts.length > 1 ? ` #${index + 1}` : ''}
                 </div>
-                {w.rpe ? <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>RPE: <strong style={{ color: '#fff' }}>{w.rpe}/10</strong></div> : null}
               </div>
 
               <div style={{ display: 'flex', gap: '24px' }}>
@@ -52,6 +51,11 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
                   <Activity size={16} />
                   <span>{w.totalSetsCompleted} sets</span>
                 </div>
+                {w.rpe ? (
+                  <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
+                    RPE: <strong style={{ color: '#fff' }}>{w.rpe}/10</strong>
+                  </div>
+                ) : null}
               </div>
 
               {w.exerciseLogs.length > 0 && (
