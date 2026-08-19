@@ -22,6 +22,7 @@ import { CalendarDrawer } from './components/CalendarDrawer';
 import { DayDetailDrawer } from './components/DayDetailDrawer';
 import { ExerciseLibraryDrawer } from './components/ExerciseLibraryDrawer';
 import { ProgramListDrawer } from './components/ProgramListDrawer';
+import { OfflineBanner } from './components/OfflineBanner';
 
 import { useWorkoutStore } from './store/workoutStore';
 import { useAuth } from './context/AuthContext';
@@ -281,6 +282,8 @@ export function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-dark)' }}>
+      <OfflineBanner />
+
       {/* Header Bar */}
       <Header
         onNavigate={handleNavigate}
