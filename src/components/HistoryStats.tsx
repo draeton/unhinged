@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CompletedWorkout } from '../types/workout';
 import { Flame, Calendar, Clock, CheckCircle2, Trophy } from 'lucide-react';
-import { SetCompletionDiagram } from './SetCompletionDiagram';
+import { WorkoutCompletionDiagram } from './WorkoutCompletionDiagram';
 
 interface HistoryStatsProps {
   workouts: CompletedWorkout[];
@@ -112,7 +112,7 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
 
                 {w.exerciseLogs.length > 0 && (
                   <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-                    <SetCompletionDiagram exerciseLogs={w.exerciseLogs} />
+                    <WorkoutCompletionDiagram exerciseLogs={w.exerciseLogs} />
                   </div>
                 )}
               </div>

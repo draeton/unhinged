@@ -59,8 +59,7 @@ describe('DayDetailDrawer set-completion diagram', () => {
         ]}
       />
     );
-    expect(screen.getByText('Pull-Ups')).toBeInTheDocument();
-    expect(screen.getByLabelText('Pull-Ups set 1 not completed')).toBeInTheDocument();
+    expect(screen.getByLabelText('Pull-Ups: not completed')).toBeInTheDocument();
   });
 
   it('omits the diagram for older workouts with no exercise logs', () => {

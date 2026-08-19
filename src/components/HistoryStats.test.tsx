@@ -39,8 +39,7 @@ describe('HistoryStats set-completion diagram', () => {
         ]}
       />
     );
-    expect(screen.getByText('Pull-Ups')).toBeInTheDocument();
-    expect(screen.getByLabelText('Pull-Ups set 1 completed')).toBeInTheDocument();
+    expect(screen.getByLabelText('Pull-Ups: completed')).toBeInTheDocument();
   });
 
   it('omits the diagram for older workouts with no exercise logs', () => {
