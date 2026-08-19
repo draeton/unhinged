@@ -72,7 +72,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               onClick={isDisabled ? undefined : (isThisActive ? onResumeActiveWorkout : () => onSelectProgram(program.id))}
               className="glass-panel"
               style={{
-                padding: '28px',
+                padding: '18px 20px',
                 background: isThisActive
                   ? 'linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(0, 255, 157, 0.15) 100%)'
                   : 'linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(18, 24, 38, 0.9) 100%)',
@@ -81,49 +81,31 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                 opacity: isDisabled ? 0.45 : 1,
                 transition: 'all 0.25s ease',
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: '16px',
+                alignItems: 'center',
+                gap: '14px',
                 boxShadow: isThisActive ? '0 0 30px rgba(0, 240, 255, 0.3)' : 'none',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '16px',
-                  background: 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#050B14',
-                  boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)',
-                }}>
-                  <Play size={28} fill="#050B14" style={{ marginLeft: '3px' }} />
-                </div>
-                {isThisActive && (
-                  <span className="badge" style={{
-                    background: isWorkoutPaused ? 'rgba(255, 179, 0, 0.15)' : 'rgba(0, 240, 255, 0.15)',
-                    border: isWorkoutPaused ? '1px solid #FFB300' : '1px solid #00F0FF',
-                    color: isWorkoutPaused ? '#FFB300' : '#00F0FF',
-                    display: 'flex', alignItems: 'center', gap: '6px'
-                  }}>
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      background: isWorkoutPaused ? '#FFB300' : '#00F0FF',
-                      boxShadow: isWorkoutPaused ? '0 0 8px rgba(255, 179, 0, 0.6)' : '0 0 8px rgba(0, 240, 255, 0.6)',
-                    }} />
-                    {isWorkoutPaused ? 'PAUSED' : 'IN PROGRESS'} <span style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>({formatTime(totalSecondsElapsed)})</span>
-                  </span>
-                )}
+              <div style={{
+                width: '36px',
+                height: '36px',
+                flexShrink: 0,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #00F0FF 0%, #00F0FF 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#050B14',
+                boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)',
+              }}>
+                <Play size={16} fill="#050B14" style={{ marginLeft: '2px' }} />
               </div>
 
-              <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h3 style={{ flex: 1, fontSize: '1.2rem', fontWeight: '800', color: '#FFFFFF' }}>
                 {program.name}
-                <ChevronRight size={20} color="var(--accent-cyan)" />
               </h3>
+
+              <ChevronRight size={20} color="var(--accent-cyan)" style={{ flexShrink: 0 }} />
             </div>
           );
         })}

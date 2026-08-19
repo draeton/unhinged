@@ -67,10 +67,11 @@ describe('StartScreen Component', () => {
       />
     );
 
-    // Exact match (case-sensitive by default): the card's all-caps status badge, not
-    // the floating button's "Paused".
-    expect(screen.getByText('PAUSED')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Program A'));
+    // Cards carry no status text (icon/name/chevron only) -- the active one is
+    // distinguished by its highlighted border/background instead.
+    const programACard = screen.getByText('Program A').closest('.glass-panel') as HTMLElement;
+    expect(programACard).toHaveStyle({ border: '2px solid #00F0FF' });
+    fireEvent.click(programACard);
     expect(onResumeActiveWorkout).toHaveBeenCalled();
   });
 
