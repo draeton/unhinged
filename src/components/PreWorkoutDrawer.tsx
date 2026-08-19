@@ -54,10 +54,21 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {programName && (
+        <h2 style={{
+          padding: '0 16px',
+          fontSize: '1.3rem',
+          fontWeight: '800',
+          color: '#FFFFFF',
+        }}>
+          {programName}
+        </h2>
+      )}
+
       {/* Top Action Bar */}
-      <div style={{ 
-        padding: '16px', 
-        display: 'flex', 
+      <div style={{
+        padding: '16px',
+        display: 'flex',
         gap: '12px',
       }}>
         <button
