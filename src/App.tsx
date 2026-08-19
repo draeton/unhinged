@@ -242,6 +242,7 @@ export function App() {
       rpe,
       notes,
       exerciseLogs: [],
+      programName: activeProgram?.name,
     };
     saveCompletedWorkout(newWorkout);
     syncWorkoutToSupabase(newWorkout); // Push to Supabase async

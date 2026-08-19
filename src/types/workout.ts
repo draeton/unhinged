@@ -51,6 +51,10 @@ export interface CompletedWorkout {
   rpe: number; // 1-10 rate of perceived exertion
   notes: string;
   exerciseLogs: ExerciseLog[];
+  // Snapshot of the active program's name at completion time (not a live FK -- a
+  // renamed/deleted program shouldn't rewrite history). Optional since workouts
+  // completed before this field existed won't have it.
+  programName?: string;
 }
 
 export interface PersonalRecord {

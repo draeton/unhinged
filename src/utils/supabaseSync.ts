@@ -21,6 +21,7 @@ export const syncWorkoutToSupabase = async (workout: CompletedWorkout) => {
         rpe: workout.rpe,
         notes: workout.notes,
         exercise_logs: workout.exerciseLogs,
+        program_name: workout.programName ?? null,
       });
 
     if (error) {
@@ -59,6 +60,7 @@ export const syncWorkoutsFromSupabase = async (): Promise<CompletedWorkout[]> =>
       rpe: row.rpe,
       notes: row.notes,
       exerciseLogs: row.exercise_logs,
+      programName: row.program_name ?? undefined,
     }));
 
     // Merge with local workouts (prioritizing Supabase data for duplicates)
