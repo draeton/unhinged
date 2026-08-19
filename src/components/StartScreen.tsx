@@ -120,31 +120,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
                 )}
               </div>
 
-              <div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {program.name}
-                  <ChevronRight size={20} color="var(--accent-cyan)" />
-                </h3>
-                <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
-                  {isThisActive
-                    ? 'Resume your active session with live counting timer & auto set progression.'
-                    : isDisabled
-                      ? 'Finish or reset your current workout to switch programs.'
-                      : (program.description || 'Start a guided workout with countdown timers, audio cues, and set tracking.')}
-                </p>
-              </div>
-
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontWeight: '700',
-                fontSize: '0.9rem',
-                color: isDisabled ? 'var(--text-dim)' : '#00F0FF',
-                marginTop: '8px',
-              }}>
-                {isThisActive ? 'Resume Active Session' : isDisabled ? 'Unavailable' : 'Start New Session'} →
-              </div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {program.name}
+                <ChevronRight size={20} color="var(--accent-cyan)" />
+              </h3>
             </div>
           );
         })}

@@ -35,11 +35,10 @@ describe('StartScreen Component', () => {
     completedWorkouts: [],
   };
 
-  it('renders a start card for each program', () => {
+  it('renders a card for each program', () => {
     render(<StartScreen {...defaultProps} programs={[programA, programB]} />);
     expect(screen.getByText('Program A')).toBeInTheDocument();
     expect(screen.getByText('Program B')).toBeInTheDocument();
-    expect(screen.getAllByText(/Start New Session/i)).toHaveLength(2);
   });
 
   it('shows an empty state when the user has no programs', () => {
@@ -68,7 +67,9 @@ describe('StartScreen Component', () => {
       />
     );
 
-    expect(screen.getByText(/Resume Active Session/i)).toBeInTheDocument();
+    // Exact match (case-sensitive by default): the card's all-caps status badge, not
+    // the floating button's "Paused".
+    expect(screen.getByText('PAUSED')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Program A'));
     expect(onResumeActiveWorkout).toHaveBeenCalled();
   });
@@ -85,9 +86,10 @@ describe('StartScreen Component', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Program B'));
+    const programBCard = screen.getByText('Program B').closest('.glass-panel') as HTMLElement;
+    fireEvent.click(programBCard);
     expect(onSelectProgram).not.toHaveBeenCalled();
-    expect(screen.getByText(/Unavailable/)).toBeInTheDocument();
+    expect(programBCard).toHaveStyle({ cursor: 'not-allowed' });
   });
 
   it('shows a floating resume button while a workout is active', () => {

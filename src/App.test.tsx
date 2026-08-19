@@ -43,7 +43,7 @@ describe('App Integration', () => {
   it('starts a new workout and opens player drawer', async () => {
     render(<App />);
     
-    const startButton = await screen.findByText(/Start New Session/i);
+    const startButton = await screen.findByRole('heading', { name: 'Test Program', level: 3 });
     fireEvent.click(startButton);
     
     const startWorkoutButton = screen.getByText(/Start Workout/i);
@@ -60,7 +60,7 @@ describe('App Integration', () => {
     render(<App />);
     
     // Start
-    fireEvent.click(await screen.findByText(/Start New Session/i));
+    fireEvent.click(await screen.findByRole('heading', { name: 'Test Program', level: 3 }));
     fireEvent.click(screen.getByText(/Start Workout/i));
 
     // Open Menu
@@ -82,7 +82,7 @@ describe('App Integration', () => {
 
     // Start (fake timers activated only after this async lookup resolves --
     // findByText's internal polling needs real timers to ever settle)
-    fireEvent.click(await screen.findByText(/Start New Session/i));
+    fireEvent.click(await screen.findByRole('heading', { name: 'Test Program', level: 3 }));
     vi.useFakeTimers();
     fireEvent.click(screen.getByText(/Start Workout/i));
 
@@ -106,7 +106,7 @@ describe('App Integration', () => {
     fireEvent.click(yesButton);
 
     // Wait for start screen
-    expect(screen.getByText(/Start New Session/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test Program', level: 3 })).toBeInTheDocument();
     vi.useRealTimers();
   });
 
@@ -115,7 +115,7 @@ describe('App Integration', () => {
 
     // Start (fake timers activated only after this async lookup resolves --
     // findByText's internal polling needs real timers to ever settle)
-    fireEvent.click(await screen.findByText(/Start New Session/i));
+    fireEvent.click(await screen.findByRole('heading', { name: 'Test Program', level: 3 }));
     vi.useFakeTimers();
     fireEvent.click(screen.getByText(/Start Workout/i));
 
@@ -152,7 +152,7 @@ describe('App Integration', () => {
 
     // Start (fake timers activated only after this async lookup resolves --
     // findByText's internal polling needs real timers to ever settle)
-    fireEvent.click(await screen.findByText(/Start New Session/i));
+    fireEvent.click(await screen.findByRole('heading', { name: 'Test Program', level: 3 }));
     vi.useFakeTimers();
     fireEvent.click(screen.getByText(/Start Workout/i));
 
