@@ -54,33 +54,55 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {programName && (
-        <h2 style={{
-          padding: '0 16px',
-          fontSize: '1.3rem',
-          fontWeight: '800',
-          color: '#FFFFFF',
-        }}>
-          {programName}
-        </h2>
-      )}
-
-      {/* Top Action Bar */}
+      {/* Title + Settings */}
       <div style={{
-        padding: '16px',
+        padding: '16px 16px 0',
         display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         gap: '12px',
       }}>
+        {programName ? (
+          <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>
+            {programName}
+          </h2>
+        ) : <div />}
+
+        <button
+          title="Menu"
+          onClick={onMenuClick}
+          disabled={!isWorkoutStarted}
+          style={{
+            width: '44px',
+            height: '44px',
+            flexShrink: 0,
+            borderRadius: '12px',
+            border: '1px solid var(--border-subtle)',
+            background: 'rgba(255, 255, 255, 0.04)',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer',
+            opacity: !isWorkoutStarted ? 0.5 : 1,
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Settings size={22} />
+        </button>
+      </div>
+
+      {/* Top Action Bar */}
+      <div style={{ padding: '16px' }}>
         <button
           onClick={hasError && onRetryActiveProgram ? onRetryActiveProgram : onStart}
           disabled={!hasProgram && !isWorkoutStarted && !hasError}
           className="btn-primary glow-cyan"
           style={{
-            flex: 1,
-            padding: '16px',
+            padding: '16px 24px',
             fontSize: '1.1rem',
             fontWeight: '800',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'flex-start',
             gap: '8px',
@@ -105,27 +127,6 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
               Paused ({formatTime(totalSecondsElapsed)})
             </>
           )}
-        </button>
-        
-        <button
-          title="Menu"
-          onClick={onMenuClick}
-          disabled={!isWorkoutStarted}
-          style={{
-            width: '54px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-subtle)',
-            background: 'rgba(255, 255, 255, 0.04)',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer',
-            opacity: !isWorkoutStarted ? 0.5 : 1,
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <Settings size={24} />
         </button>
       </div>
 
