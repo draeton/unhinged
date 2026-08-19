@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CompletedWorkout } from '../types/workout';
 import { Flame, Calendar, Clock, CheckCircle2, Trophy } from 'lucide-react';
+import { SetCompletionDiagram } from './SetCompletionDiagram';
 
 interface HistoryStatsProps {
   workouts: CompletedWorkout[];
@@ -86,28 +87,34 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
                 borderRadius: '12px',
                 padding: '16px',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '12px'
+                flexDirection: 'column',
+                gap: '14px',
               }}>
-                <div>
-                  <div style={{ fontWeight: '700', fontSize: '1rem', color: '#FFFFFF' }}>
-                    {w.programName ?? 'Workout'} — Session #{workouts.length - idx}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontWeight: '700', fontSize: '1rem', color: '#FFFFFF' }}>
+                      {w.programName ?? 'Workout'} — Session #{workouts.length - idx}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      {new Date(w.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                    {new Date(w.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
+                      ⏱️ {w.durationMinutes} mins
+                    </span>
+                    <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00F0FF' }}>
+                      ✅ {w.totalSetsCompleted} sets
+                    </span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
-                    ⏱️ {w.durationMinutes} mins
-                  </span>
-                  <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00F0FF' }}>
-                    ✅ {w.totalSetsCompleted} sets
-                  </span>
-                </div>
+                {w.exerciseLogs.length > 0 && (
+                  <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+                    <SetCompletionDiagram exerciseLogs={w.exerciseLogs} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

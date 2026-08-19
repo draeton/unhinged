@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { CompletedWorkout } from './types/workout';
+import type { CompletedWorkout, ExerciseLog } from './types/workout';
 import { getCompletedWorkouts, saveCompletedWorkout } from './utils/storage';
 import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
 import { supabase } from './utils/supabase';
@@ -234,6 +234,26 @@ export function App() {
   };
 
   const handleSaveWorkout = (rpe: number, notes: string) => {
+    // Read directly from the store rather than a subscribed value -- this must reflect
+    // completedSets as it stood at the moment of completion, and stopWorkout() (called
+    // below, after saving) resets it back to {}.
+    const completedSetsDict = useWorkoutStore.getState().completedSets;
+    const exerciseLogs: ExerciseLog[] = (activeProgram?.blocks ?? []).flatMap(block =>
+      block.exercises.map((ex): ExerciseLog => {
+        const completedCount = completedSetsDict[ex.id] ?? 0;
+        return {
+          exerciseId: ex.id,
+          exerciseName: ex.name,
+          sets: Array.from({ length: ex.sets }, (_, i) => ({
+            setNumber: i + 1,
+            reps: 0,
+            weightLbs: 0,
+            completed: i < completedCount,
+          })),
+        };
+      })
+    );
+
     const newWorkout: CompletedWorkout = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
@@ -241,7 +261,7 @@ export function App() {
       totalSetsCompleted: completionStats.completedSets,
       rpe,
       notes,
-      exerciseLogs: [],
+      exerciseLogs,
       programName: activeProgram?.name,
     };
     saveCompletedWorkout(newWorkout);

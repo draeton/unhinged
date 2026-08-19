@@ -44,3 +44,27 @@ describe('DayDetailDrawer workout titles', () => {
     expect(screen.getByText('Program B #2')).toBeInTheDocument();
   });
 });
+
+describe('DayDetailDrawer set-completion diagram', () => {
+  it('renders the diagram when a workout has exercise logs', () => {
+    render(
+      <DayDetailDrawer
+        dateStr="2026-01-01"
+        completedWorkouts={[
+          workoutOn('2026-01-01', {
+            exerciseLogs: [
+              { exerciseId: 'ex-1', exerciseName: 'Pull-Ups', sets: [{ setNumber: 1, reps: 0, weightLbs: 0, completed: false }] },
+            ],
+          }),
+        ]}
+      />
+    );
+    expect(screen.getByText('Pull-Ups')).toBeInTheDocument();
+    expect(screen.getByLabelText('Pull-Ups set 1 not completed')).toBeInTheDocument();
+  });
+
+  it('omits the diagram for older workouts with no exercise logs', () => {
+    render(<DayDetailDrawer dateStr="2026-01-01" completedWorkouts={[workoutOn('2026-01-01')]} />);
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+});

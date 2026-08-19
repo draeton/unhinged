@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { App } from './App';
 import { useWorkoutStore } from './store/workoutStore';
 import { RESOLVED_TEST_PROGRAM } from './test-utils/fixtures';
+import { getCompletedWorkouts } from './utils/storage';
 
 vi.mock('./context/AuthContext', () => ({
   useAuth: () => ({
@@ -132,7 +133,48 @@ describe('App Integration', () => {
     // Completion modal shows
     expect(screen.getByText('UNHINGED Mastered!')).toBeInTheDocument();
     expect(screen.getByText('0 mins')).toBeInTheDocument();
-    
+
+    vi.useRealTimers();
+  });
+
+  it('saves a per-exercise, per-set completion snapshot when the workout is saved', async () => {
+    vi.useFakeTimers();
+    render(<App />);
+
+    // Start
+    fireEvent.click(screen.getByText(/Start New Session/i));
+    fireEvent.click(screen.getByText(/Start Workout/i));
+
+    // Mark set 1 of the first exercise (w1, 1 set total) as complete. Disambiguate from
+    // PreWorkoutDrawer's condensed RoutineOverview (always mounted, uses <h4> for the
+    // exercise name) by heading level -- LivePlayer's is an <h2>.
+    const heading = screen.getByRole('heading', { name: 'Wrist Mobility Sequence', level: 2 });
+    const panel = heading.closest('.glass-panel') as HTMLElement;
+    fireEvent.click(within(panel).getByRole('button', { name: '1' }));
+
+    // Complete the workout from the menu
+    const menuButton = document.querySelector('button[title="Menu"]') as HTMLButtonElement;
+    fireEvent.click(menuButton);
+    fireEvent.click(screen.getByText('Complete Workout'));
+    for (let i = 0; i < 3; i++) {
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+    fireEvent.click(screen.getByText('Yes, Complete Workout'));
+
+    // Save
+    fireEvent.click(screen.getByRole('button', { name: /Save Workout/i }));
+
+    const [saved] = getCompletedWorkouts();
+    const w1Log = saved.exerciseLogs.find(log => log.exerciseId === 'w1');
+    expect(w1Log?.sets).toEqual([{ setNumber: 1, reps: 0, weightLbs: 0, completed: true }]);
+
+    // s1 (untouched, 5 sets) should be logged as fully uncompleted, not omitted
+    const s1Log = saved.exerciseLogs.find(log => log.exerciseId === 's1');
+    expect(s1Log?.sets.every(s => !s.completed)).toBe(true);
+    expect(s1Log?.sets).toHaveLength(5);
+
     vi.useRealTimers();
   });
 });

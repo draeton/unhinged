@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CompletedWorkout } from '../types/workout';
 import { Calendar as CalendarIcon, Clock, Activity, CheckCircle } from 'lucide-react';
+import { SetCompletionDiagram } from './SetCompletionDiagram';
 
 interface DayDetailDrawerProps {
   dateStr: string;
@@ -52,7 +53,11 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
                   <span>{w.totalSetsCompleted} sets</span>
                 </div>
               </div>
-              
+
+              {w.exerciseLogs.length > 0 && (
+                <SetCompletionDiagram exerciseLogs={w.exerciseLogs} />
+              )}
+
               {w.notes && (
                 <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px', fontStyle: 'italic' }}>
                   "{w.notes}"
