@@ -223,8 +223,9 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           display: 'flex',
           overflowX: 'auto',
           gap: '12px',
-          padding: '0 4px',
-          width: '100%',
+          margin: '0 -16px',
+          padding: '0 16px',
+          width: 'auto',
           WebkitOverflowScrolling: 'touch',
         }} className="hide-scrollbar">
           {allExercises.map((item, index) => {
