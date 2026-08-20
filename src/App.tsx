@@ -348,7 +348,7 @@ export function App() {
       </main>
 
       {/* Pre-Workout Drawer */}
-      <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)}>
+      <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)} fullScreen>
         <PreWorkoutDrawer
           blocks={activeProgram?.blocks ?? []}
           programName={activeProgram?.name}
@@ -360,14 +360,16 @@ export function App() {
           onStart={handleStartWorkout}
           onMenuClick={() => setActiveDrawer('workoutMenu')}
           onPlayVideo={setActiveVideoUrl}
+          onClose={() => setIsPreWorkoutOpen(false)}
         />
       </Drawer>
 
       {/* Live Player Drawer */}
-      <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)}>
+      <Drawer isOpen={isPlayerOpen} onClose={() => setIsPlayerOpen(false)} fullScreen>
         <LivePlayer
           blocks={activeProgram?.blocks ?? []}
           onPlayVideo={setActiveVideoUrl}
+          onClose={() => setIsPlayerOpen(false)}
         />
       </Drawer>
 
@@ -643,13 +645,18 @@ export function App() {
       </Drawer>
 
       {/* Exercise Library Drawer */}
-      <Drawer isOpen={activeDrawer === 'exerciseLibrary'} onClose={() => setActiveDrawer(null)}>
-        {user && <ExerciseLibraryDrawer userId={user.id} />}
+      <Drawer isOpen={activeDrawer === 'exerciseLibrary'} onClose={() => setActiveDrawer(null)} fullScreen>
+        {user && <ExerciseLibraryDrawer userId={user.id} onClose={() => setActiveDrawer(null)} />}
       </Drawer>
 
       {/* Programs Drawer */}
-      <Drawer isOpen={activeDrawer === 'programs'} onClose={() => { setActiveDrawer(null); refreshPrograms(); }}>
-        {user && <ProgramListDrawer userId={user.id} />}
+      <Drawer isOpen={activeDrawer === 'programs'} onClose={() => { setActiveDrawer(null); refreshPrograms(); }} fullScreen>
+        {user && (
+          <ProgramListDrawer
+            userId={user.id}
+            onClose={() => { setActiveDrawer(null); refreshPrograms(); }}
+          />
+        )}
       </Drawer>
     </div>
   );

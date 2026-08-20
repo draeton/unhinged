@@ -18,6 +18,7 @@ describe('LivePlayer Component', () => {
   const defaultProps = {
     blocks: RESOLVED_TEST_BLOCKS,
     onPlayVideo: vi.fn(),
+    onClose: vi.fn(),
   };
 
   const panelFor = (exerciseName: string) => {

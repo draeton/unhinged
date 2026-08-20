@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Settings, Play, Pause } from 'lucide-react';
+import { Settings, Play, Pause, X } from 'lucide-react';
 import { RoutineOverview } from './RoutineOverview';
 import type { ResolvedBlock } from '../types/program';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -15,6 +15,7 @@ interface PreWorkoutDrawerProps {
   onStart: () => void;
   onMenuClick: () => void;
   onPlayVideo: (url: string) => void;
+  onClose: () => void;
 }
 
 const formatTime = (totalSeconds: number) => {
@@ -34,6 +35,7 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
   onStart,
   onMenuClick,
   onPlayVideo,
+  onClose,
 }) => {
   const currentIndex = useWorkoutStore((state) => state.currentIndex);
   const completedSets = useWorkoutStore((state) => state.completedSets);
@@ -68,28 +70,37 @@ export const PreWorkoutDrawer: React.FC<PreWorkoutDrawerProps> = ({
           </h2>
         ) : <div />}
 
-        <button
-          title="Menu"
-          onClick={onMenuClick}
-          disabled={!isWorkoutStarted}
-          style={{
-            width: '44px',
-            height: '44px',
-            flexShrink: 0,
-            borderRadius: '12px',
-            border: '1px solid var(--border-subtle)',
-            background: 'rgba(255, 255, 255, 0.04)',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer',
-            opacity: !isWorkoutStarted ? 0.5 : 1,
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <Settings size={22} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+          <button
+            title="Menu"
+            onClick={onMenuClick}
+            disabled={!isWorkoutStarted}
+            style={{
+              width: '44px',
+              height: '44px',
+              flexShrink: 0,
+              borderRadius: '12px',
+              border: '1px solid var(--border-subtle)',
+              background: 'rgba(255, 255, 255, 0.04)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: !isWorkoutStarted ? 'not-allowed' : 'pointer',
+              opacity: !isWorkoutStarted ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Settings size={22} />
+          </button>
+          <button
+            title="Close"
+            onClick={onClose}
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
+          >
+            <X size={22} />
+          </button>
+        </div>
       </div>
 
       {/* Top Action Bar */}

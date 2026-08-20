@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Copy } from 'lucide-react';
+import { Plus, Pencil, Copy, X } from 'lucide-react';
 import type { Program } from '../types/program';
 import { listPrograms, createProgram, duplicateProgram, deleteProgram } from '../services/programs';
 import { Drawer } from './Drawer';
@@ -8,9 +8,10 @@ import { SwipeToDelete } from './SwipeToDelete';
 
 interface ProgramListDrawerProps {
   userId: string;
+  onClose: () => void;
 }
 
-export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId }) => {
+export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, onClose }) => {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,16 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId }) 
 
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF' }}>Programs</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF' }}>Programs</h2>
+        <button
+          title="Close"
+          onClick={onClose}
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
+        >
+          <X size={22} />
+        </button>
+      </div>
 
       {!showNewForm ? (
         <button className="btn-primary" onClick={() => setShowNewForm(true)} style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem' }}>
@@ -122,8 +132,10 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId }) 
         ))}
       </div>
 
-      <Drawer isOpen={!!openProgramId} onClose={() => setOpenProgramId(null)}>
-        {openProgramId && <ProgramEditorDrawer userId={userId} programId={openProgramId} />}
+      <Drawer isOpen={!!openProgramId} onClose={() => setOpenProgramId(null)} fullScreen>
+        {openProgramId && (
+          <ProgramEditorDrawer userId={userId} programId={openProgramId} onClose={() => setOpenProgramId(null)} />
+        )}
       </Drawer>
     </div>
   );

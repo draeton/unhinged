@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ResolvedBlock, ResolvedExercise } from '../types/program';
 import { audio } from '../utils/audio';
-import { Clock, Info } from 'lucide-react';
+import { Clock, Info, X } from 'lucide-react';
 import { useWorkoutStore } from '../store/workoutStore';
 import { Drawer } from './Drawer';
 import { ExerciseInfoPanel } from './ExerciseInfoPanel';
@@ -11,6 +11,7 @@ import { useTimerTicker } from '../hooks/useTimerTicker';
 interface LivePlayerProps {
   blocks: ResolvedBlock[];
   onPlayVideo: (url: string) => void;
+  onClose: () => void;
 }
 
 const TIMER_BUTTON_COLORS: Record<TimerType, string> = {
@@ -26,6 +27,7 @@ const TIMER_BUTTON_LABELS: Record<TimerType, string> = {
 export const LivePlayer: React.FC<LivePlayerProps> = ({
   blocks,
   onPlayVideo,
+  onClose,
 }) => {
   // Flatten exercises with block metadata
   const allExercises = React.useMemo(() => {
@@ -204,6 +206,15 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 16px 0' }}>
+        <button
+          title="Close"
+          onClick={onClose}
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
+        >
+          <X size={22} />
+        </button>
+      </div>
 
       <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 

@@ -30,6 +30,17 @@ describe('Drawer Component', () => {
     }
   });
 
+  it('renders full screen without a drag handle when fullScreen is set', () => {
+    render(
+      <Drawer isOpen={true} onClose={vi.fn()} fullScreen>
+        <div data-testid="drawer-content">Content</div>
+      </Drawer>
+    );
+
+    expect(screen.getByTestId('drawer-content')).toBeInTheDocument();
+    expect(document.body.querySelector('.drawer-drag-handle')).not.toBeInTheDocument();
+  });
+
   it('locks body scroll when open', () => {
     const { unmount } = render(
       <Drawer isOpen={true} onClose={vi.fn()}>

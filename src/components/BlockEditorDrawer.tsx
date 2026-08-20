@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, ChevronUp, ChevronDown, ChevronRight, ChevronDown as ChevronDownIcon, Search } from 'lucide-react';
+import { Plus, ChevronUp, ChevronDown, ChevronRight, ChevronDown as ChevronDownIcon, Search, X } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import type { BlockExercise } from '../types/program';
 import { listExercises } from '../services/exercises';
@@ -17,6 +17,7 @@ interface BlockEditorDrawerProps {
   userId: string;
   blockId: string;
   blockTitle: string;
+  onClose: () => void;
 }
 
 const fieldInputStyle: React.CSSProperties = {
@@ -38,7 +39,7 @@ const overrideFieldsFromForm = (form: {
   repsOrTimeOverride: form.repsOrTime === '' ? null : form.repsOrTime,
 });
 
-export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, blockId, blockTitle }) => {
+export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, blockId, blockTitle, onClose }) => {
   const [placements, setPlacements] = useState<BlockExercise[]>([]);
   const [library, setLibrary] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +129,16 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
 
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>{blockTitle}</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>{blockTitle}</h2>
+        <button
+          title="Close"
+          onClick={onClose}
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
+        >
+          <X size={22} />
+        </button>
+      </div>
       <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '-8px' }}>Exercises in this block</p>
 
       {loading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</div>}
