@@ -348,7 +348,7 @@ export function App() {
       </main>
 
       {/* Pre-Workout Drawer */}
-      <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)} fullScreen>
+      <Drawer isOpen={isPreWorkoutOpen} onClose={() => setIsPreWorkoutOpen(false)}>
         <PreWorkoutDrawer
           blocks={activeProgram?.blocks ?? []}
           programName={activeProgram?.name}
@@ -360,7 +360,6 @@ export function App() {
           onStart={handleStartWorkout}
           onMenuClick={() => setActiveDrawer('workoutMenu')}
           onPlayVideo={setActiveVideoUrl}
-          onClose={() => setIsPreWorkoutOpen(false)}
         />
       </Drawer>
 
