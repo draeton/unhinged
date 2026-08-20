@@ -13,6 +13,7 @@ import { Play, Pause, RotateCcw, X, Volume2, VolumeX, CheckCircle } from 'lucide
 import { Header } from './components/Header';
 import { StartScreen } from './components/StartScreen';
 import type { ScreenType } from './components/StartScreen';
+import { StartScreenSkeleton } from './components/StartScreenSkeleton';
 import { LivePlayer } from './components/LivePlayer';
 import { HistoryStats } from './components/HistoryStats';
 import { CompletionModal } from './components/CompletionModal';
@@ -43,14 +44,19 @@ export function App() {
   const { program: activeProgram, error: activeProgramError, refetch: refetchActiveProgram } = useActiveProgram(user?.id ?? null);
 
   const [programs, setPrograms] = useState<Program[]>([]);
+  // Tracks only the *first* program-list fetch, so the skeleton shows on initial load
+  // but doesn't reappear on a background refresh (e.g. after closing the programs drawer).
+  const [programsLoading, setProgramsLoading] = useState(true);
   const refreshPrograms = useCallback(() => {
     if (!user) {
       setPrograms([]);
+      setProgramsLoading(false);
       return;
     }
     listPrograms(user.id)
       .then(setPrograms)
-      .catch(err => console.error('Failed to load programs:', err));
+      .catch(err => console.error('Failed to load programs:', err))
+      .finally(() => setProgramsLoading(false));
   }, [user]);
 
   useEffect(() => {
@@ -326,25 +332,29 @@ export function App() {
       />
 
       <main style={{ flex: 1, paddingBottom: '60px' }}>
-        <StartScreen
-          programs={programs}
-          activeProgramId={activeProgram?.id ?? null}
-          onSelectProgram={handleSelectProgram}
-          onResumeActiveWorkout={handleResumeActiveWorkout}
-          onOpenPrograms={() => setActiveDrawer('programs')}
-          onOpenExerciseLibrary={() => setActiveDrawer('exerciseLibrary')}
-          onOpenCalendar={(dateStr) => {
-            setActiveDrawer('calendar');
-            if (dateStr) {
-              setActiveDayDetail(dateStr);
-            }
-          }}
-          isWorkoutActive={isWorkoutStarted}
-          isWorkoutPaused={isWorkoutPaused}
-          totalSecondsElapsed={totalSecondsElapsed}
+        {programsLoading ? (
+          <StartScreenSkeleton />
+        ) : (
+          <StartScreen
+            programs={programs}
+            activeProgramId={activeProgram?.id ?? null}
+            onSelectProgram={handleSelectProgram}
+            onResumeActiveWorkout={handleResumeActiveWorkout}
+            onOpenPrograms={() => setActiveDrawer('programs')}
+            onOpenExerciseLibrary={() => setActiveDrawer('exerciseLibrary')}
+            onOpenCalendar={(dateStr) => {
+              setActiveDrawer('calendar');
+              if (dateStr) {
+                setActiveDayDetail(dateStr);
+              }
+            }}
+            isWorkoutActive={isWorkoutStarted}
+            isWorkoutPaused={isWorkoutPaused}
+            totalSecondsElapsed={totalSecondsElapsed}
 
-          completedWorkouts={completedWorkouts}
-        />
+            completedWorkouts={completedWorkouts}
+          />
+        )}
       </main>
 
       {/* Pre-Workout Drawer */}
