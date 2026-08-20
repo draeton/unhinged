@@ -10,6 +10,10 @@ interface SwipeToDeleteProps {
 
 const ACTION_WIDTH = 84;
 const DRAG_THRESHOLD = 10;
+// However rounded a row's own corner gets (glass-panel uses 16px, HistoryStats' rows use 12px),
+// this covers it -- the backdrop needs to extend at least that far past the row's flat edge or
+// the row's corner curve exposes bare page background instead of red in the notch it carves out.
+const CORNER_BACKDROP_MARGIN = 24;
 
 export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({ onDelete, children, ariaLabel, disabled }) => {
   const [translateX, setTranslateX] = useState(0);
@@ -81,6 +85,11 @@ export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({ onDelete, children
   };
 
   const revealWidth = Math.min(ACTION_WIDTH, -translateX);
+  // Extend past the visible reveal so the backdrop still sits behind the row's own rounded
+  // corner as it slides away, instead of stopping at a hard edge the curve exposes bare
+  // background through. Zero unless actually revealed, so nothing renders (and nothing can
+  // bleed through a translucent row) at rest.
+  const backdropWidth = revealWidth > 0 ? revealWidth + CORNER_BACKDROP_MARGIN : 0;
 
   return (
     <div ref={containerRef} style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
@@ -90,11 +99,10 @@ export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({ onDelete, children
           top: 0,
           right: 0,
           bottom: 0,
-          // Clip to the revealed width instead of sliding the button itself -- this keeps the
-          // button anchored in a static position (matching the row sliding away from over it)
-          // while also ensuring nothing renders behind a translucent row background at rest
-          // (e.g. HistoryStats' rgba(255,255,255,0.03) rows), since a 0-width clip paints nothing.
-          width: `${revealWidth}px`,
+          width: `${backdropWidth}px`,
+          // The fill lives here, not just on the button below -- the backdrop is wider than
+          // the button (by CORNER_BACKDROP_MARGIN) so it still backs the row's rounded corner.
+          background: '#FF3366',
           overflow: 'hidden',
           transition: isDragging ? 'none' : 'width 0.2s ease',
         }}
@@ -108,7 +116,7 @@ export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({ onDelete, children
             right: 0,
             bottom: 0,
             width: `${ACTION_WIDTH}px`,
-            background: '#FF3366',
+            background: 'transparent',
             border: 'none',
             color: '#FFFFFF',
             cursor: 'pointer',
