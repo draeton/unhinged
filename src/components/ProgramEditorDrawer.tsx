@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, ChevronUp, ChevronDown, ListChecks } from 'lucide-react';
+import { Plus, ChevronUp, ChevronDown, ListChecks, X } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
 import { Drawer } from './Drawer';
@@ -9,6 +9,7 @@ import { SwipeToDelete } from './SwipeToDelete';
 interface ProgramEditorDrawerProps {
   userId: string;
   programId: string;
+  onClose: () => void;
 }
 
 const BLOCK_TYPES: BlockType[] = ['warmup', 'strength', 'mobility', 'cardio', 'cooldown'];
@@ -25,7 +26,7 @@ const fieldInputStyle: React.CSSProperties = {
 
 const emptyNewBlock = () => ({ title: '', subtitle: '', blockType: 'warmup' as BlockType, durationMinutes: 10 });
 
-export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId, programId }) => {
+export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId, programId, onClose }) => {
   const [program, setProgram] = useState<Program | null>(null);
   const [blocks, setBlocks] = useState<ProgramBlock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,6 +110,16 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
 
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          title="Close"
+          onClick={onClose}
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
+        >
+          <X size={22} />
+        </button>
+      </div>
+
       {loading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</div>}
       {error && <div style={{ color: '#FF3366', fontSize: '0.85rem' }}>{error}</div>}
 
@@ -193,8 +204,15 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
         </div>
       )}
 
-      <Drawer isOpen={!!openBlock} onClose={() => setOpenBlock(null)}>
-        {openBlock && <BlockEditorDrawer userId={userId} blockId={openBlock.id} blockTitle={openBlock.title} />}
+      <Drawer isOpen={!!openBlock} onClose={() => setOpenBlock(null)} fullScreen>
+        {openBlock && (
+          <BlockEditorDrawer
+            userId={userId}
+            blockId={openBlock.id}
+            blockTitle={openBlock.title}
+            onClose={() => setOpenBlock(null)}
+          />
+        )}
       </Drawer>
     </div>
   );

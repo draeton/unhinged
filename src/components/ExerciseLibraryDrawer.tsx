@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Pencil, Search } from 'lucide-react';
+import { Plus, Pencil, Search, X } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import { listExercises, deleteExercise } from '../services/exercises';
 import { Drawer } from './Drawer';
@@ -8,11 +8,12 @@ import { SwipeToDelete } from './SwipeToDelete';
 
 interface ExerciseLibraryDrawerProps {
   userId: string;
+  onClose: () => void;
 }
 
 type EditorState = { mode: 'closed' } | { mode: 'new' } | { mode: 'edit'; exercise: Exercise };
 
-export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ userId }) => {
+export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ userId, onClose }) => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +58,16 @@ export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ us
 
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF' }}>Exercise Library</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF' }}>Exercise Library</h2>
+        <button
+          title="Close"
+          onClick={onClose}
+          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
+        >
+          <X size={22} />
+        </button>
+      </div>
 
       <div style={{ position: 'relative' }}>
         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -121,7 +131,7 @@ export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ us
         ))}
       </div>
 
-      <Drawer isOpen={editor.mode !== 'closed'} onClose={() => setEditor({ mode: 'closed' })}>
+      <Drawer isOpen={editor.mode !== 'closed'} onClose={() => setEditor({ mode: 'closed' })} fullScreen>
         {editor.mode !== 'closed' && (
           <ExerciseEditorDrawer
             userId={userId}

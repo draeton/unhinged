@@ -6,11 +6,13 @@ interface DrawerProps {
   onClose: () => void;
   children: React.ReactNode;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  /** Render as a full-screen view instead of a bottom sheet. The content is responsible for its own close button. */
+  fullScreen?: boolean;
 }
 
 let globalZIndex = 1000;
 
-export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrollRef }) => {
+export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrollRef, fullScreen = false }) => {
   const [startY, setStartY] = useState<number | null>(null);
   const [currentY, setCurrentY] = useState<number | null>(null);
   const [zIndex, setZIndex] = useState(1000);
@@ -87,11 +89,13 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrol
   };
 
   // Push past 100% when closed so the sheet's box-shadow blur doesn't peek above the viewport edge.
-  const transformY = isOpen ? (currentY !== null ? `${currentY}px` : '0') : 'calc(100% + 40px)';
+  const transformY = isOpen
+    ? (currentY !== null ? `${currentY}px` : '0')
+    : (fullScreen ? '100%' : 'calc(100% + 40px)');
 
   const drawerContent = (
     <>
-      <div 
+      <div
         style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -102,14 +106,24 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrol
           transition: 'opacity 0.3s ease',
           zIndex: zIndex,
           touchAction: 'none'
-        }} 
+        }}
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
       />
-      <div 
-        style={{
+      <div
+        style={fullScreen ? {
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'var(--bg-dark)',
+          transform: `translateY(${transformY})`,
+          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          zIndex: zIndex + 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overscrollBehavior: 'none'
+        } : {
           position: 'fixed',
           bottom: 0,
           left: 0,
@@ -127,15 +141,17 @@ export const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, children, scrol
           overscrollBehavior: 'none'
         }}
       >
-        <div 
-          className="drawer-drag-handle"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '16px 0', cursor: 'grab', touchAction: 'none' }}
-        >
-          <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px' }} />
-        </div>
+        {!fullScreen && (
+          <div
+            className="drawer-drag-handle"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '16px 0', cursor: 'grab', touchAction: 'none' }}
+          >
+            <div style={{ width: '48px', height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px' }} />
+          </div>
+        )}
         <div ref={scrollRef} id="drawer-scroll-container" style={{ flex: 1, overflowY: 'auto', paddingBottom: '40px', overscrollBehavior: 'contain' }}>
           {children}
         </div>
