@@ -2,14 +2,16 @@ import React from 'react';
 import type { CompletedWorkout } from '../types/workout';
 import { Flame, Calendar, Clock, CheckCircle2, Trophy } from 'lucide-react';
 import { WorkoutCompletionDiagram } from './WorkoutCompletionDiagram';
+import { SwipeToDelete } from './SwipeToDelete';
 
 interface HistoryStatsProps {
   workouts: CompletedWorkout[];
+  onDeleteWorkout: (id: string) => void;
   prs?: any[];
   onClearHistory?: () => void;
 }
 
-export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
+export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts, onDeleteWorkout }) => {
   const totalMinutes = workouts.reduce((sum, w) => sum + w.durationMinutes, 0);
   const totalSets = workouts.reduce((sum, w) => sum + w.totalSetsCompleted, 0);
 
@@ -81,41 +83,43 @@ export const HistoryStats: React.FC<HistoryStatsProps> = ({ workouts }) => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {workouts.map((w, idx) => (
-              <div key={w.id || idx} style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '12px',
-                padding: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '14px',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                  <div>
-                    <div style={{ fontWeight: '700', fontSize: '1rem', color: '#FFFFFF' }}>
-                      {w.programName ?? 'Workout'} — Session #{workouts.length - idx}
+              <SwipeToDelete key={w.id || idx} onDelete={() => onDeleteWorkout(w.id)} ariaLabel={`Delete ${w.programName ?? 'Workout'} — Session #${workouts.length - idx}`}>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <div style={{ fontWeight: '700', fontSize: '1rem', color: '#FFFFFF' }}>
+                        {w.programName ?? 'Workout'} — Session #{workouts.length - idx}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {new Date(w.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      {new Date(w.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
+                        ⏱️ {w.durationMinutes} mins
+                      </span>
+                      <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00F0FF' }}>
+                        ✅ {w.totalSetsCompleted} sets
+                      </span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span className="badge" style={{ background: 'rgba(0, 240, 255, 0.15)', color: '#00F0FF' }}>
-                      ⏱️ {w.durationMinutes} mins
-                    </span>
-                    <span className="badge" style={{ background: 'rgba(0, 255, 157, 0.15)', color: '#00F0FF' }}>
-                      ✅ {w.totalSetsCompleted} sets
-                    </span>
-                  </div>
+                  {w.exerciseLogs.length > 0 && (
+                    <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+                      <WorkoutCompletionDiagram exerciseLogs={w.exerciseLogs} />
+                    </div>
+                  )}
                 </div>
-
-                {w.exerciseLogs.length > 0 && (
-                  <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
-                    <WorkoutCompletionDiagram exerciseLogs={w.exerciseLogs} />
-                  </div>
-                )}
-              </div>
+              </SwipeToDelete>
             ))}
           </div>
         )}

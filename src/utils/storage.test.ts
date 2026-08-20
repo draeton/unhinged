@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getCompletedWorkouts, saveCompletedWorkout } from './storage';
+import { getCompletedWorkouts, saveCompletedWorkout, deleteCompletedWorkout } from './storage';
 import type { CompletedWorkout } from '../types/workout';
 
 describe('Storage Utils', () => {
@@ -28,6 +28,28 @@ describe('Storage Utils', () => {
     const retrieved = getCompletedWorkouts();
     expect(retrieved.length).toBe(1);
     expect(retrieved[0]).toEqual(workout);
+  });
+
+  it('should delete a completed workout by id', () => {
+    const workoutA: CompletedWorkout = {
+      id: 'test-1',
+      date: '2026-08-10',
+      durationMinutes: 45,
+      totalSetsCompleted: 10,
+      rpe: 8,
+      notes: 'Good workout',
+      exerciseLogs: [],
+    };
+    const workoutB: CompletedWorkout = { ...workoutA, id: 'test-2' };
+
+    saveCompletedWorkout(workoutA);
+    saveCompletedWorkout(workoutB);
+
+    deleteCompletedWorkout('test-1');
+
+    const retrieved = getCompletedWorkouts();
+    expect(retrieved.length).toBe(1);
+    expect(retrieved[0].id).toBe('test-2');
   });
 
 });

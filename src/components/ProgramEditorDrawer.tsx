@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown, ListChecks } from 'lucide-react';
+import { Plus, ChevronUp, ChevronDown, ListChecks } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
 import { Drawer } from './Drawer';
 import { BlockEditorDrawer } from './BlockEditorDrawer';
+import { SwipeToDelete } from './SwipeToDelete';
 
 interface ProgramEditorDrawerProps {
   userId: string;
@@ -32,7 +33,6 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
   const [nameDraft, setNameDraft] = useState('');
   const [showAddBlock, setShowAddBlock] = useState(false);
   const [newBlock, setNewBlock] = useState(emptyNewBlock());
-  const [confirmDeleteBlockId, setConfirmDeleteBlockId] = useState<string | null>(null);
   const [openBlock, setOpenBlock] = useState<ProgramBlock | null>(null);
 
   const refresh = () => {
@@ -87,7 +87,6 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
   const handleDeleteBlock = async (id: string) => {
     try {
       await deleteBlock(id);
-      setConfirmDeleteBlockId(null);
       refresh();
     } catch (err: any) {
       setError(err?.message ?? 'Failed to delete block.');
@@ -133,57 +132,39 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No blocks yet — add one below.</div>
         )}
         {blocks.map((block, index) => (
-          <div key={block.id} className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <button onClick={() => handleMove(index, -1)} disabled={index === 0} style={{ background: 'transparent', border: 'none', color: index === 0 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === 0 ? 'default' : 'pointer', padding: '2px' }}>
-                  <ChevronUp size={16} />
-                </button>
-                <button onClick={() => handleMove(index, 1)} disabled={index === blocks.length - 1} style={{ background: 'transparent', border: 'none', color: index === blocks.length - 1 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === blocks.length - 1 ? 'default' : 'pointer', padding: '2px' }}>
-                  <ChevronDown size={16} />
+          <SwipeToDelete key={block.id} onDelete={() => handleDeleteBlock(block.id)} ariaLabel={`Delete ${block.title}`}>
+            <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <button onClick={() => handleMove(index, -1)} disabled={index === 0} style={{ background: 'transparent', border: 'none', color: index === 0 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === 0 ? 'default' : 'pointer', padding: '2px' }}>
+                    <ChevronUp size={16} />
+                  </button>
+                  <button onClick={() => handleMove(index, 1)} disabled={index === blocks.length - 1} style={{ background: 'transparent', border: 'none', color: index === blocks.length - 1 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === blocks.length - 1 ? 'default' : 'pointer', padding: '2px' }}>
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
+                      {block.blockType}
+                    </span>
+                    <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{block.title}</span>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    ~{block.durationMinutes} min{block.subtitle ? ` • ${block.subtitle}` : ''}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setOpenBlock(block)}
+                  style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
+                >
+                  <ListChecks size={16} />
                 </button>
               </div>
-
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
-                    {block.blockType}
-                  </span>
-                  <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{block.title}</span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  ~{block.durationMinutes} min{block.subtitle ? ` • ${block.subtitle}` : ''}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setOpenBlock(block)}
-                style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
-              >
-                <ListChecks size={16} />
-              </button>
-              <button
-                onClick={() => setConfirmDeleteBlockId(block.id)}
-                style={{ background: 'rgba(255,0,122,0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#FF3366', cursor: 'pointer' }}
-              >
-                <Trash2 size={16} />
-              </button>
             </div>
-
-            {confirmDeleteBlockId === block.id && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: 'rgba(255,0,122,0.08)', border: '1px solid rgba(255,0,122,0.3)', borderRadius: '10px', padding: '10px 12px' }}>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-main)' }}>Delete this block and its exercises?</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => setConfirmDeleteBlockId(null)} style={{ background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '6px 12px', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.8rem' }}>
-                    Cancel
-                  </button>
-                  <button onClick={() => handleDeleteBlock(block.id)} style={{ background: '#FF3366', border: 'none', borderRadius: '8px', padding: '6px 12px', color: '#FFFFFF', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          </SwipeToDelete>
         ))}
       </div>
 

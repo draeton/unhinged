@@ -33,7 +33,28 @@ export const syncWorkoutToSupabase = async (workout: CompletedWorkout) => {
 };
 
 /**
- * Downloads all completed workouts for the authenticated user and merges them 
+ * Deletes a completed workout from Supabase if the user is authenticated.
+ */
+export const deleteWorkoutFromSupabase = async (id: string) => {
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session?.user) return; // Not logged in, nothing to delete remotely
+
+    const { error } = await supabase
+      .from('completed_workouts')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting workout from Supabase:', error);
+    }
+  } catch (err) {
+    console.error('Failed to delete workout from Supabase:', err);
+  }
+};
+
+/**
+ * Downloads all completed workouts for the authenticated user and merges them
  * with the local storage workouts, ensuring no duplicates.
  */
 export const syncWorkoutsFromSupabase = async (): Promise<CompletedWorkout[]> => {

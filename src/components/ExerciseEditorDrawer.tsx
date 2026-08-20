@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import type { Exercise, TargetMuscle } from '../types/workout';
 import { createExercise, updateExercise, type ExerciseInput } from '../services/exercises';
+import { SwipeToDelete } from './SwipeToDelete';
 
 interface ExerciseEditorDrawerProps {
   userId: string;
@@ -245,21 +246,14 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <label style={fieldLabelStyle}>Form Cues</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {form.formCues.map((cue, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px' }}>
+            <SwipeToDelete key={i} onDelete={() => removeFormCue(i)} ariaLabel={`Remove cue ${i + 1}`}>
               <input
                 type="text"
                 value={cue}
                 onChange={e => updateFormCue(i, e.target.value)}
-                style={{ ...fieldInputStyle, flex: 1 }}
+                style={{ ...fieldInputStyle, width: '100%' }}
               />
-              <button
-                type="button"
-                onClick={() => removeFormCue(i)}
-                style={{ background: 'transparent', border: 'none', color: '#FF3366', cursor: 'pointer', padding: '4px' }}
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
+            </SwipeToDelete>
           ))}
           <button
             type="button"
@@ -276,29 +270,24 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <label style={fieldLabelStyle}>Video Links</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {(form.videoUrls ?? []).map((video, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="text"
-                value={video.title}
-                onChange={e => updateVideoUrl(i, 'title', e.target.value)}
-                placeholder="Title"
-                style={{ ...fieldInputStyle, flex: 1 }}
-              />
-              <input
-                type="text"
-                value={video.url}
-                onChange={e => updateVideoUrl(i, 'url', e.target.value)}
-                placeholder="URL"
-                style={{ ...fieldInputStyle, flex: 1 }}
-              />
-              <button
-                type="button"
-                onClick={() => removeVideoUrl(i)}
-                style={{ background: 'transparent', border: 'none', color: '#FF3366', cursor: 'pointer', padding: '4px' }}
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
+            <SwipeToDelete key={i} onDelete={() => removeVideoUrl(i)} ariaLabel={`Remove video link ${i + 1}`}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  value={video.title}
+                  onChange={e => updateVideoUrl(i, 'title', e.target.value)}
+                  placeholder="Title"
+                  style={{ ...fieldInputStyle, flex: 1 }}
+                />
+                <input
+                  type="text"
+                  value={video.url}
+                  onChange={e => updateVideoUrl(i, 'url', e.target.value)}
+                  placeholder="URL"
+                  style={{ ...fieldInputStyle, flex: 1 }}
+                />
+              </div>
+            </SwipeToDelete>
           ))}
           <button
             type="button"
