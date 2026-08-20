@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Search } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import { listExercises, deleteExercise } from '../services/exercises';
 import { Drawer } from './Drawer';
 import { ExerciseEditorDrawer } from './ExerciseEditorDrawer';
+import { SwipeToDelete } from './SwipeToDelete';
 
 interface ExerciseLibraryDrawerProps {
   userId: string;
@@ -17,7 +18,6 @@ export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ us
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [editor, setEditor] = useState<EditorState>({ mode: 'closed' });
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const refresh = () => {
@@ -49,7 +49,6 @@ export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ us
     setDeleteError(null);
     try {
       await deleteExercise(id);
-      setConfirmDeleteId(null);
       refresh();
     } catch (err: any) {
       setDeleteError(err?.message ?? 'Failed to delete exercise.');
@@ -96,54 +95,29 @@ export const ExerciseLibraryDrawer: React.FC<ExerciseLibraryDrawerProps> = ({ us
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No exercises found.</div>
         )}
         {filtered.map(ex => (
-          <div
-            key={ex.id}
-            className="glass-panel"
-            style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-              <div>
-                <div style={{ fontWeight: '700', color: '#FFFFFF', fontSize: '1rem' }}>{ex.name}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  {ex.repsOrTime}{ex.equipment ? ` • ${ex.equipment}` : ''}
+          <SwipeToDelete key={ex.id} onDelete={() => handleDelete(ex.id)} ariaLabel={`Delete ${ex.name}`}>
+            <div
+              className="glass-panel"
+              style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                <div>
+                  <div style={{ fontWeight: '700', color: '#FFFFFF', fontSize: '1rem' }}>{ex.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {ex.repsOrTime}{ex.equipment ? ` • ${ex.equipment}` : ''}
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                <button
-                  onClick={() => setEditor({ mode: 'edit', exercise: ex })}
-                  style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  onClick={() => { setDeleteError(null); setConfirmDeleteId(ex.id); }}
-                  style={{ background: 'rgba(255,0,122,0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#FF3366', cursor: 'pointer' }}
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    onClick={() => setEditor({ mode: 'edit', exercise: ex })}
+                    style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                </div>
               </div>
             </div>
-
-            {confirmDeleteId === ex.id && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: 'rgba(255,0,122,0.08)', border: '1px solid rgba(255,0,122,0.3)', borderRadius: '10px', padding: '10px 12px' }}>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-main)' }}>Delete this exercise?</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => setConfirmDeleteId(null)}
-                    style={{ background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '6px 12px', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.8rem' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleDelete(ex.id)}
-                    style={{ background: '#FF3366', border: 'none', borderRadius: '8px', padding: '6px 12px', color: '#FFFFFF', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          </SwipeToDelete>
         ))}
       </div>
 

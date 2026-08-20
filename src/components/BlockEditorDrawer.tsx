@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown, ChevronRight, ChevronDown as ChevronDownIcon, Search } from 'lucide-react';
+import { Plus, ChevronUp, ChevronDown, ChevronRight, ChevronDown as ChevronDownIcon, Search } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import type { BlockExercise } from '../types/program';
 import { listExercises } from '../services/exercises';
+import { SwipeToDelete } from './SwipeToDelete';
 import {
   listBlockExercises,
   addExerciseToBlock,
@@ -141,59 +142,55 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
           const exercise = libraryById.get(placement.exerciseId);
           const isExpanded = expandedId === placement.id;
           return (
-            <div key={placement.id} className="glass-panel" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <button onClick={() => handleMove(index, -1)} disabled={index === 0} style={{ background: 'transparent', border: 'none', color: index === 0 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === 0 ? 'default' : 'pointer', padding: '2px' }}>
-                    <ChevronUp size={16} />
-                  </button>
-                  <button onClick={() => handleMove(index, 1)} disabled={index === placements.length - 1} style={{ background: 'transparent', border: 'none', color: index === placements.length - 1 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === placements.length - 1 ? 'default' : 'pointer', padding: '2px' }}>
-                    <ChevronDown size={16} />
+            <SwipeToDelete key={placement.id} onDelete={() => handleRemove(placement.id)} ariaLabel={`Remove ${exercise?.name ?? 'exercise'}`}>
+              <div className="glass-panel" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <button onClick={() => handleMove(index, -1)} disabled={index === 0} style={{ background: 'transparent', border: 'none', color: index === 0 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === 0 ? 'default' : 'pointer', padding: '2px' }}>
+                      <ChevronUp size={16} />
+                    </button>
+                    <button onClick={() => handleMove(index, 1)} disabled={index === placements.length - 1} style={{ background: 'transparent', border: 'none', color: index === placements.length - 1 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === placements.length - 1 ? 'default' : 'pointer', padding: '2px' }}>
+                      <ChevronDown size={16} />
+                    </button>
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '700', color: '#FFFFFF', fontSize: '0.95rem' }}>
+                      {exercise?.name ?? '(exercise not found)'}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      {placement.setsOverride ?? exercise?.sets} sets
+                      {(placement.repsOrTimeOverride ?? exercise?.repsOrTime) ? ` • ${placement.repsOrTimeOverride ?? exercise?.repsOrTime}` : ''}
+                      {placement.setsOverride != null || placement.repsOrTimeOverride != null || placement.workSecondsOverride != null || placement.restSecondsOverride != null ? ' (overridden)' : ''}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => (isExpanded ? setExpandedId(null) : startEditingOverrides(placement))}
+                    style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRight size={16} />}
                   </button>
                 </div>
 
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '700', color: '#FFFFFF', fontSize: '0.95rem' }}>
-                    {exercise?.name ?? '(exercise not found)'}
+                {isExpanded && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)' }}>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                      Leave a field blank to use the library default ({exercise?.sets} sets, {exercise?.repsOrTime || '—'}, work {exercise?.workSeconds ?? '—'}s, rest {exercise?.restSeconds ?? '—'}s).
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <input type="number" placeholder="Sets" value={overrideForm.sets} onChange={e => setOverrideForm(f => ({ ...f, sets: e.target.value }))} style={fieldInputStyle} />
+                      <input type="text" placeholder="Reps / Time" value={overrideForm.repsOrTime} onChange={e => setOverrideForm(f => ({ ...f, repsOrTime: e.target.value }))} style={fieldInputStyle} />
+                      <input type="number" placeholder="Work seconds" value={overrideForm.workSeconds} onChange={e => setOverrideForm(f => ({ ...f, workSeconds: e.target.value }))} style={fieldInputStyle} />
+                      <input type="number" placeholder="Rest seconds" value={overrideForm.restSeconds} onChange={e => setOverrideForm(f => ({ ...f, restSeconds: e.target.value }))} style={fieldInputStyle} />
+                    </div>
+                    <button className="btn-primary" onClick={() => handleSaveOverrides(placement.id)} style={{ justifyContent: 'center', padding: '10px', fontSize: '0.85rem' }}>
+                      Save Overrides
+                    </button>
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    {placement.setsOverride ?? exercise?.sets} sets
-                    {(placement.repsOrTimeOverride ?? exercise?.repsOrTime) ? ` • ${placement.repsOrTimeOverride ?? exercise?.repsOrTime}` : ''}
-                    {placement.setsOverride != null || placement.repsOrTimeOverride != null || placement.workSecondsOverride != null || placement.restSecondsOverride != null ? ' (overridden)' : ''}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => (isExpanded ? setExpandedId(null) : startEditingOverrides(placement))}
-                  style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
-                >
-                  {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRight size={16} />}
-                </button>
-                <button
-                  onClick={() => handleRemove(placement.id)}
-                  style={{ background: 'rgba(255,0,122,0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#FF3366', cursor: 'pointer' }}
-                >
-                  <Trash2 size={16} />
-                </button>
+                )}
               </div>
-
-              {isExpanded && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)' }}>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                    Leave a field blank to use the library default ({exercise?.sets} sets, {exercise?.repsOrTime || '—'}, work {exercise?.workSeconds ?? '—'}s, rest {exercise?.restSeconds ?? '—'}s).
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input type="number" placeholder="Sets" value={overrideForm.sets} onChange={e => setOverrideForm(f => ({ ...f, sets: e.target.value }))} style={fieldInputStyle} />
-                    <input type="text" placeholder="Reps / Time" value={overrideForm.repsOrTime} onChange={e => setOverrideForm(f => ({ ...f, repsOrTime: e.target.value }))} style={fieldInputStyle} />
-                    <input type="number" placeholder="Work seconds" value={overrideForm.workSeconds} onChange={e => setOverrideForm(f => ({ ...f, workSeconds: e.target.value }))} style={fieldInputStyle} />
-                    <input type="number" placeholder="Rest seconds" value={overrideForm.restSeconds} onChange={e => setOverrideForm(f => ({ ...f, restSeconds: e.target.value }))} style={fieldInputStyle} />
-                  </div>
-                  <button className="btn-primary" onClick={() => handleSaveOverrides(placement.id)} style={{ justifyContent: 'center', padding: '10px', fontSize: '0.85rem' }}>
-                    Save Overrides
-                  </button>
-                </div>
-              )}
-            </div>
+            </SwipeToDelete>
           );
         })}
       </div>

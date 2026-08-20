@@ -2,15 +2,18 @@ import React from 'react';
 import type { CompletedWorkout } from '../types/workout';
 import { Calendar as CalendarIcon, Clock, Activity, CheckCircle } from 'lucide-react';
 import { WorkoutCompletionDiagram } from './WorkoutCompletionDiagram';
+import { SwipeToDelete } from './SwipeToDelete';
 
 interface DayDetailDrawerProps {
   dateStr: string;
   completedWorkouts: CompletedWorkout[];
+  onDeleteWorkout: (id: string) => void;
 }
 
 export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   dateStr,
   completedWorkouts,
+  onDeleteWorkout,
 }) => {
   const getLocalDateString = (d: Date) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -34,40 +37,42 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {dayWorkouts.map((w, index) => (
-            <div key={w.id || index} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700' }}>
-                  <CheckCircle size={16} color="#00F0FF" />
-                  {w.programName ?? 'Workout'}{dayWorkouts.length > 1 ? ` #${index + 1}` : ''}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
-                  <Clock size={16} />
-                  <span>{w.durationMinutes} mins</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
-                  <Activity size={16} />
-                  <span>{w.totalSetsCompleted} sets</span>
-                </div>
-                {w.rpe ? (
-                  <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
-                    RPE: <strong style={{ color: '#fff' }}>{w.rpe}/10</strong>
+            <SwipeToDelete key={w.id || index} onDelete={() => onDeleteWorkout(w.id)} ariaLabel={`Delete ${w.programName ?? 'Workout'}${dayWorkouts.length > 1 ? ` #${index + 1}` : ''}`}>
+              <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700' }}>
+                    <CheckCircle size={16} color="#00F0FF" />
+                    {w.programName ?? 'Workout'}{dayWorkouts.length > 1 ? ` #${index + 1}` : ''}
                   </div>
-                ) : null}
-              </div>
-
-              {w.exerciseLogs.length > 0 && (
-                <WorkoutCompletionDiagram exerciseLogs={w.exerciseLogs} />
-              )}
-
-              {w.notes && (
-                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px', fontStyle: 'italic' }}>
-                  "{w.notes}"
                 </div>
-              )}
-            </div>
+
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
+                    <Clock size={16} />
+                    <span>{w.durationMinutes} mins</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
+                    <Activity size={16} />
+                    <span>{w.totalSetsCompleted} sets</span>
+                  </div>
+                  {w.rpe ? (
+                    <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>
+                      RPE: <strong style={{ color: '#fff' }}>{w.rpe}/10</strong>
+                    </div>
+                  ) : null}
+                </div>
+
+                {w.exerciseLogs.length > 0 && (
+                  <WorkoutCompletionDiagram exerciseLogs={w.exerciseLogs} />
+                )}
+
+                {w.notes && (
+                  <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px', fontStyle: 'italic' }}>
+                    "{w.notes}"
+                  </div>
+                )}
+              </div>
+            </SwipeToDelete>
           ))}
         </div>
       )}

@@ -43,6 +43,15 @@ export const getPersonalRecords = (): PersonalRecord[] => {
   }
 };
 
+export const deleteCompletedWorkout = (id: string): void => {
+  try {
+    const updated = getCompletedWorkouts().filter(w => w.id !== id);
+    localStorage.setItem(STORAGE_KEYS.COMPLETED_WORKOUTS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Failed to delete workout from localStorage:', e);
+  }
+};
+
 export const savePersonalRecord = (record: PersonalRecord): void => {
   try {
     const records = getPersonalRecords();

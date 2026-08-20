@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { CompletedWorkout, ExerciseLog } from './types/workout';
 import type { Program } from './types/program';
-import { getCompletedWorkouts, saveCompletedWorkout, setActiveProgramId } from './utils/storage';
-import { syncWorkoutToSupabase, syncWorkoutsFromSupabase } from './utils/supabaseSync';
+import { getCompletedWorkouts, saveCompletedWorkout, deleteCompletedWorkout, setActiveProgramId } from './utils/storage';
+import { syncWorkoutToSupabase, syncWorkoutsFromSupabase, deleteWorkoutFromSupabase } from './utils/supabaseSync';
 import { supabase } from './utils/supabase';
 import { audio } from './utils/audio';
 import { useActiveProgram } from './hooks/useActiveProgram';
@@ -309,6 +309,12 @@ export function App() {
     setActiveDrawer('history');
   };
 
+  const handleDeleteWorkout = (id: string) => {
+    setCompletedWorkouts(prev => prev.filter(w => w.id !== id));
+    deleteCompletedWorkout(id);
+    deleteWorkoutFromSupabase(id);
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-dark)' }}>
       <OfflineBanner />
@@ -368,6 +374,7 @@ export function App() {
       <Drawer isOpen={activeDrawer === 'history'} onClose={() => setActiveDrawer(null)}>
         <HistoryStats
           workouts={completedWorkouts}
+          onDeleteWorkout={handleDeleteWorkout}
         />
       </Drawer>
 
@@ -630,6 +637,7 @@ export function App() {
           <DayDetailDrawer
             dateStr={activeDayDetail}
             completedWorkouts={completedWorkouts}
+            onDeleteWorkout={handleDeleteWorkout}
           />
         )}
       </Drawer>
