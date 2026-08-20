@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabase';
+import { WelcomeCarousel } from './WelcomeCarousel';
 
 export const AuthScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -29,55 +30,58 @@ export const AuthScreen: React.FC = () => {
       flexDirection: 'column',
       background: 'var(--bg-dark)',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
+      padding: '32px 24px 24px',
+      gap: '28px',
     }}>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '24px',
-        maxWidth: '400px',
-        width: '100%',
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%)',
-        padding: '40px 32px',
-        borderRadius: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div style={{
-          width: '64px',
-          height: '64px',
-          borderRadius: '16px',
+          width: '40px',
+          height: '40px',
+          borderRadius: '12px',
           background: 'rgba(0, 240, 255, 0.15)',
           border: '1px solid rgba(0, 240, 255, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 0 30px rgba(0, 240, 255, 0.2)',
-          fontSize: '2rem',
+          boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)',
+          fontSize: '1.25rem',
           fontWeight: 900,
           color: '#00F0FF',
-          marginBottom: '8px'
         }}>
           ⚡
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-          <h1 style={{
-            fontSize: '1.8rem',
-            fontWeight: 900,
-            letterSpacing: '-0.03em',
-            fontFamily: 'var(--font-mono)',
-            textTransform: 'uppercase',
-            color: '#FFFFFF',
-            marginBottom: '8px'
-          }}>
-            UNHINGED
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Sign in to start your workout
-          </p>
-        </div>
+        <h1 style={{
+          fontSize: '1.3rem',
+          fontWeight: 900,
+          letterSpacing: '-0.03em',
+          fontFamily: 'var(--font-mono)',
+          textTransform: 'uppercase',
+          color: '#FFFFFF',
+        }}>
+          UNHINGED
+        </h1>
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', width: '100%', maxWidth: '400px' }}>
+        <WelcomeCarousel />
+      </div>
+
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '16px',
+        maxWidth: '400px',
+        width: '100%',
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%)',
+        padding: '24px',
+        borderRadius: '20px',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          Sign in to start your workout
+        </p>
 
         <button
           onClick={handleGoogleLogin}
