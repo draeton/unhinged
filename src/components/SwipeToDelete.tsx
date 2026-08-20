@@ -80,36 +80,49 @@ export const SwipeToDelete: React.FC<SwipeToDeleteProps> = ({ onDelete, children
     }
   };
 
+  const revealWidth = Math.min(ACTION_WIDTH, -translateX);
+
   return (
     <div ref={containerRef} style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
-      <button
-        onClick={onDelete}
-        aria-label={ariaLabel}
+      <div
         style={{
           position: 'absolute',
           top: 0,
           right: 0,
           bottom: 0,
-          width: `${ACTION_WIDTH}px`,
-          background: '#FF3366',
-          border: 'none',
-          color: '#FFFFFF',
-          cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '4px',
-          // Slide with the content instead of sitting statically behind it -- otherwise a
-          // translucent row background (e.g. HistoryStats' rgba(255,255,255,0.03) rows) lets
-          // this bleed through even at rest, before any swipe.
-          transform: `translateX(${ACTION_WIDTH + translateX}px)`,
-          transition: isDragging ? 'none' : 'transform 0.2s ease',
+          // Clip to the revealed width instead of sliding the button itself -- this keeps the
+          // button anchored in a static position (matching the row sliding away from over it)
+          // while also ensuring nothing renders behind a translucent row background at rest
+          // (e.g. HistoryStats' rgba(255,255,255,0.03) rows), since a 0-width clip paints nothing.
+          width: `${revealWidth}px`,
+          overflow: 'hidden',
+          transition: isDragging ? 'none' : 'width 0.2s ease',
         }}
       >
-        <Trash2 size={18} />
-        <span style={{ fontSize: '0.7rem', fontWeight: '700' }}>Delete</span>
-      </button>
+        <button
+          onClick={onDelete}
+          aria-label={ariaLabel}
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: `${ACTION_WIDTH}px`,
+            background: '#FF3366',
+            border: 'none',
+            color: '#FFFFFF',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+          }}
+        >
+          <Trash2 size={18} />
+          <span style={{ fontSize: '0.7rem', fontWeight: '700' }}>Delete</span>
+        </button>
+      </div>
       <div
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
