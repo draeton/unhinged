@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, ChevronUp, ChevronDown, ListChecks, X } from 'lucide-react';
+import { Plus, ListChecks, X } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
 import { Drawer } from './Drawer';
 import { BlockEditorDrawer } from './BlockEditorDrawer';
 import { SwipeToDelete } from './SwipeToDelete';
+import { SortableList } from './SortableList';
+import { SortableRow } from './SortableRow';
 
 interface ProgramEditorDrawerProps {
   userId: string;
@@ -94,11 +96,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     }
   };
 
-  const handleMove = async (index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= blocks.length) return;
-    const reordered = [...blocks];
-    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+  const handleReorder = async (reordered: ProgramBlock[]) => {
     setBlocks(reordered); // optimistic
     try {
       await reorderBlocks(userId, programId, reordered.map(b => b.id));
@@ -142,41 +140,40 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
         {!loading && blocks.length === 0 && (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No blocks yet — add one below.</div>
         )}
-        {blocks.map((block, index) => (
-          <SwipeToDelete key={block.id} onDelete={() => handleDeleteBlock(block.id)} ariaLabel={`Delete ${block.title}`}>
-            <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <button onClick={() => handleMove(index, -1)} disabled={index === 0} style={{ background: 'transparent', border: 'none', color: index === 0 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === 0 ? 'default' : 'pointer', padding: '2px' }}>
-                    <ChevronUp size={16} />
-                  </button>
-                  <button onClick={() => handleMove(index, 1)} disabled={index === blocks.length - 1} style={{ background: 'transparent', border: 'none', color: index === blocks.length - 1 ? 'var(--text-dim)' : 'var(--text-muted)', cursor: index === blocks.length - 1 ? 'default' : 'pointer', padding: '2px' }}>
-                    <ChevronDown size={16} />
-                  </button>
-                </div>
+        <SortableList items={blocks} onReorder={handleReorder}>
+          {block => (
+            <SortableRow key={block.id} id={block.id}>
+              {dragHandle => (
+                <SwipeToDelete onDelete={() => handleDeleteBlock(block.id)} ariaLabel={`Delete ${block.title}`}>
+                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {dragHandle}
 
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
-                      {block.blockType}
-                    </span>
-                    <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{block.title}</span>
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                    ~{block.durationMinutes} min{block.subtitle ? ` • ${block.subtitle}` : ''}
-                  </div>
-                </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
+                            {block.blockType}
+                          </span>
+                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{block.title}</span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          ~{block.durationMinutes} min{block.subtitle ? ` • ${block.subtitle}` : ''}
+                        </div>
+                      </div>
 
-                <button
-                  onClick={() => setOpenBlock(block)}
-                  style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
-                >
-                  <ListChecks size={16} />
-                </button>
-              </div>
-            </div>
-          </SwipeToDelete>
-        ))}
+                      <button
+                        onClick={() => setOpenBlock(block)}
+                        style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
+                      >
+                        <ListChecks size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </SwipeToDelete>
+              )}
+            </SortableRow>
+          )}
+        </SortableList>
       </div>
 
       {!showAddBlock ? (
