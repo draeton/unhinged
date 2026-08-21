@@ -35,22 +35,21 @@ const fieldInputStyle: React.CSSProperties = {
 
 interface OverrideForm {
   sets: number;
-  workSeconds: string;
-  restSeconds: string;
+  workSeconds: number;
+  restSeconds: number;
   repsOrTime: string;
 }
 
 // Override fields are pre-filled with the exercise's library default rather than left blank, so
-// a value only becomes a stored override once it actually diverges from that default.
+// a value only becomes a stored override once it actually diverges from that default. Work/rest
+// seconds use 0 (not null) to mean "no timer" in the form, matching the NumberReel's range.
 const overrideFieldsFromForm = (form: OverrideForm, exercise: Exercise | undefined): BlockExerciseOverrides => {
-  const defaultWorkSeconds = exercise?.workSeconds ?? null;
-  const defaultRestSeconds = exercise?.restSeconds ?? null;
-  const formWorkSeconds = form.workSeconds === '' ? null : Number(form.workSeconds);
-  const formRestSeconds = form.restSeconds === '' ? null : Number(form.restSeconds);
+  const defaultWorkSeconds = exercise?.workSeconds ?? 0;
+  const defaultRestSeconds = exercise?.restSeconds ?? 0;
   return {
     setsOverride: exercise && form.sets === exercise.sets ? null : form.sets,
-    workSecondsOverride: formWorkSeconds === defaultWorkSeconds ? null : formWorkSeconds,
-    restSecondsOverride: formRestSeconds === defaultRestSeconds ? null : formRestSeconds,
+    workSecondsOverride: form.workSeconds === defaultWorkSeconds ? null : form.workSeconds,
+    restSecondsOverride: form.restSeconds === defaultRestSeconds ? null : form.restSeconds,
     repsOrTimeOverride: form.repsOrTime === (exercise?.repsOrTime ?? '') ? null : form.repsOrTime,
   };
 };
@@ -63,7 +62,7 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
   const [showPicker, setShowPicker] = useState(false);
   const [pickerSearch, setPickerSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [overrideForm, setOverrideForm] = useState<OverrideForm>({ sets: 1, workSeconds: '', restSeconds: '', repsOrTime: '' });
+  const [overrideForm, setOverrideForm] = useState<OverrideForm>({ sets: 1, workSeconds: 0, restSeconds: 0, repsOrTime: '' });
 
   const refresh = () => {
     setLoading(true);
@@ -124,8 +123,8 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
     setExpandedId(placement.id);
     setOverrideForm({
       sets: placement.setsOverride ?? exercise?.sets ?? 1,
-      workSeconds: (placement.workSecondsOverride ?? exercise?.workSeconds)?.toString() ?? '',
-      restSeconds: (placement.restSecondsOverride ?? exercise?.restSeconds)?.toString() ?? '',
+      workSeconds: (placement.workSecondsOverride ?? exercise?.workSeconds) ?? 0,
+      restSeconds: (placement.restSecondsOverride ?? exercise?.restSeconds) ?? 0,
       repsOrTime: placement.repsOrTimeOverride ?? exercise?.repsOrTime ?? '',
     });
   };
@@ -207,8 +206,22 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                               label="Sets"
                             />
                             <input type="text" placeholder="Reps / Time" value={overrideForm.repsOrTime} onChange={e => setOverrideForm(f => ({ ...f, repsOrTime: e.target.value }))} style={fieldInputStyle} />
-                            <input type="number" placeholder="Work seconds" value={overrideForm.workSeconds} onChange={e => setOverrideForm(f => ({ ...f, workSeconds: e.target.value }))} style={fieldInputStyle} />
-                            <input type="number" placeholder="Rest seconds" value={overrideForm.restSeconds} onChange={e => setOverrideForm(f => ({ ...f, restSeconds: e.target.value }))} style={fieldInputStyle} />
+                            <NumberReel
+                              compact
+                              value={overrideForm.workSeconds}
+                              min={0}
+                              max={600}
+                              onChange={v => setOverrideForm(f => ({ ...f, workSeconds: v }))}
+                              label="Work Seconds"
+                            />
+                            <NumberReel
+                              compact
+                              value={overrideForm.restSeconds}
+                              min={0}
+                              max={600}
+                              onChange={v => setOverrideForm(f => ({ ...f, restSeconds: v }))}
+                              label="Rest Seconds"
+                            />
                           </div>
                           <button className="btn-primary" onClick={() => handleSaveOverrides(placement.id, exercise)} style={{ justifyContent: 'center', padding: '10px', fontSize: '0.85rem' }}>
                             Save Overrides

@@ -159,23 +159,21 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <div>
-          <label style={fieldLabelStyle}>Work Seconds (blank = no work timer)</label>
-          <input
-            type="number"
+          <NumberReel
+            value={form.workSeconds ?? 0}
             min={0}
-            value={form.workSeconds ?? ''}
-            onChange={e => setField('workSeconds', e.target.value === '' ? null : Number(e.target.value))}
-            style={fieldInputStyle}
+            max={600}
+            onChange={v => setField('workSeconds', v === 0 ? null : v)}
+            label="Work Seconds (0 = no timer)"
           />
         </div>
         <div>
-          <label style={fieldLabelStyle}>Rest Seconds (blank = no rest timer)</label>
-          <input
-            type="number"
+          <NumberReel
+            value={form.restSeconds ?? 0}
             min={0}
-            value={form.restSeconds ?? ''}
-            onChange={e => setField('restSeconds', e.target.value === '' ? null : Number(e.target.value))}
-            style={fieldInputStyle}
+            max={600}
+            onChange={v => setField('restSeconds', v === 0 ? null : v)}
+            label="Rest Seconds (0 = no timer)"
           />
         </div>
       </div>
