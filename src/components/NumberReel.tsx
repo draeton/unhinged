@@ -12,10 +12,9 @@ interface NumberReelProps {
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
 /**
- * Drag-to-change numeric picker: dragging down increases the value, dragging up decreases it,
- * like scrolling a slot-machine reel. Arrow keys are also supported (up/right = increase,
- * down/left = decrease) since that direction is the accessible/keyboard convention regardless
- * of the drag orientation.
+ * Drag-to-change numeric picker: dragging up increases the value, dragging down decreases it,
+ * like scrolling a slot-machine reel. Arrow keys (up/right = increase, down/left = decrease)
+ * and Home/End are also supported.
  */
 export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChange, label, compact = false }) => {
   const itemHeight = compact ? 32 : 40;
@@ -35,16 +34,19 @@ export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChang
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
+    // deltaY is the raw physical drag distance (positive = finger moved down). Since dragging up
+    // increases the value, the value change is the negation of the physical step count.
     const deltaY = e.clientY - startYRef.current;
     const rawSteps = deltaY / itemHeight;
-    const boundedSteps = clamp(rawSteps, min - startValueRef.current, max - startValueRef.current);
+    const boundedSteps = clamp(rawSteps, startValueRef.current - max, startValueRef.current - min);
     const steppedDelta = Math.trunc(boundedSteps);
     const fractional = boundedSteps - steppedDelta;
-    const nextValue = clamp(startValueRef.current + steppedDelta, min, max);
+    const nextValue = clamp(startValueRef.current - steppedDelta, min, max);
     if (nextValue !== lastValueRef.current) {
       lastValueRef.current = nextValue;
       onChange(nextValue);
     }
+    // The visual offset tracks the physical drag direction, so content still follows the finger.
     setOffsetPx(fractional * itemHeight);
   };
 
@@ -72,8 +74,10 @@ export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChang
     }
   };
 
-  const above = value + 1 <= max ? value + 1 : null;
-  const below = value - 1 >= min ? value - 1 : null;
+  // Revealed by dragging down (decrease) vs. up (increase) — content follows the finger, so the
+  // row physically above the center is the *lower* neighbor and vice versa.
+  const above = value - 1 >= min ? value - 1 : null;
+  const below = value + 1 <= max ? value + 1 : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
