@@ -259,12 +259,14 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {form.formCues.map((cue, i) => (
             <SwipeToDelete key={i} onDelete={() => removeFormCue(i)} ariaLabel={`Remove cue ${i + 1}`}>
-              <AutoGrowTextarea
-                value={cue}
-                onChange={e => updateFormCue(i, e.target.value)}
-                placeholder="e.g. Keep your chest up and core braced"
-                style={{ ...fieldInputStyle, width: '100%' }}
-              />
+              <div style={{ background: 'var(--bg-dark)', borderRadius: '10px' }}>
+                <AutoGrowTextarea
+                  value={cue}
+                  onChange={e => updateFormCue(i, e.target.value)}
+                  placeholder="e.g. Keep your chest up and core braced"
+                  style={{ ...fieldInputStyle, width: '100%', outlineOffset: '-2px' }}
+                />
+              </div>
             </SwipeToDelete>
           ))}
           <button
@@ -283,13 +285,13 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {(form.videoUrls ?? []).map((video, i) => (
             <SwipeToDelete key={i} onDelete={() => removeVideoUrl(i)} ariaLabel={`Remove video link ${i + 1}`}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-dark)', borderRadius: '10px' }}>
                 <input
                   type="text"
                   value={video.title}
                   onChange={e => updateVideoUrl(i, 'title', e.target.value)}
                   placeholder="Title"
-                  style={{ ...fieldInputStyle, flex: 1 }}
+                  style={{ ...fieldInputStyle, flex: 1, outlineOffset: '-2px' }}
                 />
                 <button
                   type="button"
@@ -301,9 +303,8 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
                     justifyContent: 'center',
                     width: '44px',
                     flexShrink: 0,
-                    background: video.url ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
-                    border: video.url ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                    borderRadius: '10px',
+                    background: 'transparent',
+                    border: 'none',
                     color: video.url ? '#00F0FF' : 'var(--text-muted)',
                     cursor: 'pointer',
                   }}
