@@ -3,6 +3,7 @@ import { Plus, X } from 'lucide-react';
 import type { Exercise, TargetMuscle } from '../types/workout';
 import { createExercise, updateExercise, type ExerciseInput } from '../services/exercises';
 import { SwipeToDelete } from './SwipeToDelete';
+import { NumberReel } from './NumberReel';
 
 interface ExerciseEditorDrawerProps {
   userId: string;
@@ -31,7 +32,7 @@ const fieldInputStyle: React.CSSProperties = {
   padding: '10px',
   color: '#FFFFFF',
   fontFamily: 'var(--font-main)',
-  fontSize: '0.9rem',
+  fontSize: '1.15rem',
 };
 
 const emptyFormState = (): ExerciseInput => ({
@@ -142,14 +143,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <div>
-          <label style={fieldLabelStyle}>Sets</label>
-          <input
-            type="number"
-            min={1}
-            value={form.sets}
-            onChange={e => setField('sets', Number(e.target.value) || 1)}
-            style={fieldInputStyle}
-          />
+          <NumberReel value={form.sets} min={1} max={10} onChange={v => setField('sets', v)} label="Sets" />
         </div>
         <div>
           <label style={fieldLabelStyle}>Reps / Time (display text)</label>
@@ -165,23 +159,23 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <div>
-          <label style={fieldLabelStyle}>Work Seconds (blank = no work timer)</label>
-          <input
-            type="number"
+          <NumberReel
+            value={form.workSeconds ?? 0}
             min={0}
-            value={form.workSeconds ?? ''}
-            onChange={e => setField('workSeconds', e.target.value === '' ? null : Number(e.target.value))}
-            style={fieldInputStyle}
+            max={600}
+            step={15}
+            onChange={v => setField('workSeconds', v === 0 ? null : v)}
+            label="Work Seconds (0 = no timer)"
           />
         </div>
         <div>
-          <label style={fieldLabelStyle}>Rest Seconds (blank = no rest timer)</label>
-          <input
-            type="number"
+          <NumberReel
+            value={form.restSeconds ?? 0}
             min={0}
-            value={form.restSeconds ?? ''}
-            onChange={e => setField('restSeconds', e.target.value === '' ? null : Number(e.target.value))}
-            style={fieldInputStyle}
+            max={600}
+            step={15}
+            onChange={v => setField('restSeconds', v === 0 ? null : v)}
+            label="Rest Seconds (0 = no timer)"
           />
         </div>
       </div>
