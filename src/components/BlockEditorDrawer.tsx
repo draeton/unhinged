@@ -7,6 +7,7 @@ import { SwipeToDelete } from './SwipeToDelete';
 import { SortableList } from './SortableList';
 import { SortableRow } from './SortableRow';
 import { NumberReel } from './NumberReel';
+import { ConfirmDialog } from './ConfirmDialog';
 import {
   listBlockExercises,
   addExerciseToBlock,
@@ -63,6 +64,10 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
   const [pickerSearch, setPickerSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [overrideForm, setOverrideForm] = useState<OverrideForm>({ sets: 1, workSeconds: 0, restSeconds: 0, repsOrTime: '' });
+  const [initialOverrideForm, setInitialOverrideForm] = useState<OverrideForm>({ sets: 1, workSeconds: 0, restSeconds: 0, repsOrTime: '' });
+  const [pendingDiscardAction, setPendingDiscardAction] = useState<'collapse' | 'close' | null>(null);
+
+  const isOverrideDirty = expandedId !== null && JSON.stringify(overrideForm) !== JSON.stringify(initialOverrideForm);
 
   const refresh = () => {
     setLoading(true);
@@ -120,13 +125,15 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
 
   const startEditingOverrides = (placement: BlockExercise) => {
     const exercise = libraryById.get(placement.exerciseId);
-    setExpandedId(placement.id);
-    setOverrideForm({
+    const initial = {
       sets: placement.setsOverride ?? exercise?.sets ?? 1,
       workSeconds: (placement.workSecondsOverride ?? exercise?.workSeconds) ?? 0,
       restSeconds: (placement.restSecondsOverride ?? exercise?.restSeconds) ?? 0,
       repsOrTime: placement.repsOrTimeOverride ?? exercise?.repsOrTime ?? '',
-    });
+    };
+    setExpandedId(placement.id);
+    setOverrideForm(initial);
+    setInitialOverrideForm(initial);
   };
 
   const handleSaveOverrides = async (id: string, exercise: Exercise | undefined) => {
@@ -139,13 +146,42 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
     }
   };
 
+  const handleToggleExpand = (placement: BlockExercise) => {
+    if (expandedId === placement.id) {
+      if (isOverrideDirty) {
+        setPendingDiscardAction('collapse');
+      } else {
+        setExpandedId(null);
+      }
+    } else {
+      startEditingOverrides(placement);
+    }
+  };
+
+  const requestClose = () => {
+    if (isOverrideDirty) {
+      setPendingDiscardAction('close');
+    } else {
+      onClose();
+    }
+  };
+
+  const confirmDiscard = () => {
+    if (pendingDiscardAction === 'close') {
+      onClose();
+    } else {
+      setExpandedId(null);
+    }
+    setPendingDiscardAction(null);
+  };
+
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>{blockTitle}</h2>
         <button
           title="Close"
-          onClick={onClose}
+          onClick={requestClose}
           style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
         >
           <X size={22} />
@@ -184,7 +220,7 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                         </div>
 
                         <button
-                          onClick={() => (isExpanded ? setExpandedId(null) : startEditingOverrides(placement))}
+                          onClick={() => handleToggleExpand(placement)}
                           style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
                         >
                           {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRight size={16} />}
@@ -225,7 +261,12 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                               label="Rest Seconds"
                             />
                           </div>
-                          <button className="btn-primary" onClick={() => handleSaveOverrides(placement.id, exercise)} style={{ justifyContent: 'center', padding: '10px', fontSize: '0.85rem' }}>
+                          <button
+                            className="btn-primary"
+                            onClick={() => handleSaveOverrides(placement.id, exercise)}
+                            disabled={!isOverrideDirty}
+                            style={{ justifyContent: 'center', padding: '10px', fontSize: '0.85rem', opacity: isOverrideDirty ? 1 : 0.6 }}
+                          >
                             Save Overrides
                           </button>
                         </div>
@@ -274,6 +315,14 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={pendingDiscardAction !== null}
+        title="Discard changes?"
+        message="You have unsaved override changes for this exercise. If you leave now, they'll be lost."
+        onConfirm={confirmDiscard}
+        onCancel={() => setPendingDiscardAction(null)}
+      />
     </div>
   );
 };

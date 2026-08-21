@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Plus, X, Link } from 'lucide-react';
 import type { Exercise, TargetMuscle } from '../types/workout';
 import { createExercise, updateExercise, type ExerciseInput } from '../services/exercises';
@@ -6,6 +6,7 @@ import { SwipeToDelete } from './SwipeToDelete';
 import { NumberReel } from './NumberReel';
 import { Drawer } from './Drawer';
 import { AutoGrowTextarea } from './AutoGrowTextarea';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface ExerciseEditorDrawerProps {
   userId: string;
@@ -51,28 +52,41 @@ const emptyFormState = (): ExerciseInput => ({
   videoUrls: [],
 });
 
+const formFromExercise = (exercise: Exercise | null): ExerciseInput =>
+  exercise
+    ? {
+        name: exercise.name,
+        workSeconds: exercise.workSeconds,
+        restSeconds: exercise.restSeconds,
+        sets: exercise.sets,
+        repsOrTime: exercise.repsOrTime,
+        targetMuscles: exercise.targetMuscles,
+        equipment: exercise.equipment,
+        description: exercise.description,
+        formCues: exercise.formCues,
+        safetyTip: exercise.safetyTip,
+        videoUrls: exercise.videoUrls ?? [],
+      }
+    : emptyFormState();
+
 export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ userId, exercise, onSaved, onCancel }) => {
-  const [form, setForm] = useState<ExerciseInput>(() =>
-    exercise
-      ? {
-          name: exercise.name,
-          workSeconds: exercise.workSeconds,
-          restSeconds: exercise.restSeconds,
-          sets: exercise.sets,
-          repsOrTime: exercise.repsOrTime,
-          targetMuscles: exercise.targetMuscles,
-          equipment: exercise.equipment,
-          description: exercise.description,
-          formCues: exercise.formCues,
-          safetyTip: exercise.safetyTip,
-          videoUrls: exercise.videoUrls ?? [],
-        }
-      : emptyFormState()
-  );
+  const initialForm = useRef(formFromExercise(exercise));
+  const [form, setForm] = useState<ExerciseInput>(initialForm.current);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingVideoUrlIndex, setEditingVideoUrlIndex] = useState<number | null>(null);
   const [urlDraft, setUrlDraft] = useState('');
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm.current);
+
+  const requestClose = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+    } else {
+      onCancel();
+    }
+  };
 
   const setField = <K extends keyof ExerciseInput>(key: K, value: ExerciseInput[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -142,7 +156,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>
           {exercise ? 'Edit Exercise' : 'New Exercise'}
         </h2>
-        <button onClick={onCancel} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}>
+        <button onClick={requestClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}>
           <X size={22} />
         </button>
       </div>
@@ -332,12 +346,20 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
       <button
         className="btn-primary"
         onClick={handleSave}
-        disabled={saving}
-        style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem', opacity: saving ? 0.6 : 1 }}
+        disabled={saving || !isDirty}
+        style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem', opacity: saving || !isDirty ? 0.6 : 1 }}
       >
         {saving ? 'Saving...' : 'Save Exercise'}
       </button>
     </div>
+
+    <ConfirmDialog
+      isOpen={showDiscardConfirm}
+      title="Discard changes?"
+      message="You have unsaved changes to this exercise. If you leave now, they'll be lost."
+      onConfirm={onCancel}
+      onCancel={() => setShowDiscardConfirm(false)}
+    />
 
     <Drawer isOpen={editingVideoUrlIndex !== null} onClose={() => setEditingVideoUrlIndex(null)}>
       <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
