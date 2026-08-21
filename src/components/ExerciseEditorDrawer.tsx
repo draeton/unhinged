@@ -303,9 +303,8 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
                     justifyContent: 'center',
                     width: '44px',
                     flexShrink: 0,
-                    background: video.url ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
-                    border: video.url ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                    borderRadius: '10px',
+                    background: 'transparent',
+                    border: 'none',
                     color: video.url ? '#00F0FF' : 'var(--text-muted)',
                     cursor: 'pointer',
                   }}
