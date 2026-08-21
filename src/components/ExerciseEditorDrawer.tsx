@@ -163,6 +163,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
             value={form.workSeconds ?? 0}
             min={0}
             max={600}
+            step={15}
             onChange={v => setField('workSeconds', v === 0 ? null : v)}
             label="Work Seconds (0 = no timer)"
           />
@@ -172,6 +173,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
             value={form.restSeconds ?? 0}
             min={0}
             max={600}
+            step={15}
             onChange={v => setField('restSeconds', v === 0 ? null : v)}
             label="Rest Seconds (0 = no timer)"
           />

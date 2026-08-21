@@ -211,6 +211,7 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                               value={overrideForm.workSeconds}
                               min={0}
                               max={600}
+                              step={15}
                               onChange={v => setOverrideForm(f => ({ ...f, workSeconds: v }))}
                               label="Work Seconds"
                             />
@@ -219,6 +220,7 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                               value={overrideForm.restSeconds}
                               min={0}
                               max={600}
+                              step={15}
                               onChange={v => setOverrideForm(f => ({ ...f, restSeconds: v }))}
                               label="Rest Seconds"
                             />

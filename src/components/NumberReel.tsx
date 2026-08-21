@@ -7,6 +7,7 @@ interface NumberReelProps {
   onChange: (value: number) => void;
   label?: string;
   compact?: boolean;
+  step?: number;
 }
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
@@ -16,7 +17,7 @@ const clamp = (value: number, min: number, max: number): number => Math.min(max,
  * like scrolling a slot-machine reel. Arrow keys (up/right = increase, down/left = decrease)
  * and Home/End are also supported.
  */
-export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChange, label, compact = false }) => {
+export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChange, label, compact = false, step = 1 }) => {
   const itemHeight = compact ? 32 : 40;
   const [dragging, setDragging] = useState(false);
   const [offsetPx, setOffsetPx] = useState(0);
@@ -35,13 +36,14 @@ export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChang
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
     // deltaY is the raw physical drag distance (positive = finger moved down). Since dragging up
-    // increases the value, the value change is the negation of the physical step count.
+    // increases the value, the value change is the negation of the physical step count, in units
+    // of `step`.
     const deltaY = e.clientY - startYRef.current;
     const rawSteps = deltaY / itemHeight;
-    const boundedSteps = clamp(rawSteps, startValueRef.current - max, startValueRef.current - min);
+    const boundedSteps = clamp(rawSteps, (startValueRef.current - max) / step, (startValueRef.current - min) / step);
     const steppedDelta = Math.trunc(boundedSteps);
     const fractional = boundedSteps - steppedDelta;
-    const nextValue = clamp(startValueRef.current - steppedDelta, min, max);
+    const nextValue = clamp(startValueRef.current - steppedDelta * step, min, max);
     if (nextValue !== lastValueRef.current) {
       lastValueRef.current = nextValue;
       onChange(nextValue);
@@ -61,10 +63,10 @@ export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChang
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
       e.preventDefault();
-      onChange(clamp(value + 1, min, max));
+      onChange(clamp(value + step, min, max));
     } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
       e.preventDefault();
-      onChange(clamp(value - 1, min, max));
+      onChange(clamp(value - step, min, max));
     } else if (e.key === 'Home') {
       e.preventDefault();
       onChange(min);
@@ -76,8 +78,8 @@ export const NumberReel: React.FC<NumberReelProps> = ({ value, min, max, onChang
 
   // Revealed by dragging down (decrease) vs. up (increase) — content follows the finger, so the
   // row physically above the center is the *lower* neighbor and vice versa.
-  const above = value - 1 >= min ? value - 1 : null;
-  const below = value + 1 <= max ? value + 1 : null;
+  const above = value - step >= min ? value - step : null;
+  const below = value + step <= max ? value + step : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
