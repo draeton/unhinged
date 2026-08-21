@@ -265,7 +265,17 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                             className="btn-primary"
                             onClick={() => handleSaveOverrides(placement.id, exercise)}
                             disabled={!isOverrideDirty}
-                            style={{ justifyContent: 'center', padding: '10px', fontSize: '0.85rem', opacity: isOverrideDirty ? 1 : 0.6 }}
+                            style={{
+                              justifyContent: 'center',
+                              padding: '10px',
+                              fontSize: '0.85rem',
+                              ...(!isOverrideDirty && {
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                color: 'var(--text-dim)',
+                                boxShadow: 'none',
+                                cursor: 'not-allowed',
+                              }),
+                            }}
                           >
                             Save Overrides
                           </button>

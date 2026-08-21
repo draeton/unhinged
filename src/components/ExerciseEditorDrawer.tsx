@@ -347,7 +347,18 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         className="btn-primary"
         onClick={handleSave}
         disabled={saving || !isDirty}
-        style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem', opacity: saving || !isDirty ? 0.6 : 1 }}
+        style={{
+          width: '100%',
+          justifyContent: 'center',
+          padding: '14px',
+          fontSize: '1rem',
+          ...((saving || !isDirty) && {
+            background: 'rgba(255, 255, 255, 0.08)',
+            color: 'var(--text-dim)',
+            boxShadow: 'none',
+            cursor: 'not-allowed',
+          }),
+        }}
       >
         {saving ? 'Saving...' : 'Save Exercise'}
       </button>
