@@ -30,7 +30,7 @@ const fieldInputStyle: React.CSSProperties = {
   borderRadius: '8px',
   padding: '8px',
   color: '#FFFFFF',
-  fontSize: '0.85rem',
+  fontSize: '0.95rem',
 };
 
 interface OverrideForm {

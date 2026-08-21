@@ -32,7 +32,7 @@ const fieldInputStyle: React.CSSProperties = {
   padding: '10px',
   color: '#FFFFFF',
   fontFamily: 'var(--font-main)',
-  fontSize: '0.9rem',
+  fontSize: '1.15rem',
 };
 
 const emptyFormState = (): ExerciseInput => ({
