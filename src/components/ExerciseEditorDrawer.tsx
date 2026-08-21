@@ -5,6 +5,7 @@ import { createExercise, updateExercise, type ExerciseInput } from '../services/
 import { SwipeToDelete } from './SwipeToDelete';
 import { NumberReel } from './NumberReel';
 import { Drawer } from './Drawer';
+import { AutoGrowTextarea } from './AutoGrowTextarea';
 
 interface ExerciseEditorDrawerProps {
   userId: string;
@@ -148,10 +149,10 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div>
         <label style={fieldLabelStyle}>Name</label>
-        <input
-          type="text"
+        <AutoGrowTextarea
           value={form.name}
           onChange={e => setField('name', e.target.value)}
+          placeholder="e.g. Pistol Squat"
           style={fieldInputStyle}
         />
       </div>
@@ -197,10 +198,10 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div>
         <label style={fieldLabelStyle}>Equipment</label>
-        <input
-          type="text"
+        <AutoGrowTextarea
           value={form.equipment}
           onChange={e => setField('equipment', e.target.value)}
+          placeholder="e.g. Pull-up bar, resistance band"
           style={fieldInputStyle}
         />
       </div>
@@ -235,19 +236,21 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div>
         <label style={fieldLabelStyle}>Description</label>
-        <textarea
+        <AutoGrowTextarea
           value={form.description}
           onChange={e => setField('description', e.target.value)}
-          style={{ ...fieldInputStyle, minHeight: '70px', resize: 'none' }}
+          placeholder="Briefly describe how to perform this exercise..."
+          style={{ ...fieldInputStyle, minHeight: '70px' }}
         />
       </div>
 
       <div>
         <label style={fieldLabelStyle}>Safety Tip</label>
-        <textarea
+        <AutoGrowTextarea
           value={form.safetyTip}
           onChange={e => setField('safetyTip', e.target.value)}
-          style={{ ...fieldInputStyle, minHeight: '50px', resize: 'none' }}
+          placeholder="e.g. Keep your core braced to protect your lower back"
+          style={{ ...fieldInputStyle, minHeight: '50px' }}
         />
       </div>
 
@@ -256,10 +259,10 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {form.formCues.map((cue, i) => (
             <SwipeToDelete key={i} onDelete={() => removeFormCue(i)} ariaLabel={`Remove cue ${i + 1}`}>
-              <input
-                type="text"
+              <AutoGrowTextarea
                 value={cue}
                 onChange={e => updateFormCue(i, e.target.value)}
+                placeholder="e.g. Keep your chest up and core braced"
                 style={{ ...fieldInputStyle, width: '100%' }}
               />
             </SwipeToDelete>
