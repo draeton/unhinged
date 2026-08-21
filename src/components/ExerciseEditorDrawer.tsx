@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Link } from 'lucide-react';
 import type { Exercise, TargetMuscle } from '../types/workout';
 import { createExercise, updateExercise, type ExerciseInput } from '../services/exercises';
 import { SwipeToDelete } from './SwipeToDelete';
 import { NumberReel } from './NumberReel';
+import { Drawer } from './Drawer';
 import { AutoGrowTextarea } from './AutoGrowTextarea';
 
 interface ExerciseEditorDrawerProps {
@@ -70,6 +71,8 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingVideoUrlIndex, setEditingVideoUrlIndex] = useState<number | null>(null);
+  const [urlDraft, setUrlDraft] = useState('');
 
   const setField = <K extends keyof ExerciseInput>(key: K, value: ExerciseInput[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -104,6 +107,17 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
     setField('videoUrls', (form.videoUrls ?? []).filter((_, i) => i !== index));
   };
 
+  const openUrlEditor = (index: number) => {
+    setUrlDraft((form.videoUrls ?? [])[index]?.url ?? '');
+    setEditingVideoUrlIndex(index);
+  };
+
+  const saveUrlDraft = () => {
+    if (editingVideoUrlIndex === null) return;
+    updateVideoUrl(editingVideoUrlIndex, 'url', urlDraft);
+    setEditingVideoUrlIndex(null);
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) {
       setError('Name is required.');
@@ -122,6 +136,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
   };
 
   return (
+    <>
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>
@@ -276,13 +291,25 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
                   placeholder="Title"
                   style={{ ...fieldInputStyle, flex: 1 }}
                 />
-                <input
-                  type="text"
-                  value={video.url}
-                  onChange={e => updateVideoUrl(i, 'url', e.target.value)}
-                  placeholder="URL"
-                  style={{ ...fieldInputStyle, flex: 1 }}
-                />
+                <button
+                  type="button"
+                  onClick={() => openUrlEditor(i)}
+                  title={video.url ? 'Edit video URL' : 'Add video URL'}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '44px',
+                    flexShrink: 0,
+                    background: video.url ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+                    border: video.url ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                    borderRadius: '10px',
+                    color: video.url ? '#00F0FF' : 'var(--text-muted)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Link size={18} />
+                </button>
               </div>
             </SwipeToDelete>
           ))}
@@ -310,5 +337,31 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         {saving ? 'Saving...' : 'Save Exercise'}
       </button>
     </div>
+
+    <Drawer isOpen={editingVideoUrlIndex !== null} onClose={() => setEditingVideoUrlIndex(null)}>
+      <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#FFFFFF' }}>Video URL</h3>
+          <button onClick={() => setEditingVideoUrlIndex(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}>
+            <X size={20} />
+          </button>
+        </div>
+        <div>
+          <label style={fieldLabelStyle}>URL</label>
+          <input
+            type="url"
+            value={urlDraft}
+            onChange={e => setUrlDraft(e.target.value)}
+            placeholder="https://..."
+            style={fieldInputStyle}
+            autoFocus
+          />
+        </div>
+        <button className="btn-primary" onClick={saveUrlDraft} style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem' }}>
+          Save
+        </button>
+      </div>
+    </Drawer>
+    </>
   );
 };
