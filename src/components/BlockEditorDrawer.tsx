@@ -32,6 +32,13 @@ const fieldInputStyle: React.CSSProperties = {
   fontSize: '0.85rem',
 };
 
+const clampSetsOverride = (value: string): string => {
+  if (value === '') return value;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return value;
+  return String(Math.min(10, Math.max(1, parsed)));
+};
+
 const overrideFieldsFromForm = (form: {
   sets: string; workSeconds: string; restSeconds: string; repsOrTime: string;
 }): BlockExerciseOverrides => ({
@@ -183,7 +190,16 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
                             Leave a field blank to use the library default ({exercise?.sets} sets, {exercise?.repsOrTime || '—'}, work {exercise?.workSeconds ?? '—'}s, rest {exercise?.restSeconds ?? '—'}s).
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                            <input type="number" placeholder="Sets" value={overrideForm.sets} onChange={e => setOverrideForm(f => ({ ...f, sets: e.target.value }))} style={fieldInputStyle} />
+                            <input
+                              type="number"
+                              min={1}
+                              max={10}
+                              step={1}
+                              placeholder="Sets"
+                              value={overrideForm.sets}
+                              onChange={e => setOverrideForm(f => ({ ...f, sets: clampSetsOverride(e.target.value) }))}
+                              style={fieldInputStyle}
+                            />
                             <input type="text" placeholder="Reps / Time" value={overrideForm.repsOrTime} onChange={e => setOverrideForm(f => ({ ...f, repsOrTime: e.target.value }))} style={fieldInputStyle} />
                             <input type="number" placeholder="Work seconds" value={overrideForm.workSeconds} onChange={e => setOverrideForm(f => ({ ...f, workSeconds: e.target.value }))} style={fieldInputStyle} />
                             <input type="number" placeholder="Rest seconds" value={overrideForm.restSeconds} onChange={e => setOverrideForm(f => ({ ...f, restSeconds: e.target.value }))} style={fieldInputStyle} />

@@ -15,6 +15,8 @@ const ALL_TARGET_MUSCLES: TargetMuscle[] = [
   'lats', 'biceps', 'scapula', 'hamstrings', 'glutes', 'lower_back', 'wrist_flexors', 'wrist_extensors', 'grip',
 ];
 
+const clampSets = (value: number): number => Math.min(10, Math.max(1, Number.isFinite(value) ? value : 1));
+
 const fieldLabelStyle: React.CSSProperties = {
   fontSize: '0.82rem',
   fontWeight: '700',
@@ -146,8 +148,10 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
           <input
             type="number"
             min={1}
+            max={10}
+            step={1}
             value={form.sets}
-            onChange={e => setField('sets', Number(e.target.value) || 1)}
+            onChange={e => setField('sets', clampSets(Number(e.target.value)))}
             style={fieldInputStyle}
           />
         </div>
