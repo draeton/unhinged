@@ -259,12 +259,12 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {form.formCues.map((cue, i) => (
             <SwipeToDelete key={i} onDelete={() => removeFormCue(i)} ariaLabel={`Remove cue ${i + 1}`}>
-              <div style={{ background: 'var(--bg-dark)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ background: 'var(--bg-dark)', borderRadius: '10px' }}>
                 <AutoGrowTextarea
                   value={cue}
                   onChange={e => updateFormCue(i, e.target.value)}
                   placeholder="e.g. Keep your chest up and core braced"
-                  style={{ ...fieldInputStyle, width: '100%' }}
+                  style={{ ...fieldInputStyle, width: '100%', outlineOffset: '-2px' }}
                 />
               </div>
             </SwipeToDelete>
@@ -285,13 +285,13 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {(form.videoUrls ?? []).map((video, i) => (
             <SwipeToDelete key={i} onDelete={() => removeVideoUrl(i)} ariaLabel={`Remove video link ${i + 1}`}>
-              <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-dark)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-dark)', borderRadius: '10px' }}>
                 <input
                   type="text"
                   value={video.title}
                   onChange={e => updateVideoUrl(i, 'title', e.target.value)}
                   placeholder="Title"
-                  style={{ ...fieldInputStyle, flex: 1 }}
+                  style={{ ...fieldInputStyle, flex: 1, outlineOffset: '-2px' }}
                 />
                 <button
                   type="button"
