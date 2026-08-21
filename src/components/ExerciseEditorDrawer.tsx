@@ -171,20 +171,19 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <div>
-          <NumberReel value={form.sets} min={1} max={10} onChange={v => setField('sets', v)} label="Sets" />
-        </div>
-        <div>
-          <label style={fieldLabelStyle}>Reps / Time (display text)</label>
-          <input
-            type="text"
-            value={form.repsOrTime}
-            onChange={e => setField('repsOrTime', e.target.value)}
-            placeholder="e.g. 3 x 10 Reps"
-            style={fieldInputStyle}
-          />
-        </div>
+      <div>
+        <NumberReel value={form.sets} min={1} max={10} onChange={v => setField('sets', v)} label="Sets" />
+      </div>
+
+      <div>
+        <label style={fieldLabelStyle}>Reps / Time (display text)</label>
+        <input
+          type="text"
+          value={form.repsOrTime}
+          onChange={e => setField('repsOrTime', e.target.value)}
+          placeholder="e.g. 3 x 10 Reps"
+          style={fieldInputStyle}
+        />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
