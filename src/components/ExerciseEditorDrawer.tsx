@@ -3,6 +3,7 @@ import { Plus, X } from 'lucide-react';
 import type { Exercise, TargetMuscle } from '../types/workout';
 import { createExercise, updateExercise, type ExerciseInput } from '../services/exercises';
 import { SwipeToDelete } from './SwipeToDelete';
+import { NumberReel } from './NumberReel';
 
 interface ExerciseEditorDrawerProps {
   userId: string;
@@ -14,8 +15,6 @@ interface ExerciseEditorDrawerProps {
 const ALL_TARGET_MUSCLES: TargetMuscle[] = [
   'lats', 'biceps', 'scapula', 'hamstrings', 'glutes', 'lower_back', 'wrist_flexors', 'wrist_extensors', 'grip',
 ];
-
-const clampSets = (value: number): number => Math.min(10, Math.max(1, Number.isFinite(value) ? value : 1));
 
 const fieldLabelStyle: React.CSSProperties = {
   fontSize: '0.82rem',
@@ -144,16 +143,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <div>
-          <label style={fieldLabelStyle}>Sets</label>
-          <input
-            type="number"
-            min={1}
-            max={10}
-            step={1}
-            value={form.sets}
-            onChange={e => setField('sets', clampSets(Number(e.target.value)))}
-            style={fieldInputStyle}
-          />
+          <NumberReel value={form.sets} min={1} max={10} onChange={v => setField('sets', v)} label="Sets" />
         </div>
         <div>
           <label style={fieldLabelStyle}>Reps / Time (display text)</label>
