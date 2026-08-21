@@ -137,6 +137,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <AutoGrowTextarea
           value={form.name}
           onChange={e => setField('name', e.target.value)}
+          placeholder="e.g. Pistol Squat"
           style={fieldInputStyle}
         />
       </div>
@@ -185,6 +186,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <AutoGrowTextarea
           value={form.equipment}
           onChange={e => setField('equipment', e.target.value)}
+          placeholder="e.g. Pull-up bar, resistance band"
           style={fieldInputStyle}
         />
       </div>
@@ -222,6 +224,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <AutoGrowTextarea
           value={form.description}
           onChange={e => setField('description', e.target.value)}
+          placeholder="Briefly describe how to perform this exercise..."
           style={{ ...fieldInputStyle, minHeight: '70px' }}
         />
       </div>
@@ -231,6 +234,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
         <AutoGrowTextarea
           value={form.safetyTip}
           onChange={e => setField('safetyTip', e.target.value)}
+          placeholder="e.g. Keep your core braced to protect your lower back"
           style={{ ...fieldInputStyle, minHeight: '50px' }}
         />
       </div>
@@ -243,6 +247,7 @@ export const ExerciseEditorDrawer: React.FC<ExerciseEditorDrawerProps> = ({ user
               <AutoGrowTextarea
                 value={cue}
                 onChange={e => updateFormCue(i, e.target.value)}
+                placeholder="e.g. Keep your chest up and core braced"
                 style={{ ...fieldInputStyle, width: '100%' }}
               />
             </SwipeToDelete>
