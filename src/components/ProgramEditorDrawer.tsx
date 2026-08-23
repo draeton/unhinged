@@ -26,6 +26,7 @@ const fieldInputStyle: React.CSSProperties = {
   borderRadius: '8px',
   padding: '10px',
   color: '#FFFFFF',
+  fontFamily: 'var(--font-main)',
   fontSize: '0.9rem',
 };
 
