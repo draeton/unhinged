@@ -156,8 +156,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
           <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
             Name
           </label>
-          <input
-            type="text"
+          <AutoGrowTextarea
             value={nameDraft}
             onChange={e => setNameDraft(e.target.value)}
             onBlur={handleNameBlur}
