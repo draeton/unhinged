@@ -40,13 +40,19 @@ export const deleteWorkoutFromSupabase = async (id: string) => {
     const { data: session } = await supabase.auth.getSession();
     if (!session.session?.user) return; // Not logged in, nothing to delete remotely
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('completed_workouts')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', session.session.user.id)
+      .select('id');
 
     if (error) {
       console.error('Error deleting workout from Supabase:', error);
+    } else if (!data || data.length === 0) {
+      // RLS filters rows a DELETE can touch rather than rejecting the statement, so a
+      // delete with no matching policy/row still returns success with nothing removed.
+      console.error(`Delete for workout ${id} matched no rows in Supabase`);
     }
   } catch (err) {
     console.error('Failed to delete workout from Supabase:', err);
