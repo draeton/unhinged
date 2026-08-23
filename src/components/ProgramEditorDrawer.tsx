@@ -176,7 +176,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
             onChange={e => setDescriptionDraft(e.target.value)}
             onBlur={handleDescriptionBlur}
             placeholder="Briefly describe this program..."
-            style={{ ...fieldInputStyle, minHeight: '60px' }}
+            style={{ ...fieldInputStyle, fontSize: '1.15rem', fontWeight: '400', minHeight: '60px' }}
           />
         </div>
       )}
