@@ -232,12 +232,12 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
                       {dragHandle}
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: '#FFFFFF', fontSize: '0.9rem', fontWeight: '700' }}>
-                          {block.title}
-                        </span>
-
                         <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem', alignSelf: 'flex-start' }}>
                           {block.blockType}
+                        </span>
+
+                        <span style={{ color: '#FFFFFF', fontSize: '0.9rem', fontWeight: '700' }}>
+                          {block.title}
                         </span>
                       </div>
                     </div>
