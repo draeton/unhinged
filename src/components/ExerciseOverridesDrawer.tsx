@@ -20,7 +20,7 @@ const fieldInputStyle: React.CSSProperties = {
   borderRadius: '8px',
   padding: '8px',
   color: '#FFFFFF',
-  fontSize: '0.95rem',
+  fontSize: '1.15rem',
 };
 
 interface OverrideForm {
@@ -94,6 +94,8 @@ export const ExerciseOverridesDrawer: React.FC<ExerciseOverridesDrawerProps> = (
           Fields start at the library default — only a value you change is saved as an override for this block.
         </p>
 
+        <NumberReel value={form.sets} min={1} max={10} onChange={v => setForm(f => ({ ...f, sets: v }))} label="Sets" />
+
         <div>
           <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Reps / Time</label>
           <input
@@ -104,8 +106,6 @@ export const ExerciseOverridesDrawer: React.FC<ExerciseOverridesDrawerProps> = (
             style={fieldInputStyle}
           />
         </div>
-
-        <NumberReel value={form.sets} min={1} max={10} onChange={v => setForm(f => ({ ...f, sets: v }))} label="Sets" />
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <NumberReel
