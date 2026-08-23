@@ -154,14 +154,14 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
       {program && (
         <div>
           <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-            Program Name
+            Name
           </label>
           <input
             type="text"
             value={nameDraft}
             onChange={e => setNameDraft(e.target.value)}
             onBlur={handleNameBlur}
-            style={{ ...fieldInputStyle, fontSize: '1.1rem', fontWeight: '800' }}
+            style={{ ...fieldInputStyle, fontSize: '1.15rem', fontWeight: '400' }}
           />
         </div>
       )}
