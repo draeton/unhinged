@@ -8,9 +8,10 @@
 -- it. Dated before 20260819000100 so a fresh replay creates the table before that
 -- migration's `alter table` runs against it.
 --
--- Note this reproduces an existing gap as-is: there is no delete policy on this table
--- (only select/insert/update), and no index on user_id. Fixing either is a separate
--- change.
+-- Note this reproduces an existing gap as-is: at the time this table was hand-created,
+-- there was no delete policy (only select/insert/update) and no index on user_id. The
+-- missing delete policy is fixed by 20260822000100_add_completed_workouts_delete_policy.sql;
+-- the missing index is left as a separate follow-up.
 
 create table if not exists public.completed_workouts (
   id uuid primary key,
