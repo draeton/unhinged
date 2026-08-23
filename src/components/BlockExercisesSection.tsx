@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, ChevronRight, ChevronDown as ChevronDownIcon, Search, X } from 'lucide-react';
+import { Plus, ChevronRight, ChevronDown as ChevronDownIcon, Search } from 'lucide-react';
 import type { Exercise } from '../types/workout';
 import type { BlockExercise } from '../types/program';
 import { listExercises } from '../services/exercises';
@@ -17,11 +17,9 @@ import {
   type BlockExerciseOverrides,
 } from '../services/programs';
 
-interface BlockEditorDrawerProps {
+interface BlockExercisesSectionProps {
   userId: string;
   blockId: string;
-  blockTitle: string;
-  onClose: () => void;
 }
 
 const fieldInputStyle: React.CSSProperties = {
@@ -55,7 +53,7 @@ const overrideFieldsFromForm = (form: OverrideForm, exercise: Exercise | undefin
   };
 };
 
-export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, blockId, blockTitle, onClose }) => {
+export const BlockExercisesSection: React.FC<BlockExercisesSectionProps> = ({ userId, blockId }) => {
   const [placements, setPlacements] = useState<BlockExercise[]>([]);
   const [library, setLibrary] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +63,7 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [overrideForm, setOverrideForm] = useState<OverrideForm>({ sets: 1, workSeconds: 0, restSeconds: 0, repsOrTime: '' });
   const [initialOverrideForm, setInitialOverrideForm] = useState<OverrideForm>({ sets: 1, workSeconds: 0, restSeconds: 0, repsOrTime: '' });
-  const [pendingDiscardAction, setPendingDiscardAction] = useState<'collapse' | 'close' | null>(null);
+  const [pendingDiscard, setPendingDiscard] = useState(false);
 
   const isOverrideDirty = expandedId !== null && JSON.stringify(overrideForm) !== JSON.stringify(initialOverrideForm);
 
@@ -149,7 +147,7 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
   const handleToggleExpand = (placement: BlockExercise) => {
     if (expandedId === placement.id) {
       if (isOverrideDirty) {
-        setPendingDiscardAction('collapse');
+        setPendingDiscard(true);
       } else {
         setExpandedId(null);
       }
@@ -158,140 +156,114 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
     }
   };
 
-  const requestClose = () => {
-    if (isOverrideDirty) {
-      setPendingDiscardAction('close');
-    } else {
-      onClose();
-    }
-  };
-
   const confirmDiscard = () => {
-    if (pendingDiscardAction === 'close') {
-      onClose();
-    } else {
-      setExpandedId(null);
-    }
-    setPendingDiscardAction(null);
+    setExpandedId(null);
+    setPendingDiscard(false);
   };
 
   return (
-    <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>{blockTitle}</h2>
-        <button
-          title="Close"
-          onClick={requestClose}
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
-        >
-          <X size={22} />
-        </button>
-      </div>
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '-8px' }}>Exercises in this block</p>
-
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       {loading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</div>}
       {error && <div style={{ color: '#FF3366', fontSize: '0.85rem' }}>{error}</div>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {!loading && placements.length === 0 && (
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No exercises in this block yet.</div>
-        )}
-        <SortableList items={placements} onReorder={handleReorder}>
-          {placement => {
-            const exercise = libraryById.get(placement.exerciseId);
-            const isExpanded = expandedId === placement.id;
-            return (
-              <SortableRow key={placement.id} id={placement.id}>
-                {dragHandle => (
-                  <SwipeToDelete onDelete={() => handleRemove(placement.id)} ariaLabel={`Remove ${exercise?.name ?? 'exercise'}`}>
-                    <div className="glass-panel" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {dragHandle}
+      {!loading && placements.length === 0 && (
+        <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No exercises in this block yet.</div>
+      )}
+      <SortableList items={placements} onReorder={handleReorder}>
+        {placement => {
+          const exercise = libraryById.get(placement.exerciseId);
+          const isExpanded = expandedId === placement.id;
+          return (
+            <SortableRow key={placement.id} id={placement.id}>
+              {dragHandle => (
+                <SwipeToDelete onDelete={() => handleRemove(placement.id)} ariaLabel={`Remove ${exercise?.name ?? 'exercise'}`}>
+                  <div className="glass-panel" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {dragHandle}
 
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: '700', color: '#FFFFFF', fontSize: '0.95rem' }}>
-                            {exercise?.name ?? '(exercise not found)'}
-                          </div>
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                            {placement.setsOverride ?? exercise?.sets} sets
-                            {(placement.repsOrTimeOverride ?? exercise?.repsOrTime) ? ` • ${placement.repsOrTimeOverride ?? exercise?.repsOrTime}` : ''}
-                            {placement.setsOverride != null || placement.repsOrTimeOverride != null || placement.workSecondsOverride != null || placement.restSecondsOverride != null ? ' (overridden)' : ''}
-                          </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '700', color: '#FFFFFF', fontSize: '0.95rem' }}>
+                          {exercise?.name ?? '(exercise not found)'}
                         </div>
-
-                        <button
-                          onClick={() => handleToggleExpand(placement)}
-                          style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
-                        >
-                          {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRight size={16} />}
-                        </button>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                          {placement.setsOverride ?? exercise?.sets} sets
+                          {(placement.repsOrTimeOverride ?? exercise?.repsOrTime) ? ` • ${placement.repsOrTimeOverride ?? exercise?.repsOrTime}` : ''}
+                          {placement.setsOverride != null || placement.repsOrTimeOverride != null || placement.workSecondsOverride != null || placement.restSecondsOverride != null ? ' (overridden)' : ''}
+                        </div>
                       </div>
 
-                      {isExpanded && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)' }}>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                            Fields start at the library default — only a value you change is saved as an override for this block.
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'end' }}>
-                            <NumberReel
-                              compact
-                              value={overrideForm.sets}
-                              min={1}
-                              max={10}
-                              onChange={v => setOverrideForm(f => ({ ...f, sets: v }))}
-                              label="Sets"
-                            />
-                            <input type="text" placeholder="Reps / Time" value={overrideForm.repsOrTime} onChange={e => setOverrideForm(f => ({ ...f, repsOrTime: e.target.value }))} style={fieldInputStyle} />
-                            <NumberReel
-                              compact
-                              value={overrideForm.workSeconds}
-                              min={0}
-                              max={600}
-                              step={15}
-                              onChange={v => setOverrideForm(f => ({ ...f, workSeconds: v }))}
-                              label="Work Seconds"
-                            />
-                            <NumberReel
-                              compact
-                              value={overrideForm.restSeconds}
-                              min={0}
-                              max={600}
-                              step={15}
-                              onChange={v => setOverrideForm(f => ({ ...f, restSeconds: v }))}
-                              label="Rest Seconds"
-                            />
-                          </div>
-                          <button
-                            className="btn-primary"
-                            onClick={() => handleSaveOverrides(placement.id, exercise)}
-                            disabled={!isOverrideDirty}
-                            style={{
-                              justifyContent: 'center',
-                              padding: '10px',
-                              fontSize: '0.85rem',
-                              ...(!isOverrideDirty && {
-                                background: 'rgba(255, 255, 255, 0.08)',
-                                color: 'var(--text-dim)',
-                                boxShadow: 'none',
-                                cursor: 'not-allowed',
-                              }),
-                            }}
-                          >
-                            Save Overrides
-                          </button>
-                        </div>
-                      )}
+                      <button
+                        onClick={() => handleToggleExpand(placement)}
+                        style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '8px', padding: '8px', color: 'var(--text-muted)', cursor: 'pointer' }}
+                      >
+                        {isExpanded ? <ChevronDownIcon size={16} /> : <ChevronRight size={16} />}
+                      </button>
                     </div>
-                  </SwipeToDelete>
-                )}
-              </SortableRow>
-            );
-          }}
-        </SortableList>
-      </div>
+
+                    {isExpanded && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)' }}>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                          Fields start at the library default — only a value you change is saved as an override for this block.
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'end' }}>
+                          <NumberReel
+                            compact
+                            value={overrideForm.sets}
+                            min={1}
+                            max={10}
+                            onChange={v => setOverrideForm(f => ({ ...f, sets: v }))}
+                            label="Sets"
+                          />
+                          <input type="text" placeholder="Reps / Time" value={overrideForm.repsOrTime} onChange={e => setOverrideForm(f => ({ ...f, repsOrTime: e.target.value }))} style={fieldInputStyle} />
+                          <NumberReel
+                            compact
+                            value={overrideForm.workSeconds}
+                            min={0}
+                            max={600}
+                            step={15}
+                            onChange={v => setOverrideForm(f => ({ ...f, workSeconds: v }))}
+                            label="Work Seconds"
+                          />
+                          <NumberReel
+                            compact
+                            value={overrideForm.restSeconds}
+                            min={0}
+                            max={600}
+                            step={15}
+                            onChange={v => setOverrideForm(f => ({ ...f, restSeconds: v }))}
+                            label="Rest Seconds"
+                          />
+                        </div>
+                        <button
+                          className="btn-primary"
+                          onClick={() => handleSaveOverrides(placement.id, exercise)}
+                          disabled={!isOverrideDirty}
+                          style={{
+                            justifyContent: 'center',
+                            padding: '10px',
+                            fontSize: '0.85rem',
+                            ...(!isOverrideDirty && {
+                              background: 'rgba(255, 255, 255, 0.08)',
+                              color: 'var(--text-dim)',
+                              boxShadow: 'none',
+                              cursor: 'not-allowed',
+                            }),
+                          }}
+                        >
+                          Save Overrides
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </SwipeToDelete>
+              )}
+            </SortableRow>
+          );
+        }}
+      </SortableList>
 
       {!showPicker ? (
-        <button className="btn-primary" onClick={() => setShowPicker(true)} style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem' }}>
+        <button className="btn-secondary" onClick={() => setShowPicker(true)} style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem' }}>
           <Plus size={18} /> Add Exercise
         </button>
       ) : (
@@ -327,11 +299,11 @@ export const BlockEditorDrawer: React.FC<BlockEditorDrawerProps> = ({ userId, bl
       )}
 
       <ConfirmDialog
-        isOpen={pendingDiscardAction !== null}
+        isOpen={pendingDiscard}
         title="Discard changes?"
         message="You have unsaved override changes for this exercise. If you leave now, they'll be lost."
         onConfirm={confirmDiscard}
-        onCancel={() => setPendingDiscardAction(null)}
+        onCancel={() => setPendingDiscard(false)}
       />
     </div>
   );

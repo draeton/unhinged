@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, ListChecks, X } from 'lucide-react';
+import { Plus, Pencil, X } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
 import { Drawer } from './Drawer';
-import { BlockEditorDrawer } from './BlockEditorDrawer';
+import { BlockInfoDrawer } from './BlockInfoDrawer';
+import { BlockExercisesSection } from './BlockExercisesSection';
 import { SwipeToDelete } from './SwipeToDelete';
 import { SortableList } from './SortableList';
 import { SortableRow } from './SortableRow';
@@ -26,6 +27,16 @@ const fieldInputStyle: React.CSSProperties = {
   fontSize: '0.9rem',
 };
 
+const sectionHeadingStyle: React.CSSProperties = {
+  fontSize: '0.78rem',
+  fontWeight: '800',
+  color: 'var(--text-muted)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+};
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 const emptyNewBlock = () => ({ title: '', subtitle: '', blockType: 'warmup' as BlockType, durationMinutes: 10 });
 
 export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId, programId, onClose }) => {
@@ -36,7 +47,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
   const [nameDraft, setNameDraft] = useState('');
   const [showAddBlock, setShowAddBlock] = useState(false);
   const [newBlock, setNewBlock] = useState(emptyNewBlock());
-  const [openBlock, setOpenBlock] = useState<ProgramBlock | null>(null);
+  const [editingBlock, setEditingBlock] = useState<ProgramBlock | null>(null);
 
   const refresh = () => {
     setLoading(true);
@@ -106,9 +117,15 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     }
   };
 
+  const handleBlockSaved = (updated: ProgramBlock) => {
+    setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b)));
+    setEditingBlock(null);
+  };
+
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>Edit Program</h2>
         <button
           title="Close"
           onClick={onClose}
@@ -137,6 +154,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <h3 style={sectionHeadingStyle}>Blocks</h3>
         {!loading && blocks.length === 0 && (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No blocks yet — add one below.</div>
         )}
@@ -145,29 +163,20 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
             <SortableRow key={block.id} id={block.id}>
               {dragHandle => (
                 <SwipeToDelete onDelete={() => handleDeleteBlock(block.id)} ariaLabel={`Delete ${block.title}`}>
-                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      {dragHandle}
+                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {dragHandle}
 
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
-                            {block.blockType}
-                          </span>
-                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{block.title}</span>
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          ~{block.durationMinutes} min{block.subtitle ? ` • ${block.subtitle}` : ''}
-                        </div>
-                      </div>
+                    <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem', flex: 1 }}>
+                      {block.blockType}
+                    </span>
 
-                      <button
-                        onClick={() => setOpenBlock(block)}
-                        style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
-                      >
-                        <ListChecks size={16} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setEditingBlock(block)}
+                      title={`Edit ${block.title}`}
+                      style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
+                    >
+                      <Pencil size={16} />
+                    </button>
                   </div>
                 </SwipeToDelete>
               )}
@@ -201,13 +210,19 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
         </div>
       )}
 
-      <Drawer isOpen={!!openBlock} onClose={() => setOpenBlock(null)} fullScreen>
-        {openBlock && (
-          <BlockEditorDrawer
-            userId={userId}
-            blockId={openBlock.id}
-            blockTitle={openBlock.title}
-            onClose={() => setOpenBlock(null)}
+      {blocks.map(block => (
+        <div key={block.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <h3 style={sectionHeadingStyle}>{capitalize(block.blockType)}</h3>
+          <BlockExercisesSection userId={userId} blockId={block.id} />
+        </div>
+      ))}
+
+      <Drawer isOpen={!!editingBlock} onClose={() => setEditingBlock(null)}>
+        {editingBlock && (
+          <BlockInfoDrawer
+            block={editingBlock}
+            onSaved={handleBlockSaved}
+            onClose={() => setEditingBlock(null)}
           />
         )}
       </Drawer>
