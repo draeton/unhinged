@@ -3,6 +3,7 @@ import { Plus, Pencil, X } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
 import { Drawer } from './Drawer';
+import { AutoGrowTextarea } from './AutoGrowTextarea';
 import { BlockInfoDrawer } from './BlockInfoDrawer';
 import { BlockExercisesSection } from './BlockExercisesSection';
 import { SwipeToDelete } from './SwipeToDelete';
@@ -45,6 +46,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState('');
+  const [descriptionDraft, setDescriptionDraft] = useState('');
   const [showAddBlock, setShowAddBlock] = useState(false);
   const [newBlock, setNewBlock] = useState(emptyNewBlock());
   const [editingBlock, setEditingBlock] = useState<ProgramBlock | null>(null);
@@ -56,6 +58,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
       .then(([programRow, blockRows]) => {
         setProgram(programRow);
         setNameDraft(programRow?.name ?? '');
+        setDescriptionDraft(programRow?.description ?? '');
         setBlocks(blockRows);
       })
       .catch(err => setError(err?.message ?? 'Failed to load program.'))
@@ -74,6 +77,16 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
       setProgram(updated);
     } catch (err: any) {
       setError(err?.message ?? 'Failed to rename program.');
+    }
+  };
+
+  const handleDescriptionBlur = async () => {
+    if (!program || descriptionDraft.trim() === program.description) return;
+    try {
+      const updated = await renameProgram(program.id, program.name, descriptionDraft.trim());
+      setProgram(updated);
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to update program description.');
     }
   };
 
@@ -149,6 +162,21 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
             onChange={e => setNameDraft(e.target.value)}
             onBlur={handleNameBlur}
             style={{ ...fieldInputStyle, fontSize: '1.1rem', fontWeight: '800' }}
+          />
+        </div>
+      )}
+
+      {program && (
+        <div>
+          <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+            Description
+          </label>
+          <AutoGrowTextarea
+            value={descriptionDraft}
+            onChange={e => setDescriptionDraft(e.target.value)}
+            onBlur={handleDescriptionBlur}
+            placeholder="Briefly describe this program..."
+            style={{ ...fieldInputStyle, minHeight: '60px' }}
           />
         </div>
       )}
