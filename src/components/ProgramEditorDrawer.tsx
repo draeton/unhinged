@@ -163,12 +163,14 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
             <SortableRow key={block.id} id={block.id}>
               {dragHandle => (
                 <SwipeToDelete onDelete={() => handleDeleteBlock(block.id)} ariaLabel={`Delete ${block.title}`}>
-                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {dragHandle}
+                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {dragHandle}
 
-                    <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem', flex: 1 }}>
-                      {block.blockType}
-                    </span>
+                      <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
+                        {block.blockType}
+                      </span>
+                    </div>
 
                     <button
                       onClick={() => setEditingBlock(block)}
