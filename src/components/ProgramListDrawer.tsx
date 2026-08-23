@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Copy, X } from 'lucide-react';
 import type { Program } from '../types/program';
-import { listPrograms, createProgram, duplicateProgram, deleteProgram } from '../services/programs';
+import { listPrograms, duplicateProgram, deleteProgram } from '../services/programs';
 import { Drawer } from './Drawer';
 import { ProgramEditorDrawer } from './ProgramEditorDrawer';
+import { NewProgramDrawer } from './NewProgramDrawer';
 import { SwipeToDelete } from './SwipeToDelete';
 
 interface ProgramListDrawerProps {
@@ -15,7 +16,7 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [showNewProgram, setShowNewProgram] = useState(false);
   const [openProgramId, setOpenProgramId] = useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
@@ -33,18 +34,10 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  const handleCreate = async () => {
-    setCreating(true);
-    setError(null);
-    try {
-      const created = await createProgram(userId, 'New Program');
-      refresh();
-      setOpenProgramId(created.id);
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed to create program.');
-    } finally {
-      setCreating(false);
-    }
+  const handleProgramCreated = (created: Program) => {
+    setShowNewProgram(false);
+    refresh();
+    setOpenProgramId(created.id);
   };
 
   const handleDuplicate = async (program: Program) => {
@@ -84,11 +77,10 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
 
       <button
         className="btn-primary"
-        onClick={handleCreate}
-        disabled={creating}
-        style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem', ...(creating && { opacity: 0.6, cursor: 'not-allowed' }) }}
+        onClick={() => setShowNewProgram(true)}
+        style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem' }}
       >
-        <Plus size={18} /> {creating ? 'Creating...' : 'New Program'}
+        <Plus size={18} /> New Program
       </button>
 
       {loading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</div>}
@@ -125,6 +117,12 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
       <Drawer isOpen={!!openProgramId} onClose={() => setOpenProgramId(null)} fullScreen>
         {openProgramId && (
           <ProgramEditorDrawer userId={userId} programId={openProgramId} onClose={() => setOpenProgramId(null)} />
+        )}
+      </Drawer>
+
+      <Drawer isOpen={showNewProgram} onClose={() => setShowNewProgram(false)} fullScreen>
+        {showNewProgram && (
+          <NewProgramDrawer userId={userId} onCreated={handleProgramCreated} onClose={() => setShowNewProgram(false)} />
         )}
       </Drawer>
     </div>
