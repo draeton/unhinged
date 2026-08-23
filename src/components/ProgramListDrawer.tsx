@@ -15,8 +15,7 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showNewForm, setShowNewForm] = useState(false);
-  const [newName, setNewName] = useState('');
+  const [creating, setCreating] = useState(false);
   const [openProgramId, setOpenProgramId] = useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
@@ -35,15 +34,16 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
   }, [userId]);
 
   const handleCreate = async () => {
-    if (!newName.trim()) return;
+    setCreating(true);
+    setError(null);
     try {
-      const created = await createProgram(userId, newName.trim());
-      setNewName('');
-      setShowNewForm(false);
+      const created = await createProgram(userId, 'New Program');
       refresh();
       setOpenProgramId(created.id);
     } catch (err: any) {
       setError(err?.message ?? 'Failed to create program.');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -82,24 +82,14 @@ export const ProgramListDrawer: React.FC<ProgramListDrawerProps> = ({ userId, on
         </button>
       </div>
 
-      {!showNewForm ? (
-        <button className="btn-primary" onClick={() => setShowNewForm(true)} style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem' }}>
-          <Plus size={18} /> New Program
-        </button>
-      ) : (
-        <div className="glass-panel" style={{ padding: '14px', display: 'flex', gap: '10px' }}>
-          <input
-            type="text"
-            autoFocus
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            placeholder="Program name"
-            style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '10px', color: '#FFFFFF', fontSize: '0.9rem' }}
-          />
-          <button className="btn-primary" onClick={handleCreate} style={{ padding: '10px 16px', fontSize: '0.85rem' }}>Create</button>
-          <button className="btn-secondary" onClick={() => { setShowNewForm(false); setNewName(''); }} style={{ padding: '10px 16px', fontSize: '0.85rem' }}>Cancel</button>
-        </div>
-      )}
+      <button
+        className="btn-primary"
+        onClick={handleCreate}
+        disabled={creating}
+        style={{ justifyContent: 'center', padding: '12px', fontSize: '0.92rem', ...(creating && { opacity: 0.6, cursor: 'not-allowed' }) }}
+      >
+        <Plus size={18} /> {creating ? 'Creating...' : 'New Program'}
+      </button>
 
       {loading && <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Loading...</div>}
       {error && <div style={{ color: '#FF3366', fontSize: '0.9rem' }}>{error}</div>}
