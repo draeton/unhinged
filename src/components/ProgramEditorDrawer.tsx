@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, ListChecks, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Plus, Pencil, X } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
 import { Drawer } from './Drawer';
-import { BlockEditorDrawer } from './BlockEditorDrawer';
+import { AutoGrowTextarea } from './AutoGrowTextarea';
+import { BlockInfoDrawer } from './BlockInfoDrawer';
+import { BlockExercisesSection } from './BlockExercisesSection';
 import { SwipeToDelete } from './SwipeToDelete';
 import { SortableList } from './SortableList';
 import { SortableRow } from './SortableRow';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface ProgramEditorDrawerProps {
   userId: string;
@@ -23,8 +26,19 @@ const fieldInputStyle: React.CSSProperties = {
   borderRadius: '8px',
   padding: '10px',
   color: '#FFFFFF',
+  fontFamily: 'var(--font-main)',
   fontSize: '0.9rem',
 };
+
+const sectionHeadingStyle: React.CSSProperties = {
+  fontSize: '0.78rem',
+  fontWeight: '800',
+  color: 'var(--text-muted)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+};
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const emptyNewBlock = () => ({ title: '', subtitle: '', blockType: 'warmup' as BlockType, durationMinutes: 10 });
 
@@ -34,9 +48,16 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState('');
+  const [descriptionDraft, setDescriptionDraft] = useState('');
+  const [savingProgram, setSavingProgram] = useState(false);
   const [showAddBlock, setShowAddBlock] = useState(false);
   const [newBlock, setNewBlock] = useState(emptyNewBlock());
-  const [openBlock, setOpenBlock] = useState<ProgramBlock | null>(null);
+  const [editingBlock, setEditingBlock] = useState<ProgramBlock | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  const initialProgramForm = useRef({ name: '', description: '' });
+
+  const isProgramDirty = nameDraft !== initialProgramForm.current.name || descriptionDraft !== initialProgramForm.current.description;
 
   const refresh = () => {
     setLoading(true);
@@ -44,7 +65,11 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     Promise.all([getProgram(programId), listBlocks(programId)])
       .then(([programRow, blockRows]) => {
         setProgram(programRow);
-        setNameDraft(programRow?.name ?? '');
+        const name = programRow?.name ?? '';
+        const description = programRow?.description ?? '';
+        setNameDraft(name);
+        setDescriptionDraft(description);
+        initialProgramForm.current = { name, description };
         setBlocks(blockRows);
       })
       .catch(err => setError(err?.message ?? 'Failed to load program.'))
@@ -56,13 +81,31 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programId]);
 
-  const handleNameBlur = async () => {
-    if (!program || nameDraft.trim() === program.name || !nameDraft.trim()) return;
+  const requestClose = () => {
+    if (isProgramDirty) {
+      setShowDiscardConfirm(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleSaveProgram = async () => {
+    if (!program || !nameDraft.trim()) {
+      setError('Name is required.');
+      return;
+    }
+    setSavingProgram(true);
+    setError(null);
     try {
-      const updated = await renameProgram(program.id, nameDraft.trim());
+      const updated = await renameProgram(program.id, nameDraft.trim(), descriptionDraft.trim());
       setProgram(updated);
+      setNameDraft(updated.name);
+      setDescriptionDraft(updated.description);
+      initialProgramForm.current = { name: updated.name, description: updated.description };
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to rename program.');
+      setError(err?.message ?? 'Failed to save program.');
+    } finally {
+      setSavingProgram(false);
     }
   };
 
@@ -106,12 +149,18 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     }
   };
 
+  const handleBlockSaved = (updated: ProgramBlock) => {
+    setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b)));
+    setEditingBlock(null);
+  };
+
   return (
     <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>Edit Program</h2>
         <button
           title="Close"
-          onClick={onClose}
+          onClick={requestClose}
           style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
         >
           <X size={22} />
@@ -124,19 +173,53 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
       {program && (
         <div>
           <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-            Program Name
+            Name
           </label>
-          <input
-            type="text"
+          <AutoGrowTextarea
             value={nameDraft}
             onChange={e => setNameDraft(e.target.value)}
-            onBlur={handleNameBlur}
-            style={{ ...fieldInputStyle, fontSize: '1.1rem', fontWeight: '800' }}
+            style={{ ...fieldInputStyle, fontSize: '1.15rem', fontWeight: '400' }}
           />
         </div>
       )}
 
+      {program && (
+        <div>
+          <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+            Description
+          </label>
+          <AutoGrowTextarea
+            value={descriptionDraft}
+            onChange={e => setDescriptionDraft(e.target.value)}
+            placeholder="Briefly describe this program..."
+            style={{ ...fieldInputStyle, fontSize: '1.15rem', fontWeight: '400', minHeight: '60px' }}
+          />
+        </div>
+      )}
+
+      {program && (
+        <button
+          className="btn-primary"
+          onClick={handleSaveProgram}
+          disabled={savingProgram || !isProgramDirty}
+          style={{
+            justifyContent: 'center',
+            padding: '12px',
+            fontSize: '0.92rem',
+            ...((savingProgram || !isProgramDirty) && {
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-dim)',
+              boxShadow: 'none',
+              cursor: 'not-allowed',
+            }),
+          }}
+        >
+          {savingProgram ? 'Saving...' : 'Save Program'}
+        </button>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <h3 style={sectionHeadingStyle}>Blocks</h3>
         {!loading && blocks.length === 0 && (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No blocks yet — add one below.</div>
         )}
@@ -145,29 +228,28 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
             <SortableRow key={block.id} id={block.id}>
               {dragHandle => (
                 <SwipeToDelete onDelete={() => handleDeleteBlock(block.id)} ariaLabel={`Delete ${block.title}`}>
-                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       {dragHandle}
 
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
-                            {block.blockType}
-                          </span>
-                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{block.title}</span>
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          ~{block.durationMinutes} min{block.subtitle ? ` • ${block.subtitle}` : ''}
-                        </div>
-                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem', alignSelf: 'flex-start' }}>
+                          {block.blockType}
+                        </span>
 
-                      <button
-                        onClick={() => setOpenBlock(block)}
-                        style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
-                      >
-                        <ListChecks size={16} />
-                      </button>
+                        <span style={{ color: '#FFFFFF', fontSize: '0.9rem', fontWeight: '700' }}>
+                          {block.title}
+                        </span>
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => setEditingBlock(block)}
+                      title={`Edit ${block.title}`}
+                      style={{ background: 'rgba(0, 240, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '8px', color: '#00F0FF', cursor: 'pointer' }}
+                    >
+                      <Pencil size={16} />
+                    </button>
                   </div>
                 </SwipeToDelete>
               )}
@@ -201,16 +283,30 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
         </div>
       )}
 
-      <Drawer isOpen={!!openBlock} onClose={() => setOpenBlock(null)} fullScreen>
-        {openBlock && (
-          <BlockEditorDrawer
-            userId={userId}
-            blockId={openBlock.id}
-            blockTitle={openBlock.title}
-            onClose={() => setOpenBlock(null)}
+      {blocks.map(block => (
+        <div key={block.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <h3 style={sectionHeadingStyle}>{capitalize(block.blockType)}</h3>
+          <BlockExercisesSection userId={userId} blockId={block.id} />
+        </div>
+      ))}
+
+      <Drawer isOpen={!!editingBlock} onClose={() => setEditingBlock(null)}>
+        {editingBlock && (
+          <BlockInfoDrawer
+            block={editingBlock}
+            onSaved={handleBlockSaved}
+            onClose={() => setEditingBlock(null)}
           />
         )}
       </Drawer>
+
+      <ConfirmDialog
+        isOpen={showDiscardConfirm}
+        title="Discard changes?"
+        message="You have unsaved changes to this program's name or description. If you leave now, they'll be lost."
+        onConfirm={onClose}
+        onCancel={() => setShowDiscardConfirm(false)}
+      />
     </div>
   );
 };
