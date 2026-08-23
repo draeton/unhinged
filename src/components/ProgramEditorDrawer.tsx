@@ -234,6 +234,10 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
                       <span className="badge" style={{ background: block.badgeColor, color: '#050B14', fontWeight: '800', fontSize: '0.7rem' }}>
                         {block.blockType}
                       </span>
+
+                      <span style={{ color: '#FFFFFF', fontSize: '0.9rem', fontWeight: '700' }}>
+                        {block.title}
+                      </span>
                     </div>
 
                     <button
