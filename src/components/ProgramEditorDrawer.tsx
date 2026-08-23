@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Plus, Pencil, X } from 'lucide-react';
 import type { BlockType, Program, ProgramBlock } from '../types/program';
 import { getProgram, renameProgram, listBlocks, createBlock, deleteBlock, reorderBlocks } from '../services/programs';
@@ -9,6 +9,7 @@ import { BlockExercisesSection } from './BlockExercisesSection';
 import { SwipeToDelete } from './SwipeToDelete';
 import { SortableList } from './SortableList';
 import { SortableRow } from './SortableRow';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface ProgramEditorDrawerProps {
   userId: string;
@@ -47,9 +48,15 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
   const [error, setError] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState('');
   const [descriptionDraft, setDescriptionDraft] = useState('');
+  const [savingProgram, setSavingProgram] = useState(false);
   const [showAddBlock, setShowAddBlock] = useState(false);
   const [newBlock, setNewBlock] = useState(emptyNewBlock());
   const [editingBlock, setEditingBlock] = useState<ProgramBlock | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  const initialProgramForm = useRef({ name: '', description: '' });
+
+  const isProgramDirty = nameDraft !== initialProgramForm.current.name || descriptionDraft !== initialProgramForm.current.description;
 
   const refresh = () => {
     setLoading(true);
@@ -57,8 +64,11 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     Promise.all([getProgram(programId), listBlocks(programId)])
       .then(([programRow, blockRows]) => {
         setProgram(programRow);
-        setNameDraft(programRow?.name ?? '');
-        setDescriptionDraft(programRow?.description ?? '');
+        const name = programRow?.name ?? '';
+        const description = programRow?.description ?? '';
+        setNameDraft(name);
+        setDescriptionDraft(description);
+        initialProgramForm.current = { name, description };
         setBlocks(blockRows);
       })
       .catch(err => setError(err?.message ?? 'Failed to load program.'))
@@ -70,23 +80,31 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programId]);
 
-  const handleNameBlur = async () => {
-    if (!program || nameDraft.trim() === program.name || !nameDraft.trim()) return;
-    try {
-      const updated = await renameProgram(program.id, nameDraft.trim());
-      setProgram(updated);
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed to rename program.');
+  const requestClose = () => {
+    if (isProgramDirty) {
+      setShowDiscardConfirm(true);
+    } else {
+      onClose();
     }
   };
 
-  const handleDescriptionBlur = async () => {
-    if (!program || descriptionDraft.trim() === program.description) return;
+  const handleSaveProgram = async () => {
+    if (!program || !nameDraft.trim()) {
+      setError('Name is required.');
+      return;
+    }
+    setSavingProgram(true);
+    setError(null);
     try {
-      const updated = await renameProgram(program.id, program.name, descriptionDraft.trim());
+      const updated = await renameProgram(program.id, nameDraft.trim(), descriptionDraft.trim());
       setProgram(updated);
+      setNameDraft(updated.name);
+      setDescriptionDraft(updated.description);
+      initialProgramForm.current = { name: updated.name, description: updated.description };
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to update program description.');
+      setError(err?.message ?? 'Failed to save program.');
+    } finally {
+      setSavingProgram(false);
     }
   };
 
@@ -141,7 +159,7 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
         <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#FFFFFF' }}>Edit Program</h2>
         <button
           title="Close"
-          onClick={onClose}
+          onClick={requestClose}
           style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}
         >
           <X size={22} />
@@ -159,7 +177,6 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
           <AutoGrowTextarea
             value={nameDraft}
             onChange={e => setNameDraft(e.target.value)}
-            onBlur={handleNameBlur}
             style={{ ...fieldInputStyle, fontSize: '1.15rem', fontWeight: '400' }}
           />
         </div>
@@ -173,11 +190,31 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
           <AutoGrowTextarea
             value={descriptionDraft}
             onChange={e => setDescriptionDraft(e.target.value)}
-            onBlur={handleDescriptionBlur}
             placeholder="Briefly describe this program..."
             style={{ ...fieldInputStyle, fontSize: '1.15rem', fontWeight: '400', minHeight: '60px' }}
           />
         </div>
+      )}
+
+      {program && (
+        <button
+          className="btn-primary"
+          onClick={handleSaveProgram}
+          disabled={savingProgram || !isProgramDirty}
+          style={{
+            justifyContent: 'center',
+            padding: '12px',
+            fontSize: '0.92rem',
+            ...((savingProgram || !isProgramDirty) && {
+              background: 'rgba(255, 255, 255, 0.08)',
+              color: 'var(--text-dim)',
+              boxShadow: 'none',
+              cursor: 'not-allowed',
+            }),
+          }}
+        >
+          {savingProgram ? 'Saving...' : 'Save Program'}
+        </button>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -255,6 +292,14 @@ export const ProgramEditorDrawer: React.FC<ProgramEditorDrawerProps> = ({ userId
           />
         )}
       </Drawer>
+
+      <ConfirmDialog
+        isOpen={showDiscardConfirm}
+        title="Discard changes?"
+        message="You have unsaved changes to this program's name or description. If you leave now, they'll be lost."
+        onConfirm={onClose}
+        onCancel={() => setShowDiscardConfirm(false)}
+      />
     </div>
   );
 };
